@@ -6,6 +6,13 @@
 const tintColorLight = '#0a7ea4';
 const tintColorDark = '#fff';
 
+// #EEECFE
+
+// #9CE2DA
+// #859CFF
+// #E7F7D2
+
+// #a091f5 - purple
 export const Colors = {
   light: {
     text: '#11181C',
@@ -14,6 +21,9 @@ export const Colors = {
     icon: '#687076',
     tabIconDefault: '#687076',
     tabIconSelected: tintColorLight,
+    primary: '#000000',
+    online: '#48ea18',
+    offline: ''
   },
   dark: {
     text: '#ECEDEE',
