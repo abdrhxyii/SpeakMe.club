@@ -1,192 +1,171 @@
-import { View, Text, StyleSheet, Image, ScrollView, Animated, TouchableOpacity } from 'react-native';
-import React, {useState} from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import React, { useCallback, useRef, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Languages, Globe, MapPin, User, PhoneCall, MessageCircle, X  } from 'lucide-react-native';
-import { Colors } from '@/constants/Colors';
 import Common from '@/constants/Common';
 import ReviewCard from '@/components/ReviewCard';
-import BottomModal from '@/components/BottomModal';
+import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
+import AccountSection from '@/components/AccountSection';
+import ProfileHeader from '@/components/ProfileHeader';
+import ActionButton from '@/components/ActionButton';
+import Dialogbox from '@/components/Dialogbox';
+import { Colors } from '@/constants/Colors';
+
+const reviews = [
+  {
+    id: '1',
+    name: 'Vaishali',
+    location: 'Dehradun, India',
+    date: 'August 2024',
+    review: 'Castle Oodeypore is a magnificent palace with stunning interiors. We stepped-in and were absolutely arrested by its royal charm. Kudos to Ma\'am Nirmal for the exquisite aesthetics, the property mirrors her artistic acumen in more ways than one. The hosts were very kind and welcoming, they even upgraded our room stay. We are grateful for the family\'s warm hospitality and scrumptious meals.',
+    footer: 'Just go for it :))',
+  },
+  {
+    id: '2',
+    name: 'Bridget',
+    location: 'Auckland, New Zealand',
+    date: 'January 2024',
+    review: 'We had a happy family holiday to celebrate a birthday. We dined in on two of the three nights that we stayed and the food was spectacular. Everyone there looked after us so well and the hosts were friendly but also discrete. They had a beautiful swimming pool!',
+  },
+  {
+    id: '3',
+    name: 'Vaishali',
+    location: 'Dehradun, India',
+    date: 'August 2024',
+    review: 'Castle Oodeypore is a magnificent palace with stunning interiors. We stepped-in and were absolutely arrested by its royal charm. Kudos to Ma\'am Nirmal for the exquisite aesthetics, the property mirrors her artistic acumen in more ways than one. The hosts were very kind and welcoming, they even upgraded our room stay. We are grateful for the family\'s warm hospitality and scrumptious meals.',
+    footer: 'Just go for it :))',
+  },
+  {
+    id: '4',
+    name: 'Bridget',
+    location: 'Auckland, New Zealand',
+    date: 'January 2024',
+    review: 'We had a happy family holiday to celebrate a birthday. We dined in on two of the three nights that we stayed and the food was spectacular. Everyone there looked after us so well and the hosts were friendly but also discrete. They had a beautiful swimming pool!',
+  },
+  {
+    id: '5',
+    name: 'Vaishali',
+    location: 'Dehradun, India',
+    date: 'August 2024',
+    review: 'Castle Oodeypore is a magnificent palace with stunning interiors. We stepped-in and were absolutely arrested by its royal charm. Kudos to Ma\'am Nirmal for the exquisite aesthetics, the property mirrors her artistic acumen in more ways than one. The hosts were very kind and welcoming, they even upgraded our room stay. We are grateful for the family\'s warm hospitality and scrumptious meals.',
+    footer: 'Just go for it :))',
+  },
+  {
+    id: '6',
+    name: 'Bridget',
+    location: 'Auckland, New Zealand',
+    date: 'January 2024',
+    review: 'We had a happy family holiday to celebrate a birthday. We dined in on two of the three nights that we stayed and the food was spectacular. Everyone there looked after us so well and the hosts were friendly but also discrete. They had a beautiful swimming pool!',
+  },
+];
 
 export default function Account() {
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const [isModalVisible, setIsModalVisible] = useState(false); 
+  const [dialog, setDialog] = useState(false)
+
+  const handleSheetChanges = useCallback((index: number) => {
+    if (index === -1) {
+      setIsModalVisible(false);
+    }
+  }, []);
+
+  const openModal = () => {
+    setIsModalVisible(true);
+    bottomSheetRef.current?.snapToIndex(0);  
+  };
+
+  const closeModal = () => {
+    setIsModalVisible(false);
+    bottomSheetRef.current?.close();  
+  };
+
+  const ReviewItem = ({ review }: any) => (
+    <View style={styles.reviewContainer}>
+      <View style={styles.Modalheader}>
+        <Image
+          source={require('@/assets/images/user.jpg')}
+          style={styles.ModalprofileImage}
+        />
+        <View>
+          <Text style={styles.userName}>{review.name}, {review.location}</Text>
+          <Text style={styles.date}>{review.date}</Text>
+        </View>
+      </View>
+      <Text style={styles.reviewText}>{review.review}</Text>
+      {review.footer && <Text style={styles.footer}>{review.footer}</Text>}
+    </View>
+  );
+
+  const handleLogoutConfirmation = () => {
+    setDialog(true);
+
+  }
 
   return (
     <>
-    <SafeAreaView style={Common.container}>
-      <View style={styles.header}>
-        <View style={styles.profileContainer}>
-            <Animated.Image
-              source={require('@/assets/images/user.jpg')}
-              style={styles.profileImage}
-            />
-          <View style={styles.onlineDot}></View>
-        </View>
-        <View style={styles.headerTextContainer}>
-          <Text style={styles.headerTitle}>Abdur Rahman, 19</Text>
-          <View style={styles.detailsContainer}>
-            <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Hours</Text>
-              <Text style={styles.detailValue}>120 hrs</Text>
+      <SafeAreaView style={Common.container}>
+        {isModalVisible && <View style={styles.overlay} />} 
+        <ProfileHeader/>
+        <ActionButton/>
+        <ScrollView 
+          style={styles.content} 
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={styles.contentTitle}>Personal Information</Text>
+            <AccountSection/>
+          <Text style={styles.contentTitle}>Feedbacks</Text>
+            <View style={styles.infoContainer}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} overScrollMode="never">
+                <ReviewCard />
+                <ReviewCard />
+                <ReviewCard />
+              </ScrollView>
+              <TouchableOpacity style={styles.Reviewbutton} onPress={openModal}>
+                <Text style={styles.ReviewbuttonText}>Show all 14 reviews</Text>
+              </TouchableOpacity>
             </View>
-            <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Talks</Text>
-              <Text style={styles.detailValue}>450</Text>
-            </View>
-            <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Feedback</Text>
-              <Text style={styles.detailValue}>4.8/5</Text>
-            </View>
-          </View>
-        </View>
-      </View>
-
-      <View style={styles.actionButtonsContainer}>
-        <TouchableOpacity style={styles.button}>
-          <PhoneCall color={Colors.light.primary} size={22} />
-          <Text style={styles.buttonText}>Call</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.button}>
-          <MessageCircle color={Colors.light.primary} size={22} />
-          <Text style={styles.buttonText}>Message</Text>
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView 
-        style={styles.content} 
-        showsVerticalScrollIndicator={false}
-      >
-        <Text style={styles.contentTitle}>Personal Information</Text>
-          <View style={styles.infoContainer}>
-            <View style={styles.infoItem}>
-              <Languages color={Colors.light.primary} size={22} />
-              <View style={styles.infoTextContainer}>
-                <Text style={styles.label}>Native language</Text>
-                <Text style={styles.value}>Tamil</Text>
-              </View>
-            </View>
-
-            <View style={styles.infoItem}>
-              <Globe color={Colors.light.primary} size={22} />
-              <View style={styles.infoTextContainer}>
-                <Text style={styles.label}>English level</Text>
-                <Text style={styles.value}>A1 (Beginner)</Text>
-              </View>
-            </View>
-
-            <View style={styles.infoItem}>
-              <User color={Colors.light.primary} size={22} />
-              <View style={styles.infoTextContainer}>
-                <Text style={styles.label}>Gender</Text>
-                <Text style={styles.value}>Male</Text>
-              </View>
-            </View>
-
-            <View style={styles.infoItem}>
-              <MapPin color={Colors.light.primary} size={22} />
-              <View style={styles.infoTextContainer}>
-                <Text style={styles.label}>Location</Text>
-                <Text style={styles.value}>Sri Lanka</Text>
-              </View>
-            </View>
-          </View>
-
-        <Text style={styles.contentTitle}>Feedbacks</Text>
-          <View style={styles.infoContainer}>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} overScrollMode="never">
-                <ReviewCard/>
-                <ReviewCard/>
-                <ReviewCard/>
-            </ScrollView>
-            <TouchableOpacity style={styles.Reviewbutton}>
-              <Text style={styles.ReviewbuttonText}>Show all 14 reviews</Text>
+            <TouchableOpacity style={styles.logoutbutton} onPress={handleLogoutConfirmation}>
+                <Text style={styles.logoutbuttonText}>Logout</Text>
             </TouchableOpacity>
-          </View>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+        <Dialogbox
+            visible={dialog}
+            onClose={() => setDialog(false)}
+            title="Confirm Logout"
+            bodymessage="Are you sure you want to logout?"
+            type={'warning'}
+        />
+      </SafeAreaView>
+      
+      <BottomSheet
+          ref={bottomSheetRef}
+          onChange={handleSheetChanges}
+          snapPoints={['75%']}
+          index={isModalVisible ? 0 : -1} 
+          enablePanDownToClose
+        >
+          <BottomSheetFlatList
+            data={reviews}
+            showsVerticalScrollIndicator={false}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => <ReviewItem review={item} />}
+            ListHeaderComponent={
+              <Text style={styles.headerText}>14 Reviews</Text>
+            }
+          />
+      </BottomSheet>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: 'grey',
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    padding: 15,
-    paddingBottom: 20,
-  },
-  headerTextContainer: {
-    flex: 1,
-    marginLeft: 15,
-  },
-  headerTitle: {
-    fontSize: 30,
-    fontWeight: '700',
-  },
-  detailsContainer: {
-    flexDirection: 'row',
-    marginTop: 6,
-  },
-  detailItem: {
-    marginRight: 20, 
-    alignItems: 'flex-start',
-  },
-  detailLabel: {
-    fontSize: 12,
-    color: '#888', 
-    fontWeight: '600',
-  },
-  detailValue: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#333', 
-    marginTop: 2,
-  },
-  profileImage: {
-    width: 65,
-    height: 65,
-    borderRadius: 50,
-    backfaceVisibility: 'hidden',
-  },
-  actionButtonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    marginTop: 10,
+  infoContainer: {
+    backgroundColor: '#FFF',
     marginBottom: 10,
-  },
-  profileContainer: {
-    position: 'relative',
-  },
-  onlineDot: {
-    position: 'absolute',
-    right: 0,
-    bottom: 0,
-    backgroundColor: Colors.light.online, 
-    borderRadius: 8,
-    padding: 8 
-  },
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f2f2f2',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 6,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 5,
-    elevation: 3,
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginLeft: 8,
   },
   content: {
     padding: 15,
@@ -196,33 +175,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 15,
   },
-  infoContainer: {
-    backgroundColor: '#FFF',
-    marginBottom: 10,
-  },
-  infoItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 10,
-  },
-  infoTextContainer: {
-    marginLeft: 10,
-  },
-  label: {
-    fontSize: 12,
-    color: '#6B7280',
-  },
-  value: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  separator: {
-    height: 8,
-    width: '100%',
-    backgroundColor: '#ddd',
-    marginVertical: 15,
-  },
   Reviewbutton: {
     paddingVertical: 12,
     borderRadius: 7,
@@ -230,11 +182,72 @@ const styles = StyleSheet.create({
     marginTop: 20,
     borderWidth: 1,
     borderColor: '#000',
-    marginBottom: 15
+    marginBottom: 15,
   },
   ReviewbuttonText: {
     fontSize: 16,
     fontWeight: '700',
     color: '#000',
-  }
+  },
+  logoutbutton: {
+    paddingVertical: 12,
+    borderRadius: 7,
+    alignItems: 'center',
+    marginTop: 20,
+    borderWidth: 1,
+    borderColor: Colors.light.danger,
+    marginBottom: 30,
+  },
+  logoutbuttonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: Colors.light.danger,
+  },
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', 
+    zIndex: 1, 
+  },
+  reviewContainer: {
+    marginVertical: 10,
+    paddingHorizontal: 20,
+  },
+  Modalheader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  ModalprofileImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 10,
+  },
+  userName: {
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  date: {
+    color: 'gray',
+    fontSize: 14,
+  },
+  reviewText: {
+    marginVertical: 5,
+    fontSize: 14,
+    color: '#333',
+  },
+  footer: {
+    marginTop: 5,
+    fontSize: 14,
+  },
+  headerText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    padding: 5,
+  },
 });

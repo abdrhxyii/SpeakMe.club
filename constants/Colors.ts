@@ -19,8 +19,7 @@ export const Colors = {
     background: '#fff',
     tint: tintColorLight,
     icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
+    danger: '#ED1010',
     primary: '#000000',
     online: '#48ea18',
     offline: ''

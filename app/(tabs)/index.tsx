@@ -3,7 +3,6 @@ import { View, Text, FlatList, Image, TouchableOpacity, SafeAreaView, StyleSheet
 import { RefreshCw, PhoneCall, Search } from 'lucide-react-native';
 import Common from '@/constants/Common';
 import { Colors } from '@/constants/Colors';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function HomeScreen() {
   const data = [
@@ -137,7 +136,6 @@ export default function HomeScreen() {
   );
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
     <SafeAreaView style={Common.container}>
       <FlatList
         data={data}
@@ -145,12 +143,11 @@ export default function HomeScreen() {
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
       />
-        <TouchableOpacity style={styles.perfectPartnerButton}>
-          <Search color="white" size={25} />
-          <Text style={styles.buttonText}>Find a perfect partner</Text>
-        </TouchableOpacity>
-  </SafeAreaView>
-  </GestureHandlerRootView>
+          <TouchableOpacity style={styles.perfectPartnerButton}>
+            <Search color="white" size={25} />
+            <Text style={styles.buttonText}>Find a perfect partner</Text>
+          </TouchableOpacity>
+    </SafeAreaView>
   );
 }
 
