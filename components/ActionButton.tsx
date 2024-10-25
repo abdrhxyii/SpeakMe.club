@@ -22,6 +22,7 @@ const styles = StyleSheet.create({
     actionButtonsContainer: {
         flexDirection: 'row',
         justifyContent: 'space-evenly',
+        alignItems: 'center',
         marginTop: 7,
         marginBottom: 15,
     },
@@ -31,7 +32,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#000000',
-        marginHorizontal: 15,
+        marginHorizontal: 5,
         paddingVertical: 12,
         paddingHorizontal: 20,
         borderRadius: 6,

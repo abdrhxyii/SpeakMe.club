@@ -1,12 +1,14 @@
-import { Tabs } from 'expo-router';
+import { Tabs, useRouter } from 'expo-router';
 import React, {useEffect} from 'react';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Home, UserCircle, SlidersHorizontal , MessageSquare, } from 'lucide-react-native';
+import { Home, UserCircle, SlidersHorizontal , MessageSquare, Settings, User, Zap } from 'lucide-react-native';
 import { TouchableOpacity, StyleSheet } from 'react-native';
 import * as NavigationBar from 'expo-navigation-bar';
+import Common from '@/constants/Common';
+import { Colors } from '@/constants/Colors';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const route = useRouter()
+
   useEffect(() => {
     NavigationBar.setBackgroundColorAsync('#ffffff');
   }, []);
@@ -24,7 +26,7 @@ export default function TabLayout() {
         headerTitleStyle: {
           color: '#000',
           fontWeight: '700',
-          fontSize: 25,
+          fontSize: 20,
           shadowColor: 'none'
         },
         headerTintColor: 'black',
@@ -37,8 +39,9 @@ export default function TabLayout() {
           borderTopWidth: 0,
         },
         tabBarLabelStyle: {
-          fontSize: 10,
+          fontSize: 12,
           paddingBottom: 12,
+          color: Colors.light.primary
         },
       }}
     >
@@ -52,18 +55,27 @@ export default function TabLayout() {
             <Home color={color} size={24} style={{ marginTop: 7 }}/>
           ),
           headerRight: () => (
-            <TouchableOpacity style={styles.headerBtn}>
+            <TouchableOpacity style={Common.headerBtn}>
               <SlidersHorizontal  color={'black'} size={18} />
             </TouchableOpacity>
           ),
         }}
       />
       <Tabs.Screen
-        name="message"
+        name="practice"
         options={{
-          title: 'Message',
+          title: 'Practice',
           tabBarIcon: ({ color, focused }) => (
             <MessageSquare color={color} size={24} style={{ marginTop: 7 }}/>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="connection"
+        options={{
+          title: 'Connections',
+          tabBarIcon: ({ color, focused }) => (
+            <User color={color} size={24} style={{ marginTop: 7 }}/>
           ),
         }}
       />
@@ -74,7 +86,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <UserCircle color={color} size={24} style={{ marginTop: 7 }}/>
           ),
-          headerShown: false,
+          headerShown: true,
+          headerTitle: '', 
+          headerRight: () => (
+            <TouchableOpacity style={Common.headerBtn} onPress={() => route.push('/Setting')}>
+              <Settings  color={'black'} size={18} />
+            </TouchableOpacity>
+          ),
         }}
       />
     </Tabs>
@@ -84,10 +102,4 @@ export default function TabLayout() {
 const styles = StyleSheet.create({
   //#fcfbfb
   // #f3f3f3
-  headerBtn: {
-    backgroundColor: '#f3f0f0', 
-    padding: 10,                    
-    borderRadius: 25,               
-    marginRight: 10
-  }
 })

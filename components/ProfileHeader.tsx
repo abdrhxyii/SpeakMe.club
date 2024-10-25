@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, TouchableOpacity, Modal, Image, TouchableWithoutFeedback } from 'react-native';
 import { Colors } from '@/constants/Colors';
+import { EllipsisVertical } from 'lucide-react-native';
 
 export default function ProfileHeader() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -78,7 +79,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#ffffff',
-    padding: 15,
+    // padding: 15,
     paddingBottom: 20,
   },
   headerTextContainer: {

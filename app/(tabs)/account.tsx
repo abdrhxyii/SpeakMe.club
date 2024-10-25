@@ -1,14 +1,12 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
-import React, { useCallback, useRef, useState } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView } from 'react-native';
+import React, { useCallback, useRef, useState, useLayoutEffect  } from 'react';
 import Common from '@/constants/Common';
 import ReviewCard from '@/components/ReviewCard';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import AccountSection from '@/components/AccountSection';
 import ProfileHeader from '@/components/ProfileHeader';
 import ActionButton from '@/components/ActionButton';
-import Dialogbox from '@/components/Dialogbox';
-import { Colors } from '@/constants/Colors';
+import { useNavigation } from 'expo-router';
 
 const reviews = [
   {
@@ -59,25 +57,51 @@ const reviews = [
 ];
 
 export default function Account() {
+  const navigation = useNavigation();
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [isModalVisible, setIsModalVisible] = useState(false); 
-  const [dialog, setDialog] = useState(false)
+  const [showHeaderTitle, setShowHeaderTitle] = useState(false);
+  const scrollThreshold = 10;
 
   const handleSheetChanges = useCallback((index: number) => {
     if (index === -1) {
       setIsModalVisible(false);
+      navigation.setOptions({ 
+        tabBarStyle: {
+          backgroundColor: 'white',
+          height: 55,
+          borderTopWidth: 0,
+        },
+        headerShown: true 
+      });
+    } else {
+      setIsModalVisible(true);
+      navigation.setOptions({ 
+        tabBarStyle: { display: 'none' }, 
+        headerShown: false 
+      });
     }
-  }, []);
+  }, [navigation]);
 
   const openModal = () => {
     setIsModalVisible(true);
     bottomSheetRef.current?.snapToIndex(0);  
+    navigation.setOptions({ tabBarStyle: { display: 'none' }, headerShown: false });
   };
 
-  const closeModal = () => {
-    setIsModalVisible(false);
-    bottomSheetRef.current?.close();  
-  };
+  const handleScroll = useCallback(
+    (event: any) => {
+      const yOffset = event.nativeEvent.contentOffset.y;
+      if (yOffset > scrollThreshold && !showHeaderTitle) {
+        setShowHeaderTitle(true);
+        navigation.setOptions({ headerTitle: 'Abdur Rahman' });
+      } else if (yOffset <= scrollThreshold && showHeaderTitle) {
+        setShowHeaderTitle(false);
+        navigation.setOptions({ headerTitle: '' });
+      }
+    },
+    [navigation, showHeaderTitle]
+  );
 
   const ReviewItem = ({ review }: any) => (
     <View style={styles.reviewContainer}>
@@ -96,21 +120,18 @@ export default function Account() {
     </View>
   );
 
-  const handleLogoutConfirmation = () => {
-    setDialog(true);
-
-  }
-
   return (
     <>
       <SafeAreaView style={Common.container}>
-        {isModalVisible && <View style={styles.overlay} />} 
-        <ProfileHeader/>
-        <ActionButton/>
+      {isModalVisible && <View style={styles.overlay} />} 
         <ScrollView 
           style={styles.content} 
           showsVerticalScrollIndicator={false}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
         >
+          <ProfileHeader/>
+          <ActionButton/>
           <Text style={styles.contentTitle}>Personal Information</Text>
             <AccountSection/>
           <Text style={styles.contentTitle}>Feedbacks</Text>
@@ -124,23 +145,13 @@ export default function Account() {
                 <Text style={styles.ReviewbuttonText}>Show all 14 reviews</Text>
               </TouchableOpacity>
             </View>
-            <TouchableOpacity style={styles.logoutbutton} onPress={handleLogoutConfirmation}>
-                <Text style={styles.logoutbuttonText}>Logout</Text>
-            </TouchableOpacity>
         </ScrollView>
-        <Dialogbox
-            visible={dialog}
-            onClose={() => setDialog(false)}
-            title="Confirm Logout"
-            bodymessage="Are you sure you want to logout?"
-            type={'warning'}
-        />
       </SafeAreaView>
       
       <BottomSheet
           ref={bottomSheetRef}
           onChange={handleSheetChanges}
-          snapPoints={['75%']}
+          snapPoints={['80%']}
           index={isModalVisible ? 0 : -1} 
           enablePanDownToClose
         >
@@ -168,7 +179,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   content: {
-    padding: 15,
+    padding: 13,
   },
   contentTitle: {
     fontSize: 20,
@@ -188,20 +199,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: '#000',
-  },
-  logoutbutton: {
-    paddingVertical: 12,
-    borderRadius: 7,
-    alignItems: 'center',
-    marginTop: 20,
-    borderWidth: 1,
-    borderColor: Colors.light.danger,
-    marginBottom: 30,
-  },
-  logoutbuttonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: Colors.light.danger,
   },
   overlay: {
     position: 'absolute',

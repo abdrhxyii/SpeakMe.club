@@ -1,17 +1,21 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler'; 
 
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { TouchableOpacity } from 'react-native';
+import { ArrowLeft } from 'lucide-react-native';
+import Common from '@/constants/Common';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const route = useRouter()
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/Poppins-Regular.ttf'),
@@ -29,12 +33,27 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-      </ThemeProvider>
+      <BottomSheetModalProvider>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="Setting" 
+              options={{
+                headerShown: true,
+                headerStyle: {
+                  backgroundColor: '#ffffff',
+                },
+                headerTitle: 'Setting',
+                headerTintColor: '#000',
+                headerTitleAlign: 'center',
+                headerLeft: () => (
+                  <TouchableOpacity style={Common.headerBtn} onPress={() => route.back()}>
+                    <ArrowLeft color={'black'} size={18} />
+                  </TouchableOpacity>  
+                )        
+              }}/>
+            <Stack.Screen name="+not-found" />
+          </Stack>
+      </BottomSheetModalProvider>
     </GestureHandlerRootView>
   );
 }

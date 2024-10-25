@@ -1,5 +1,5 @@
 import React, {useRef} from 'react';
-import { View, Text, FlatList, Image, TouchableOpacity, SafeAreaView, StyleSheet, Animated } from 'react-native';
+import { View, Text, FlatList, Image, TouchableOpacity, SafeAreaView, StyleSheet, Vibration } from 'react-native';
 import { RefreshCw, PhoneCall, Search } from 'lucide-react-native';
 import Common from '@/constants/Common';
 import { Colors } from '@/constants/Colors';
@@ -10,7 +10,7 @@ export default function HomeScreen() {
       id: '1',
       name: 'Alexander horendas',
       status: 'offline',
-      country: 'United States',
+      country: 'Iran',
       talks: 17,
       percentage: 100,
       gender: 'Male',
@@ -30,7 +30,7 @@ export default function HomeScreen() {
       id: '3',
       name: 'Alexander horendas',
       status: 'offline',
-      country: 'United States',
+      country: 'Iran',
       talks: 17,
       percentage: 100,
       gender: 'Male',
@@ -50,7 +50,7 @@ export default function HomeScreen() {
       id: '5',
       name: 'Alexander horendas',
       status: 'offline',
-      country: 'United States',
+      country: 'Iran',
       talks: 17,
       percentage: 100,
       gender: 'Male',
@@ -70,7 +70,7 @@ export default function HomeScreen() {
       id: '7',
       name: 'Alexander horendas',
       status: 'offline',
-      country: 'United States',
+      country: 'Iran',
       talks: 17,
       percentage: 100,
       gender: 'Male',
@@ -90,7 +90,7 @@ export default function HomeScreen() {
       id: '9',
       name: 'Alexander horendas',
       status: 'offline',
-      country: 'United States',
+      country: 'Iran',
       talks: 17,
       percentage: 100,
       gender: 'Male',
@@ -110,7 +110,7 @@ export default function HomeScreen() {
       id: '11',
       name: 'Alexander horendas',
       status: 'offline',
-      country: 'United States',
+      country: 'Iran',
       talks: 17,
       percentage: 100,
       gender: 'Male',
@@ -125,11 +125,14 @@ export default function HomeScreen() {
         <View style={styles.details}>
           <Text style={styles.name}>{item.name}</Text>
           <Text style={styles.subtext}>
-             {item.gender} • {item.country} • {item.talks} talks
+             {item.gender} • {item.country}
+          </Text>
+          <Text style={styles.subtext}>
+             B1 Level  • 1200 talks
           </Text>
         </View>
       </View>
-      <TouchableOpacity style={styles.callButton}>
+      <TouchableOpacity style={styles.callButton} onPress={() => Vibration.vibrate(10)}>
         <PhoneCall color="white" size={20} />
       </TouchableOpacity>
     </View>
@@ -152,11 +155,6 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 5,
-  },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
