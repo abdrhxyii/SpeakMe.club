@@ -1,10 +1,10 @@
 import { View, Text, StyleSheet } from 'react-native'
 import React from 'react'
 
-export default function message() {
+export default function practice() {
   return (
     <View style={styles.titleContainer}>
-      <Text>message</Text>
+      <Text>practice</Text>
     </View>
   )
 }

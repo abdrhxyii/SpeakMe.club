@@ -1,6 +1,6 @@
 import { Tabs, useRouter } from 'expo-router';
 import React, {useEffect} from 'react';
-import { Home, UserCircle, SlidersHorizontal , MessageSquare, Settings, User, Zap } from 'lucide-react-native';
+import { Home, UserCircle, SlidersHorizontal , MessageSquare, Settings, User, Zap, ClipboardList } from 'lucide-react-native';
 import { TouchableOpacity, StyleSheet } from 'react-native';
 import * as NavigationBar from 'expo-navigation-bar';
 import Common from '@/constants/Common';
@@ -25,8 +25,6 @@ export default function TabLayout() {
         },
         headerTitleStyle: {
           color: '#000',
-          fontWeight: '700',
-          fontSize: 20,
           shadowColor: 'none'
         },
         headerTintColor: 'black',
@@ -66,7 +64,7 @@ export default function TabLayout() {
         options={{
           title: 'Practice',
           tabBarIcon: ({ color, focused }) => (
-            <MessageSquare color={color} size={24} style={{ marginTop: 7 }}/>
+            <ClipboardList color={color} size={24} style={{ marginTop: 7 }}/>
           ),
         }}
       />

@@ -119,20 +119,25 @@ export default function HomeScreen() {
   ];
 
   const renderUserItem = ({ item }: any) => (
-    <View style={styles.userContainer}>
+    <View  style={styles.userContainer}>
       <View style={styles.profileInfo}>
+      <View style={styles.imageContainer}>
         <Image source={item.profileImg} style={styles.profileImage} />
+        <View style={styles.levelBadge}>
+          <Text style={styles.levelText}>{item.level || 'B1'}</Text> 
+        </View>
+      </View>
         <View style={styles.details}>
           <Text style={styles.name}>{item.name}</Text>
           <Text style={styles.subtext}>
              {item.gender} • {item.country}
           </Text>
           <Text style={styles.subtext}>
-             B1 Level  • 1200 talks
+            1200 talks
           </Text>
         </View>
       </View>
-      <TouchableOpacity style={styles.callButton} onPress={() => Vibration.vibrate(10)}>
+      <TouchableOpacity style={styles.callButton} onPress={() => Vibration.vibrate(10)} activeOpacity={1}>
         <PhoneCall color="white" size={20} />
       </TouchableOpacity>
     </View>
@@ -174,6 +179,9 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     borderBottomColor: '#ddd',
     borderBottomWidth: 1,
+  },
+  imageContainer: {
+    position: 'relative', 
   },
   profileInfo: {
     flexDirection: 'row',
@@ -223,5 +231,21 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  levelBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 10,
+    backgroundColor: '#f3f0f0',
+    borderRadius: 12,
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  levelText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: Colors.light.primary,
   },
 });
