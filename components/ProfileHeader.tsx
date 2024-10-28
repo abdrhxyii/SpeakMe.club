@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, TouchableOpacity, Modal, Image, TouchableWithoutFeedback } from 'react-native';
 import { Colors } from '@/constants/Colors';
-import { EllipsisVertical } from 'lucide-react-native';
+import { EllipsisVertical, PenLine } from 'lucide-react-native'; 
+import { Link } from 'expo-router';
 
 export default function ProfileHeader() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -36,7 +37,14 @@ export default function ProfileHeader() {
         </TouchableOpacity>
       </View>
       <View style={styles.headerTextContainer}>
-        <Text style={styles.headerTitle}>Abdur Rahman, 19</Text>
+        <View style={styles.nameContainer}>
+          <Text style={styles.headerTitle}>Abdur Rahman</Text>
+          <Link href={'/EditProfile'} asChild>
+            <TouchableOpacity activeOpacity={0.6}>
+              <PenLine color={Colors.light.primary} size={22} style={styles.editIcon} />
+            </TouchableOpacity>
+          </Link>
+        </View>
         <View style={styles.detailsContainer}>
           <View style={styles.detailItem}>
             <Text style={styles.detailLabel}>Hours</Text>
@@ -79,16 +87,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#ffffff',
-    // padding: 15,
     paddingBottom: 20,
   },
   headerTextContainer: {
     flex: 1,
     marginLeft: 15,
   },
+  nameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   headerTitle: {
     fontSize: 30,
     fontWeight: '700',
+  },
+  editIcon: {
+    marginLeft: 10, 
   },
   profileImage: {
     width: 65,
@@ -109,7 +123,7 @@ const styles = StyleSheet.create({
   },
   detailsContainer: {
     flexDirection: 'row',
-    marginTop: 6,
+    marginTop: 5,
   },
   detailItem: {
     marginRight: 20,

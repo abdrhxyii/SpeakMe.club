@@ -2,7 +2,7 @@ import { Colors } from '@/constants/Colors';
 import Common from '@/constants/Common';
 import { Ban } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, FlatList, SafeAreaView,} from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, FlatList, SafeAreaView, Animated} from 'react-native';
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 
 const data = [
@@ -119,53 +119,69 @@ const data = [
   ];
 
   const renderUserHistoryItem = ({ item }: any) => (
-    <View style={styles.userContainer}>
-      <View style={styles.profileInfo}>
-        <Image source={item.profileImg} style={styles.profileImage} />
-        <View style={styles.details}>
-          <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.subtext}>
+    <TouchableOpacity  style={Common.userContainer} activeOpacity={0.6}>
+      <View style={Common.profileInfo} pointerEvents="box-none">
+      <View style={Common.imageContainer}>
+        <Image source={item.profileImg} style={Common.profileImage} />
+        <View style={Common.levelBadge}>
+          <Text style={Common.levelText}>{item.level || 'B1'}</Text> 
+        </View>
+      </View>
+        <View style={Common.details}>
+          <Text style={Common.name}>{item.name}</Text>
+          <Text style={Common.subtext}>
              {item.gender} • {item.country}
           </Text>
-          <Text style={styles.subtext}>
-             B1 Level  • 1200 talks
+          <Text style={Common.subtext}>
+            1200 talks
           </Text>
         </View>
       </View>
-    </View>
+      <Text style={{ color: Colors.light.primary, fontSize: 15, fontWeight: 700 }}>190 Hr</Text>
+    </TouchableOpacity>
   );
 
   const renderUserFriendItem = ({ item }: any) => (
-    <View style={styles.userContainer}>
-      <View style={styles.profileInfo}>
-        <Image source={item.profileImg} style={styles.profileImage} />
-        <View style={styles.details}>
-          <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.subtext}>
+    <TouchableOpacity  style={Common.userContainer} activeOpacity={0.6}>
+      <View style={Common.profileInfo} pointerEvents="box-none">
+      <View style={Common.imageContainer}>
+        <Image source={item.profileImg} style={Common.profileImage} />
+        <View style={Common.levelBadge}>
+          <Text style={Common.levelText}>{item.level || 'B1'}</Text> 
+        </View>
+      </View>
+        <View style={Common.details}>
+          <Text style={Common.name}>{item.name}</Text>
+          <Text style={Common.subtext}>
              {item.gender} • {item.country}
           </Text>
-          <Text style={styles.subtext}>
-             B1 Level  • 1200 talks
+          <Text style={Common.subtext}>
+            1200 talks
           </Text>
         </View>
       </View>
       <TouchableOpacity style={styles.removeButton}>
         <Text style={styles.removeButtonText}>Remove</Text>
       </TouchableOpacity>
-    </View>
+    </TouchableOpacity>
   );
 
   const renderUserBlockedItem = ({ item }: any) => (
-    <View style={styles.userContainer}>
-      <View style={styles.profileInfo}>
-        <Image source={item.profileImg} style={styles.profileImage} />
-        <View style={styles.details}>
-          <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.subtext}>
+    <TouchableOpacity  style={Common.userContainer} activeOpacity={0.6}>
+      <View style={Common.profileInfo} pointerEvents="box-none">
+      <View style={Common.imageContainer}>
+        <Image source={item.profileImg} style={Common.profileImage} />
+        <View style={Common.levelBadge}>
+          <Text style={Common.levelText}>{item.level || 'B1'}</Text> 
+        </View>
+      </View>
+        <View style={Common.details}>
+          <Text style={Common.name}>{item.name}</Text>
+          <Text style={Common.subtext}>
              {item.gender} • {item.country}
           </Text>
-          <Text style={styles.subtext}>
-             B1 Level  • 1200 talks
+          <Text style={Common.subtext}>
+            1200 talks
           </Text>
         </View>
       </View>
@@ -173,7 +189,7 @@ const data = [
         <Ban color={Colors.light.danger} size={30} />
         <Text style={styles.removeButtonText}>Blocked</Text>
       </TouchableOpacity>
-    </View>
+    </TouchableOpacity>
   );
 
 const HistoryRoute = () => (
@@ -229,7 +245,6 @@ export default function Connection() {
     blocked: BlockedRoute,
   });
 
-
   return (
     <TabView
       navigationState={{ index, routes }}
@@ -270,39 +285,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.light.primary
   },
-
-  userContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#FFF',
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 5,
-    borderBottomColor: '#ddd',
-    borderBottomWidth: 1,
-  },
-  profileInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  profileImage: {
-    width: 70,
-    height: 70,
-    borderRadius: 50,
-    marginRight: 10,
-  },
-  details: {
-    flexDirection: 'column',
-  },
-  name: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  subtext: {
-    color: '#777',
-    fontSize: 14
-  },
   actionButton: {
     backgroundColor: Colors.light.primary,
     paddingVertical: 15,
@@ -310,10 +292,6 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  callText: {
-    color: 'white',
-    marginLeft: 5,
   },
   removeButton: {
     borderWidth: 1,
@@ -327,5 +305,5 @@ const styles = StyleSheet.create({
   removeButtonText: {
     color: Colors.light.danger,
     fontSize: 12,
-  } 
+  }
 });

@@ -37,13 +37,21 @@ export default function AccountSection() {
             <Text style={styles.value}>Sri Lanka</Text>
         </View>
         </View>
+
+        <View style={styles.infoItem}>
+        <User color={Colors.light.primary} size={22} />
+        <View style={styles.infoTextContainer}>
+            <Text style={styles.label}>College/School</Text>
+            <Text style={styles.value}>London Metropolitan University</Text>
+        </View>
+        </View>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
     infoContainer: {
-        backgroundColor: '#FFF',
+        backgroundColor: Colors.light.background,
         marginBottom: 10,
       },
       infoItem: {

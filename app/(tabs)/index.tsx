@@ -3,8 +3,10 @@ import { View, Text, FlatList, Image, TouchableOpacity, SafeAreaView, StyleSheet
 import { RefreshCw, PhoneCall, Search } from 'lucide-react-native';
 import Common from '@/constants/Common';
 import { Colors } from '@/constants/Colors';
+import { Link, useRouter } from 'expo-router';
 
 export default function HomeScreen() {
+  const route = useRouter()
   const data = [
     {
       id: '1',
@@ -118,29 +120,39 @@ export default function HomeScreen() {
     }
   ];
 
+  const handleCall = () => {
+    Vibration.vibrate(20) 
+  }
+
+  const handleProfile = () => {
+    route.push('/Profile')
+  }
+
   const renderUserItem = ({ item }: any) => (
-    <View  style={styles.userContainer}>
-      <View style={styles.profileInfo}>
-      <View style={styles.imageContainer}>
-        <Image source={item.profileImg} style={styles.profileImage} />
-        <View style={styles.levelBadge}>
-          <Text style={styles.levelText}>{item.level || 'B1'}</Text> 
+    <Link href="/Profile" asChild>
+      <TouchableOpacity  style={Common.userContainer} activeOpacity={0.6}>
+        <View style={Common.profileInfo} pointerEvents="box-none">
+        <View style={Common.imageContainer}>
+          <Image source={item.profileImg} style={Common.profileImage} />
+          <View style={Common.levelBadge}>
+            <Text style={Common.levelText}>{item.level || 'B1'}</Text> 
+          </View>
         </View>
-      </View>
-        <View style={styles.details}>
-          <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.subtext}>
-             {item.gender} • {item.country}
-          </Text>
-          <Text style={styles.subtext}>
-            1200 talks
-          </Text>
+          <View style={Common.details}>
+            <Text style={Common.name}>{item.name}</Text>
+            <Text style={Common.subtext}>
+              {item.gender} • {item.country}
+            </Text>
+            <Text style={Common.subtext}>
+              1200 talks
+            </Text>
+          </View>
         </View>
-      </View>
-      <TouchableOpacity style={styles.callButton} onPress={() => Vibration.vibrate(10)} activeOpacity={1}>
-        <PhoneCall color="white" size={20} />
+        <TouchableOpacity style={styles.callButton} onPress={handleCall} activeOpacity={1}>
+          <PhoneCall color="white" size={20} />
+        </TouchableOpacity>
       </TouchableOpacity>
-    </View>
+    </Link>
   );
 
   return (
@@ -168,41 +180,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 10,
     fontWeight: 'bold',
-  },
-  userContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#FFF',
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 5,
-    borderBottomColor: '#ddd',
-    borderBottomWidth: 1,
-  },
-  imageContainer: {
-    position: 'relative', 
-  },
-  profileInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  profileImage: {
-    width: 70,
-    height: 70,
-    borderRadius: 50,
-    marginRight: 10,
-  },
-  details: {
-    flexDirection: 'column',
-  },
-  name: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  subtext: {
-    color: '#777',
-    fontSize: 14
   },
   callButton: {
     backgroundColor: Colors.light.primary,

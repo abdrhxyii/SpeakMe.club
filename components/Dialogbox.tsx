@@ -1,3 +1,4 @@
+import { Colors } from '@/constants/Colors';
 import React from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, Image } from 'react-native';
 
@@ -19,15 +20,15 @@ const Dialogbox = ({ visible, onClose, type = 'success', title, bodymessage}: an
           {
             type == 'success' ?
             <>
-                <TouchableOpacity style={[styles.basebutton,styles.successbutton]} onPress={onClose}>
+                <TouchableOpacity style={[styles.basebutton,styles.successbutton]} onPress={onClose} activeOpacity={0.8}>
                   <Text style={styles.buttonText}>Login</Text>
                 </TouchableOpacity>
             </> :
             <>
-                <TouchableOpacity style={[styles.basebutton,styles.warningbutton]} onPress={onClose}>
+                <TouchableOpacity style={[styles.basebutton,styles.warningbutton]} onPress={onClose} activeOpacity={0.8}>
                   <Text style={styles.buttonText}>Yes, Logout</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.basebutton,styles.cancelbutton]} onPress={onClose}>
+                <TouchableOpacity style={[styles.basebutton,styles.cancelbutton]} onPress={onClose} activeOpacity={0.8}>
                   <Text style={type == 'success' ? styles.buttonText : styles.cnclbuttonText}>No Cancel</Text>
                 </TouchableOpacity>
             </>
@@ -72,9 +73,9 @@ const styles = StyleSheet.create({
     color: "#808080"
   },
   basebutton: {
-    paddingVertical: 15,
+    paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 10,
+    borderRadius: 25,
     width: '100%',
     marginBottom: 10,
   },
@@ -82,7 +83,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
   },
   warningbutton: {
-    backgroundColor: '#ED1010'
+    backgroundColor: Colors.light.danger
   },
   cancelbutton: {
     backgroundColor: '#ffffff',

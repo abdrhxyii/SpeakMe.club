@@ -7,6 +7,7 @@ import AccountSection from '@/components/AccountSection';
 import ProfileHeader from '@/components/ProfileHeader';
 import ActionButton from '@/components/ActionButton';
 import { useNavigation } from 'expo-router';
+import { Colors } from '@/constants/Colors';
 
 const reviews = [
   {
@@ -14,45 +15,42 @@ const reviews = [
     name: 'Vaishali',
     location: 'Dehradun, India',
     date: 'August 2024',
-    review: 'Castle Oodeypore is a magnificent palace with stunning interiors. We stepped-in and were absolutely arrested by its royal charm. Kudos to Ma\'am Nirmal for the exquisite aesthetics, the property mirrors her artistic acumen in more ways than one. The hosts were very kind and welcoming, they even upgraded our room stay. We are grateful for the family\'s warm hospitality and scrumptious meals.',
-    footer: 'Just go for it :))',
+    review: 'Castle Oodeypore is a magnificent palace with stunning interiors. We stepped-in and were absolutely arrested by its royal charm. Kudos to Ma\'am Nirmal for the exquisite aesthetics, ',
   },
   {
     id: '2',
     name: 'Bridget',
     location: 'Auckland, New Zealand',
     date: 'January 2024',
-    review: 'We had a happy family holiday to celebrate a birthday. We dined in on two of the three nights that we stayed and the food was spectacular. Everyone there looked after us so well and the hosts were friendly but also discrete. They had a beautiful swimming pool!',
+    review: '',
   },
   {
     id: '3',
     name: 'Vaishali',
     location: 'Dehradun, India',
     date: 'August 2024',
-    review: 'Castle Oodeypore is a magnificent palace with stunning interiors. We stepped-in and were absolutely arrested by its royal charm. Kudos to Ma\'am Nirmal for the exquisite aesthetics, the property mirrors her artistic acumen in more ways than one. The hosts were very kind and welcoming, they even upgraded our room stay. We are grateful for the family\'s warm hospitality and scrumptious meals.',
-    footer: 'Just go for it :))',
+    review: '',
   },
   {
     id: '4',
     name: 'Bridget',
     location: 'Auckland, New Zealand',
     date: 'January 2024',
-    review: 'We had a happy family holiday to celebrate a birthday. We dined in on two of the three nights that we stayed and the food was spectacular. Everyone there looked after us so well and the hosts were friendly but also discrete. They had a beautiful swimming pool!',
+    review: '',
   },
   {
     id: '5',
     name: 'Vaishali',
     location: 'Dehradun, India',
     date: 'August 2024',
-    review: 'Castle Oodeypore is a magnificent palace with stunning interiors. We stepped-in and were absolutely arrested by its royal charm. Kudos to Ma\'am Nirmal for the exquisite aesthetics, the property mirrors her artistic acumen in more ways than one. The hosts were very kind and welcoming, they even upgraded our room stay. We are grateful for the family\'s warm hospitality and scrumptious meals.',
-    footer: 'Just go for it :))',
+    review: '',
   },
   {
     id: '6',
     name: 'Bridget',
     location: 'Auckland, New Zealand',
     date: 'January 2024',
-    review: 'We had a happy family holiday to celebrate a birthday. We dined in on two of the three nights that we stayed and the food was spectacular. Everyone there looked after us so well and the hosts were friendly but also discrete. They had a beautiful swimming pool!',
+    review: '',
   },
 ];
 
@@ -110,13 +108,17 @@ export default function Account() {
           source={require('@/assets/images/user.jpg')}
           style={styles.ModalprofileImage}
         />
-        <View>
-          <Text style={styles.userName}>{review.name}, {review.location}</Text>
+        <View style={styles.userDetails}>
+          <Text style={styles.userName}>
+            {review.name}, {review.location}
+          </Text>
           <Text style={styles.date}>{review.date}</Text>
+        </View>
+        <View style={styles.emojiContainer}>
+          <Text style={styles.emoji}>👍</Text>
         </View>
       </View>
       <Text style={styles.reviewText}>{review.review}</Text>
-      {review.footer && <Text style={styles.footer}>{review.footer}</Text>}
     </View>
   );
 
@@ -125,24 +127,24 @@ export default function Account() {
       <SafeAreaView style={Common.container}>
       {isModalVisible && <View style={styles.overlay} />} 
         <ScrollView 
-          style={styles.content} 
+          style={Common.profileContent} 
           showsVerticalScrollIndicator={false}
           onScroll={handleScroll}
           scrollEventThrottle={16}
         >
           <ProfileHeader/>
-          <ActionButton/>
-          <Text style={styles.contentTitle}>Personal Information</Text>
+          {/* <ActionButton/> */}
+          <Text style={Common.profileContentTitle}>Personal Information</Text>
             <AccountSection/>
-          <Text style={styles.contentTitle}>Feedbacks</Text>
-            <View style={styles.infoContainer}>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} overScrollMode="never">
+          <Text style={Common.profileContentTitle}>Feedbacks</Text>
+            <View style={Common.profileReviewContainer}>
+              <ScrollView showsHorizontalScrollIndicator={false} overScrollMode="never">
                 <ReviewCard />
                 <ReviewCard />
                 <ReviewCard />
               </ScrollView>
-              <TouchableOpacity style={styles.Reviewbutton} onPress={openModal}>
-                <Text style={styles.ReviewbuttonText}>Show all 14 reviews</Text>
+              <TouchableOpacity style={Common.Reviewbutton} onPress={openModal}>
+                <Text style={Common.ReviewbuttonText}>Show all 14 reviews</Text>
               </TouchableOpacity>
             </View>
         </ScrollView>
@@ -168,37 +170,10 @@ export default function Account() {
     </>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'grey',
-  },
-  infoContainer: {
-    backgroundColor: '#FFF',
-    marginBottom: 10,
-  },
-  content: {
-    padding: 13,
-  },
-  contentTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 15,
-  },
-  Reviewbutton: {
-    paddingVertical: 12,
-    borderRadius: 7,
-    alignItems: 'center',
-    marginTop: 20,
-    borderWidth: 1,
-    borderColor: '#000',
-    marginBottom: 15,
-  },
-  ReviewbuttonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#000',
   },
   overlay: {
     position: 'absolute',
@@ -210,7 +185,7 @@ const styles = StyleSheet.create({
     zIndex: 1, 
   },
   reviewContainer: {
-    marginVertical: 10,
+    marginVertical: 5,
     paddingHorizontal: 20,
   },
   Modalheader: {
@@ -224,6 +199,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginRight: 10,
   },
+  userDetails: {
+    flex: 1,
+  },
   userName: {
     fontWeight: 'bold',
     fontSize: 16,
@@ -231,6 +209,17 @@ const styles = StyleSheet.create({
   date: {
     color: 'gray',
     fontSize: 14,
+  },
+  emojiContainer: {
+    backgroundColor: '#DFF2BF', 
+    borderRadius: 25,
+    padding: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 5,
+  },
+  emoji: {
+    fontSize: 16,
   },
   reviewText: {
     marginVertical: 5,

@@ -54,7 +54,7 @@ export default function TabLayout() {
             <Home color={color} size={24} style={{ marginTop: 7 }}/>
           ),
           headerRight: () => (
-            <TouchableOpacity style={Common.headerBtn}>
+            <TouchableOpacity style={[Common.headerBtn, { marginRight: 10 }]}>
               <SlidersHorizontal  color={'black'} size={18} />
             </TouchableOpacity>
           ),
@@ -88,7 +88,7 @@ export default function TabLayout() {
           headerShown: true,
           headerTitle: '', 
           headerRight: () => (
-            <TouchableOpacity style={Common.headerBtn} onPress={() => route.push('/Setting')}>
+            <TouchableOpacity style={[Common.headerBtn, { marginRight: 10 }]} onPress={() => route.push('/Setting')}>
               <Settings  color={'black'} size={18} />
             </TouchableOpacity>
           ),

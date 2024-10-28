@@ -10,10 +10,10 @@ export default function ActionButton() {
             <PhoneCall color={Colors.light.background} size={22} />
             <Text style={styles.buttonText}>Call</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button}>
+        {/* <TouchableOpacity style={styles.button}>
             <MessageCircle color={Colors.light.background} size={22} />
             <Text style={styles.buttonText}>Message</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
     </View>
   )
 }
@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#000000',
+        backgroundColor: Colors.light.primary,
         marginHorizontal: 5,
         paddingVertical: 12,
         paddingHorizontal: 20,

@@ -13,8 +13,17 @@ const tintColorDark = '#fff';
 // #E7F7D2
 
 // #a091f5 - purple
+
+// #142a19
+//#224229
+//#e8f5e3
+//#99cca1
+
+// purple card - #2b1c50 and #f0f1ff or #d1d1f7
+// blue card - #1b224b and #dbf0ff
+//green card - #e8f5e3 and #142a19
 export const Colors = {
-  light: {
+  light: { 
     text: '#11181C',
     background: '#fff',
     tint: tintColorLight,
@@ -24,6 +33,7 @@ export const Colors = {
     online: '#48ea18',
     offline: ''
   },
+
   dark: {
     text: '#ECEDEE',
     background: '#151718',

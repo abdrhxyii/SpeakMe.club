@@ -57,7 +57,7 @@ const SettingsScreen = () => {
           onClose={() => setDialog(false)}
           title="Confirm Logout"
           bodymessage="Are you sure you want to logout?"
-          type={'warning'}
+          type={'success'}
         />
     </SafeAreaView>
   );
@@ -65,7 +65,7 @@ const SettingsScreen = () => {
 
 const styles = StyleSheet.create({
   content: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 15,
   },
   row: {
     flexDirection: 'row',
