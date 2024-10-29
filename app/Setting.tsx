@@ -9,7 +9,7 @@ const SettingsScreen = () => {
   const [dialog, setDialog] = useState(false)
   return (
     <SafeAreaView style={Common.container}>
-      <ScrollView style={styles.content}>
+      <ScrollView style={Common.content}>
         <View style={styles.row}>
           <Mail color={Colors.light.primary} size={24} />
           <View style={styles.rowTextContainer}>
@@ -64,9 +64,6 @@ const SettingsScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  content: {
-    paddingHorizontal: 15,
-  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',

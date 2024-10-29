@@ -1,73 +1,102 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { User, MessageSquare, Globe, Languages, Calendar, MapPin, List } from 'lucide-react-native';
+import { User, MessageSquare, Globe, Languages, MapPin, List, Camera, ChevronRight } from 'lucide-react-native';
 import Common from '@/constants/Common';
 import { Colors } from '@/constants/Colors';
+import * as ImagePicker from 'expo-image-picker';
 
 const EditProfile = () => {
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+
+  const openImagePicker = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      console.log('Sorry, we need camera roll permissions to make this work!');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setProfileImage(result.assets[0].uri);
+    }
+  };
+
   return (
-    <View style={styles.container}>
+    <View style={Common.container}>
+      <View style={Common.content}>
       <View style={styles.profileContainer}>
-        <View style={styles.profileImage}>
-          <Text style={styles.profileInitial}>A</Text>
-        </View>
+        <TouchableOpacity style={styles.profileImage} onPress={openImagePicker}>
+          {profileImage ? (
+            <Image source={{ uri: profileImage }} style={styles.profileImage} />
+          ) : (
+            <Text style={styles.profileInitial}>A</Text>
+          )}
+          <View style={styles.cameraIconContainer}>
+            <Camera color={Colors.light.primary} size={20} />
+          </View>
+        </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.itemContainer} activeOpacity={0.8}>
+      <TouchableOpacity style={styles.itemContainer} activeOpacity={1}>
         <User color={Colors.light.primary} size={24} />
         <View style={styles.textContainer}>
           <Text style={styles.itemTitle}>Name</Text>
           <Text style={styles.itemValue}>Abdur Rahman</Text>
         </View>
+        <ChevronRight color={Colors.light.primary} size={24} />
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.itemContainer} activeOpacity={0.8}>
-        <MessageSquare color={Colors.light.primary} size={24} />
-        <View style={styles.textContainer}>
-          <Text style={styles.itemTitle}>About me</Text>
-          <Text style={styles.itemValue}>Write about yourself</Text>
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.itemContainer} activeOpacity={0.8}>
+      <TouchableOpacity style={styles.itemContainer} activeOpacity={1}>
         <Globe color={Colors.light.primary} size={24} />
         <View style={styles.textContainer}>
           <Text style={styles.itemTitle}>Native language</Text>
           <Text style={styles.itemValue}>Tamil</Text>
         </View>
+        <ChevronRight color={Colors.light.primary} size={24} />
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.itemContainer} activeOpacity={0.8}>
+      <TouchableOpacity style={styles.itemContainer} activeOpacity={1}>
         <Languages color={Colors.light.primary} size={24} />
         <View style={styles.textContainer}>
           <Text style={styles.itemTitle}>English level</Text>
           <Text style={styles.itemValue}>A1 (Beginner)</Text>
         </View>
+        <ChevronRight color={Colors.light.primary} size={24} />
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.itemContainer} activeOpacity={0.8}>
-        <Calendar color={Colors.light.primary} size={24} />
+      <TouchableOpacity style={styles.itemContainer} activeOpacity={1}>
+        <MessageSquare color={Colors.light.primary} size={24} />
         <View style={styles.textContainer}>
-          <Text style={styles.itemTitle}>Age</Text>
-          <Text style={styles.itemValue}>50 years old</Text>
+          <Text style={styles.itemTitle}>About me</Text>
+          <Text style={styles.itemValue}>Write about yourself</Text>
         </View>
+        <ChevronRight color={Colors.light.primary} size={24} />
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.itemContainer} activeOpacity={0.8}>
+      <TouchableOpacity style={styles.itemContainer} activeOpacity={1}>
         <MapPin color={Colors.light.primary} size={24} />
         <View style={styles.textContainer}>
           <Text style={styles.itemTitle}>Location</Text>
           <Text style={styles.itemValue}>Sri Lanka</Text>
         </View>
+        <ChevronRight color={Colors.light.primary} size={24} />
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.itemContainer} activeOpacity={0.8}>
+      <TouchableOpacity style={styles.itemContainer} activeOpacity={1}>
         <List color={Colors.light.primary} size={24} />
         <View style={styles.textContainer}>
           <Text style={styles.itemTitle}>Interests</Text>
           <Text style={styles.itemValue}>hy</Text>
         </View>
+        <ChevronRight color={Colors.light.primary} size={24} />
       </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -98,14 +127,10 @@ const styles = StyleSheet.create({
   cameraIconContainer: {
     position: 'absolute',
     bottom: 0,
-    right: 10,
+    right: 0,
     backgroundColor: '#FFF',
     padding: 5,
     borderRadius: 20,
-  },
-  cameraIcon: {
-    width: 20,
-    height: 20,
   },
   itemContainer: {
     flexDirection: 'row',

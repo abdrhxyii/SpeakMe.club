@@ -6,7 +6,7 @@ import { ArrowRight } from 'lucide-react-native';
 export default function Practice() {
   return (
     <SafeAreaView style={Common.container}>
-      <ScrollView style={styles.content}>
+      <ScrollView style={Common.content}>
         
         <View style={[styles.card, styles.vocabularyCard]}>
           <Text style={styles.cardTitle}>Vocabulary</Text>
@@ -41,9 +41,6 @@ export default function Practice() {
 }
 
 const styles = StyleSheet.create({
-  content: {
-    paddingHorizontal: 15,
-  },
   card: {
     width: '100%',
     padding: 15,

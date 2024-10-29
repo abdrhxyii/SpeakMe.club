@@ -1,12 +1,12 @@
-import React, {useRef} from 'react';
+import React, { useEffect} from 'react';
 import { View, Text, FlatList, Image, TouchableOpacity, SafeAreaView, StyleSheet, Vibration } from 'react-native';
-import { RefreshCw, PhoneCall, Search } from 'lucide-react-native';
+import { PhoneCall, Search } from 'lucide-react-native';
 import Common from '@/constants/Common';
 import { Colors } from '@/constants/Colors';
 import { Link, useRouter } from 'expo-router';
 
 export default function HomeScreen() {
-  const route = useRouter()
+  const router  = useRouter()
   const data = [
     {
       id: '1',
@@ -124,9 +124,6 @@ export default function HomeScreen() {
     Vibration.vibrate(20) 
   }
 
-  const handleProfile = () => {
-    route.push('/Profile')
-  }
 
   const renderUserItem = ({ item }: any) => (
     <Link href="/Profile" asChild>

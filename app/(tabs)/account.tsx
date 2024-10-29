@@ -5,7 +5,6 @@ import ReviewCard from '@/components/ReviewCard';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import AccountSection from '@/components/AccountSection';
 import ProfileHeader from '@/components/ProfileHeader';
-import ActionButton from '@/components/ActionButton';
 import { useNavigation } from 'expo-router';
 import { Colors } from '@/constants/Colors';
 
@@ -133,7 +132,6 @@ export default function Account() {
           scrollEventThrottle={16}
         >
           <ProfileHeader/>
-          {/* <ActionButton/> */}
           <Text style={Common.profileContentTitle}>Personal Information</Text>
             <AccountSection/>
           <Text style={Common.profileContentTitle}>Feedbacks</Text>

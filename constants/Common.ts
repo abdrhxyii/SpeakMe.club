@@ -104,5 +104,8 @@ const Common = StyleSheet.create({
     fontWeight: 'bold',
     color: Colors.light.primary,
   },
+  content: {
+    paddingHorizontal: 15,
+  },
 });
 export default Common;
