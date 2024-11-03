@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler'; 
 
-import { useColorScheme } from '@/hooks/useColorScheme';
+import * as NavigationBar from 'expo-navigation-bar';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { TouchableOpacity } from 'react-native';
 import { Heart } from 'lucide-react-native';
@@ -22,6 +22,7 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
+    NavigationBar.setBackgroundColorAsync('#ffffff');
     if (loaded) {
       SplashScreen.hideAsync();
     }
@@ -34,14 +35,17 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomSheetModalProvider>
-          <Stack>
+          <Stack screenOptions={{
+              headerStyle: {
+                backgroundColor: '#ffffff',
+              },
+              headerShadowVisible: false,
+              headerBackTitleVisible: false,
+          }}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="Setting" 
               options={{
                 headerShown: true,
-                headerStyle: {
-                  backgroundColor: '#ffffff',
-                },
                 headerTitle: 'Setting',
                 headerTintColor: '#000',
                 headerTitleAlign: 'center',     
@@ -49,32 +53,74 @@ export default function RootLayout() {
               <Stack.Screen name="Profile"
                 options={{
                   headerShown: true,
-                  headerStyle: {
-                    backgroundColor: '#ffffff',
-                  },
                   headerTitle: '',
                   headerTintColor: '#000',
                   headerTitleAlign: 'center',   
                   headerRight: () => (
-                    <TouchableOpacity style={[Common.headerBtn, { marginRight: 10 }]} onPress={() => route.back()}>
+                    <TouchableOpacity style={[Common.headerBtn, { marginRight: 2 }]} onPress={() => route.back()}>
                       <Heart color={'black'} size={18} />
                     </TouchableOpacity>  
                   )   
                 }}/>
-                <Stack.Screen name="Authentication"
-                  options={{
-                    headerShown: false,   
-                  }}/>
-                <Stack.Screen name="EditProfile"
+              <Stack.Screen name="Authentication"
+                options={{
+                  headerShown: false,   
+                }}/>
+              <Stack.Screen name="EditProfile"
+                options={{
+                  headerShown: true,
+                  headerTitle: 'Edit Profile',
+                  headerTintColor: '#000',
+                  headerTitleAlign: 'center',   
+                }}/>
+              <Stack.Screen name="NameScreen"
                   options={{
                     headerShown: true,
-                    headerStyle: {
-                      backgroundColor: '#ffffff',
-                    },
-                    headerTitle: 'Edit Profile',
+                    headerTitle: '',
                     headerTintColor: '#000',
-                    headerTitleAlign: 'center',   
-                  }}/>
+                    headerTitleAlign: 'center', 
+                  }}
+                />
+              <Stack.Screen name="NativeLanguage"
+                  options={{
+                    headerShown: true,
+                    headerTitle: '',
+                    headerTintColor: '#000',
+                    headerTitleAlign: 'center', 
+                  }}
+                />
+              <Stack.Screen name="EnglishLevel"
+                  options={{
+                    headerShown: true,
+                    headerTitle: '',
+                    headerTintColor: '#000',
+                    headerTitleAlign: 'center', 
+                  }}
+                />
+              <Stack.Screen name="AboutMe"
+                  options={{
+                    headerShown: true,
+                    headerTitle: '',
+                    headerTintColor: '#000',
+                    headerTitleAlign: 'center', 
+                  }}
+                />
+              <Stack.Screen name="CountryList"
+                  options={{
+                    headerShown: true,
+                    headerTitle: '',
+                    headerTintColor: '#000',
+                    headerTitleAlign: 'center', 
+                  }}
+                />
+              <Stack.Screen name="Interest"
+                  options={{
+                    headerShown: true,
+                    headerTitle: '',
+                    headerTintColor: '#000',
+                    headerTitleAlign: 'center', 
+                  }}
+                />
               <Stack.Screen name="+not-found" />
           </Stack>
       </BottomSheetModalProvider>

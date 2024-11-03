@@ -1,12 +1,11 @@
-import React, { useEffect} from 'react';
-import { View, Text, FlatList, Image, TouchableOpacity, SafeAreaView, StyleSheet, Vibration } from 'react-native';
+import React from 'react';
+import { View, Text, FlatList, Image, Pressable, SafeAreaView, StyleSheet, Vibration, TouchableOpacity } from 'react-native';
 import { PhoneCall, Search } from 'lucide-react-native';
 import Common from '@/constants/Common';
 import { Colors } from '@/constants/Colors';
-import { Link, useRouter } from 'expo-router';
+import { Link } from 'expo-router';
 
 export default function HomeScreen() {
-  const router  = useRouter()
   const data = [
     {
       id: '1',
@@ -121,34 +120,31 @@ export default function HomeScreen() {
   ];
 
   const handleCall = () => {
-    Vibration.vibrate(20) 
-  }
-
+    Vibration.vibrate(20); 
+  };
 
   const renderUserItem = ({ item }: any) => (
     <Link href="/Profile" asChild>
-      <TouchableOpacity  style={Common.userContainer} activeOpacity={0.6}>
+      <Pressable style={Common.userContainer} android_ripple={{ color: '#ccc' }}>
         <View style={Common.profileInfo} pointerEvents="box-none">
-        <View style={Common.imageContainer}>
-          <Image source={item.profileImg} style={Common.profileImage} />
-          <View style={Common.levelBadge}>
-            <Text style={Common.levelText}>{item.level || 'B1'}</Text> 
+          <View style={Common.imageContainer}>
+            <Image source={item.profileImg} style={Common.profileImage} />
+            <View style={Common.levelBadge}>
+              <Text style={Common.levelText}>{item.level || 'B1'}</Text>
+            </View>
           </View>
-        </View>
           <View style={Common.details}>
             <Text style={Common.name}>{item.name}</Text>
             <Text style={Common.subtext}>
               {item.gender} • {item.country}
             </Text>
-            <Text style={Common.subtext}>
-              1200 talks
-            </Text>
+            <Text style={Common.subtext}>1200 talks</Text>
           </View>
         </View>
-        <TouchableOpacity style={styles.callButton} onPress={handleCall} activeOpacity={1}>
+        <Pressable style={styles.callButton} onPress={handleCall}>
           <PhoneCall color="white" size={20} />
-        </TouchableOpacity>
-      </TouchableOpacity>
+        </Pressable>
+      </Pressable>
     </Link>
   );
 
@@ -160,10 +156,10 @@ export default function HomeScreen() {
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
       />
-          <TouchableOpacity style={styles.perfectPartnerButton}>
-            <Search color="white" size={25} />
-            <Text style={styles.buttonText}>Find a perfect partner</Text>
-          </TouchableOpacity>
+      <TouchableOpacity style={styles.perfectPartnerButton} activeOpacity={0.9}>
+        <Search color="white" size={25} />
+        <Text style={styles.buttonText}>Find a perfect partner</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }

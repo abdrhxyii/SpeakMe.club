@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, Pressable, TouchableOpacity, Image } from 'react-native';
 import { User, MessageSquare, Globe, Languages, MapPin, List, Camera, ChevronRight } from 'lucide-react-native';
 import Common from '@/constants/Common';
 import { Colors } from '@/constants/Colors';
 import * as ImagePicker from 'expo-image-picker';
+import { useRouter } from 'expo-router';
 
 const EditProfile = () => {
+  const router = useRouter()
   const [profileImage, setProfileImage] = useState<string | null>(null);
 
   const openImagePicker = async () => {
@@ -43,59 +45,59 @@ const EditProfile = () => {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.itemContainer} activeOpacity={1}>
-        <User color={Colors.light.primary} size={24} />
-        <View style={styles.textContainer}>
-          <Text style={styles.itemTitle}>Name</Text>
-          <Text style={styles.itemValue}>Abdur Rahman</Text>
-        </View>
-        <ChevronRight color={Colors.light.primary} size={24} />
-      </TouchableOpacity>
+        <Pressable style={styles.itemContainer} onPress={() => router.push('/NameScreen')}>
+          <User color={Colors.light.primary} size={24} />
+          <View style={styles.textContainer}>
+            <Text style={styles.itemTitle}>Name</Text>
+            <Text style={styles.itemValue}>Abdur Rahman</Text>
+          </View>
+          <ChevronRight color={Colors.light.primary} size={24} />
+        </Pressable>
 
-      <TouchableOpacity style={styles.itemContainer} activeOpacity={1}>
-        <Globe color={Colors.light.primary} size={24} />
-        <View style={styles.textContainer}>
-          <Text style={styles.itemTitle}>Native language</Text>
-          <Text style={styles.itemValue}>Tamil</Text>
-        </View>
-        <ChevronRight color={Colors.light.primary} size={24} />
-      </TouchableOpacity>
+        <Pressable style={styles.itemContainer} onPress={() => router.push('/NativeLanguage')}>
+          <Globe color={Colors.light.primary} size={24} />
+          <View style={styles.textContainer}>
+            <Text style={styles.itemTitle}>Native language</Text>
+            <Text style={styles.itemValue}>Tamil</Text>
+          </View>
+          <ChevronRight color={Colors.light.primary} size={24} />
+        </Pressable>
 
-      <TouchableOpacity style={styles.itemContainer} activeOpacity={1}>
-        <Languages color={Colors.light.primary} size={24} />
-        <View style={styles.textContainer}>
-          <Text style={styles.itemTitle}>English level</Text>
-          <Text style={styles.itemValue}>A1 (Beginner)</Text>
-        </View>
-        <ChevronRight color={Colors.light.primary} size={24} />
-      </TouchableOpacity>
+        <Pressable style={styles.itemContainer} onPress={() => router.push('/EnglishLevel')}>
+          <Languages color={Colors.light.primary} size={24} />
+          <View style={styles.textContainer}>
+            <Text style={styles.itemTitle}>English level</Text>
+            <Text style={styles.itemValue}>A1 (Beginner)</Text>
+          </View>
+          <ChevronRight color={Colors.light.primary} size={24} />
+        </Pressable>
 
-      <TouchableOpacity style={styles.itemContainer} activeOpacity={1}>
-        <MessageSquare color={Colors.light.primary} size={24} />
-        <View style={styles.textContainer}>
-          <Text style={styles.itemTitle}>About me</Text>
-          <Text style={styles.itemValue}>Write about yourself</Text>
-        </View>
-        <ChevronRight color={Colors.light.primary} size={24} />
-      </TouchableOpacity>
+        <Pressable style={styles.itemContainer} onPress={() => router.push('/AboutMe')}>
+          <MessageSquare color={Colors.light.primary} size={24} />
+          <View style={styles.textContainer}>
+            <Text style={styles.itemTitle}>About me</Text>
+            <Text style={styles.itemValue}>Write about yourself</Text>
+          </View>
+          <ChevronRight color={Colors.light.primary} size={24} />
+        </Pressable>
 
-      <TouchableOpacity style={styles.itemContainer} activeOpacity={1}>
-        <MapPin color={Colors.light.primary} size={24} />
-        <View style={styles.textContainer}>
-          <Text style={styles.itemTitle}>Location</Text>
-          <Text style={styles.itemValue}>Sri Lanka</Text>
-        </View>
-        <ChevronRight color={Colors.light.primary} size={24} />
-      </TouchableOpacity>
+        <Pressable style={styles.itemContainer} onPress={() => router.push('/CountryList')}>
+          <MapPin color={Colors.light.primary} size={24} />
+          <View style={styles.textContainer}>
+            <Text style={styles.itemTitle}>Location</Text>
+            <Text style={styles.itemValue}>Sri Lanka</Text>
+          </View>
+          <ChevronRight color={Colors.light.primary} size={24} />
+        </Pressable>
 
-      <TouchableOpacity style={styles.itemContainer} activeOpacity={1}>
-        <List color={Colors.light.primary} size={24} />
-        <View style={styles.textContainer}>
-          <Text style={styles.itemTitle}>Interests</Text>
-          <Text style={styles.itemValue}>hy</Text>
-        </View>
-        <ChevronRight color={Colors.light.primary} size={24} />
-      </TouchableOpacity>
+        <Pressable style={styles.itemContainer} onPress={() => router.push('/Interest')}>
+          <List color={Colors.light.primary} size={24} />
+          <View style={styles.textContainer}>
+            <Text style={styles.itemTitle}>Interests</Text>
+            <Text style={styles.itemValue}>hy</Text>
+          </View>
+          <ChevronRight color={Colors.light.primary} size={24} />
+        </Pressable>
       </View>
     </View>
   );

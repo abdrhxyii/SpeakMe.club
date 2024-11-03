@@ -31,7 +31,10 @@ export const Colors = {
     danger: '#ED1010',
     primary: '#000000',
     online: '#48ea18',
-    offline: ''
+    offline: '',
+    border: '#DDD',
+    darkGray: '#a5a5a5',
+    info: '#666'
   },
 
   dark: {

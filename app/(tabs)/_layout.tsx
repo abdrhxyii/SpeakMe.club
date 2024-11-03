@@ -1,23 +1,22 @@
 import { Tabs, useRouter } from 'expo-router';
-import React, { useEffect } from 'react';
+import React, {useEffect} from 'react';
+import { Home, UserCircle, SlidersHorizontal , MessageSquare, Settings, User, Zap, ClipboardList } from 'lucide-react-native';
 import { TouchableOpacity, StyleSheet } from 'react-native';
 import * as NavigationBar from 'expo-navigation-bar';
 import Common from '@/constants/Common';
 import { Colors } from '@/constants/Colors';
 
-import { FontAwesome } from '@expo/vector-icons';
-
 export default function TabLayout() {
-  const route = useRouter();
+  const route = useRouter()
 
   return (
     <Tabs
       screenOptions={{
-        headerShown: true,
+        headerShown: true, 
         headerStyle: {
           backgroundColor: "#fff",
-          elevation: 0,
-          shadowOpacity: 0,
+          elevation: 0, 
+          shadowOpacity: 0, 
           borderBottomWidth: 0,
         },
         headerTitleStyle: {
@@ -37,7 +36,7 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           fontSize: 12,
           paddingBottom: 12,
-          color: Colors.light.primary,
+          color: Colors.light.primary
         },
       }}
     >
@@ -48,11 +47,11 @@ export default function TabLayout() {
           headerTitleAlign: 'left',
           headerTitle: 'Find a partner',
           tabBarIcon: ({ color, focused }) => (
-            <FontAwesome name="home" color={color} size={24} style={{ marginTop: 7 }} />
+            <Home color={color} size={24} style={{ marginTop: 7 }}/>
           ),
           headerRight: () => (
             <TouchableOpacity style={[Common.headerBtn, { marginRight: 10 }]}>
-              <FontAwesome name="sliders" color={'black'} size={18} />
+              <SlidersHorizontal  color={'black'} size={18} />
             </TouchableOpacity>
           ),
         }}
@@ -62,7 +61,7 @@ export default function TabLayout() {
         options={{
           title: 'Practice',
           tabBarIcon: ({ color, focused }) => (
-            <FontAwesome name="clipboard" color={color} size={24} style={{ marginTop: 7 }} />
+            <ClipboardList color={color} size={24} style={{ marginTop: 7 }}/>
           ),
         }}
       />
@@ -71,7 +70,7 @@ export default function TabLayout() {
         options={{
           title: 'Connections',
           tabBarIcon: ({ color, focused }) => (
-            <FontAwesome name="user" color={color} size={24} style={{ marginTop: 7 }} />
+            <User color={color} size={24} style={{ marginTop: 7 }}/>
           ),
         }}
       />
@@ -80,16 +79,13 @@ export default function TabLayout() {
         options={{
           title: 'Account',
           tabBarIcon: ({ color, focused }) => (
-            <FontAwesome name="user-circle" color={color} size={24} style={{ marginTop: 7 }} />
+            <UserCircle color={color} size={24} style={{ marginTop: 7 }}/>
           ),
           headerShown: true,
-          headerTitle: '',
+          headerTitle: '', 
           headerRight: () => (
-            <TouchableOpacity
-              style={[Common.headerBtn, { marginRight: 10 }]}
-              onPress={() => route.push('/Setting')}
-            >
-              <FontAwesome name="cog" color={'black'} size={18} />
+            <TouchableOpacity style={[Common.headerBtn, { marginRight: 10 }]} onPress={() => route.push('/Setting')}>
+              <Settings  color={'black'} size={18} />
             </TouchableOpacity>
           ),
         }}

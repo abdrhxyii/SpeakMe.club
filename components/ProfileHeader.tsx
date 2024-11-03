@@ -1,10 +1,11 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, TouchableOpacity, Modal, Image, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, StyleSheet, Animated, TouchableOpacity, Modal, Image, TouchableWithoutFeedback, Pressable } from 'react-native';
 import { Colors } from '@/constants/Colors';
-import { EllipsisVertical, PenLine } from 'lucide-react-native'; 
-import { Link } from 'expo-router';
+import { PenLine } from 'lucide-react-native'; 
+import { useRouter } from 'expo-router';
 
 export default function ProfileHeader() {
+  const router = useRouter()
   const [modalVisible, setModalVisible] = useState(false);
   const scaleValue = useRef(new Animated.Value(0)).current;
 
@@ -39,11 +40,9 @@ export default function ProfileHeader() {
       <View style={styles.headerTextContainer}>
         <View style={styles.nameContainer}>
           <Text style={styles.headerTitle}>Abdur Rahman</Text>
-          <Link href={'/EditProfile'} asChild>
-            <TouchableOpacity activeOpacity={0.6}>
+            <Pressable onPress={() => router.push('/EditProfile')}>
               <PenLine color={Colors.light.primary} size={22} style={styles.editIcon} />
-            </TouchableOpacity>
-          </Link>
+            </Pressable>
         </View>
         <View style={styles.detailsContainer}>
           <View style={styles.detailItem}>
