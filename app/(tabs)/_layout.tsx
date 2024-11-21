@@ -31,11 +31,11 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: 'white',
           height: 55,
-          borderTopWidth: 0,
+          // borderTopWidth: 0,
         },
         tabBarLabelStyle: {
           fontSize: 12,
-          paddingBottom: 12,
+          paddingBottom: 8,
           color: Colors.light.primary
         },
       }}

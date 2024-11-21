@@ -62,7 +62,6 @@ const Common = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: Colors.light.background,
     padding: 10,
-    borderRadius: 10,
     marginBottom: 5,
     borderBottomColor: '#ddd',
     borderBottomWidth: 1,

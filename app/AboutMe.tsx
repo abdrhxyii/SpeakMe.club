@@ -20,7 +20,7 @@ export default function AboutMe() {
         <Text style={styles.charCount}>{name.length}/50</Text>
 
         <Text style={styles.infoText}>
-            Share a bit about yourself! Describe your interests, background, or anything unique, but avoid sharing contact details or personal information.
+          Share a bit about yourself! Describe your interests, background, or anything unique, but avoid sharing contact details or personal information.
         </Text>
       </View>
 
@@ -41,6 +41,8 @@ const styles = StyleSheet.create({
     color: '#333',
     marginTop: 8,
     paddingLeft: 12,
+    height: 100, 
+    textAlignVertical: 'top',
   },
   charCount: {
     textAlign: 'right',

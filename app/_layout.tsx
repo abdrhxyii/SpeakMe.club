@@ -7,7 +7,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import * as NavigationBar from 'expo-navigation-bar';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { TouchableOpacity } from 'react-native';
+import { TouchableOpacity, StatusBar  } from 'react-native';
 import { Heart } from 'lucide-react-native';
 import Common from '@/constants/Common';
 
@@ -34,6 +34,7 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+      <StatusBar backgroundColor="#ffffff" barStyle="dark-content" />
       <BottomSheetModalProvider>
           <Stack screenOptions={{
               headerStyle: {

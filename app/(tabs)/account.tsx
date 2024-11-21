@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView } from 'react-native';
-import React, { useCallback, useRef, useState, useLayoutEffect  } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, TouchableWithoutFeedback  } from 'react-native';
+import React, { useCallback, useRef, useState, useMemo } from 'react';
 import Common from '@/constants/Common';
 import ReviewCard from '@/components/ReviewCard';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
@@ -14,7 +14,7 @@ const reviews = [
     name: 'Vaishali',
     location: 'Dehradun, India',
     date: 'August 2024',
-    review: 'Castle Oodeypore is a magnificent palace with stunning interiors. We stepped-in and were absolutely arrested by its royal charm. Kudos to Ma\'am Nirmal for the exquisite aesthetics, ',
+    review: 'Castle Oodeypore is a magnificent palace with stunning interiors. We stepped in and were absolutely arrested by its royal charm. Kudos to Ma\'am Nirmal for the exquisite aesthetics.',
   },
   {
     id: '2',
@@ -28,24 +28,10 @@ const reviews = [
     name: 'Vaishali',
     location: 'Dehradun, India',
     date: 'August 2024',
-    review: '',
+    review: 'Castle Oodeypore is a magnificent palace with stunning interiors. We stepped in and were absolutely arrested by its royal charm. Kudos to Ma\'am Nirmal for the exquisite aesthetics.',
   },
   {
     id: '4',
-    name: 'Bridget',
-    location: 'Auckland, New Zealand',
-    date: 'January 2024',
-    review: '',
-  },
-  {
-    id: '5',
-    name: 'Vaishali',
-    location: 'Dehradun, India',
-    date: 'August 2024',
-    review: '',
-  },
-  {
-    id: '6',
     name: 'Bridget',
     location: 'Auckland, New Zealand',
     date: 'January 2024',
@@ -56,13 +42,12 @@ const reviews = [
 export default function Account() {
   const navigation = useNavigation();
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const [isModalVisible, setIsModalVisible] = useState(false); 
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [showHeaderTitle, setShowHeaderTitle] = useState(false);
-  const scrollThreshold = 10;
+  const scrollThreshold = useMemo(() => 10, []); // Use useMemo for constants
 
-  const handleSheetChanges = useCallback((index: number) => {
-    if (index === -1) {
-      setIsModalVisible(false);
+  const close = () => {
+    setIsModalVisible(false);
       navigation.setOptions({ 
         tabBarStyle: {
           backgroundColor: 'white',
@@ -71,36 +56,47 @@ export default function Account() {
         },
         headerShown: true 
       });
-    } else {
-      setIsModalVisible(true);
-      navigation.setOptions({ 
-        tabBarStyle: { display: 'none' }, 
-        headerShown: false 
-      });
-    }
-  }, [navigation]);
+  }
 
-  const openModal = () => {
+  const handleSheetChanges = useCallback(
+    (index: number) => {
+      const options = index === -1
+        ? {
+            tabBarStyle: {
+              backgroundColor: 'white',
+              height: 55,
+              borderTopWidth: 0,
+            },
+            headerShown: true,
+          }
+        : { tabBarStyle: { display: 'none' }, headerShown: false };
+
+      setIsModalVisible(index !== -1);
+      navigation.setOptions(options);
+    },
+    [navigation]
+  );
+
+  const openModal = useCallback(() => {
     setIsModalVisible(true);
-    bottomSheetRef.current?.snapToIndex(0);  
+    bottomSheetRef.current?.snapToIndex(0);
     navigation.setOptions({ tabBarStyle: { display: 'none' }, headerShown: false });
-  };
+  }, [navigation]);
 
   const handleScroll = useCallback(
     (event: any) => {
       const yOffset = event.nativeEvent.contentOffset.y;
-      if (yOffset > scrollThreshold && !showHeaderTitle) {
-        setShowHeaderTitle(true);
-        navigation.setOptions({ headerTitle: 'Abdur Rahman' });
-      } else if (yOffset <= scrollThreshold && showHeaderTitle) {
-        setShowHeaderTitle(false);
-        navigation.setOptions({ headerTitle: '' });
+      const shouldShowTitle = yOffset > scrollThreshold;
+
+      if (shouldShowTitle !== showHeaderTitle) {
+        setShowHeaderTitle(shouldShowTitle);
+        navigation.setOptions({ headerTitle: shouldShowTitle ? 'Abdur Rahman' : '' });
       }
     },
-    [navigation, showHeaderTitle]
+    [navigation, showHeaderTitle, scrollThreshold]
   );
 
-  const ReviewItem = ({ review }: any) => (
+  const ReviewItem = useCallback(({ review }: any) => (
     <View style={styles.reviewContainer}>
       <View style={styles.Modalheader}>
         <Image
@@ -119,68 +115,75 @@ export default function Account() {
       </View>
       <Text style={styles.reviewText}>{review.review}</Text>
     </View>
-  );
+  ), []); 
+
+  const MemoizedReviewItem = useMemo(() => ReviewItem, [ReviewItem]);
 
   return (
     <>
       <SafeAreaView style={Common.container}>
-      {isModalVisible && <View style={styles.overlay} />} 
-        <ScrollView 
-          style={Common.profileContent} 
+      {isModalVisible && (
+          <TouchableWithoutFeedback
+            onPress={() => {
+              setIsModalVisible(false);
+              bottomSheetRef.current?.close();
+              navigation.setOptions({ tabBarStyle: { backgroundColor: 'white', height: 55 }, headerShown: true });
+            }}
+          >
+            <View style={styles.overlay} />
+          </TouchableWithoutFeedback>
+        )}
+        <ScrollView
+          style={Common.profileContent}
           showsVerticalScrollIndicator={false}
           onScroll={handleScroll}
           scrollEventThrottle={16}
         >
-          <ProfileHeader/>
+          <ProfileHeader />
           <Text style={Common.profileContentTitle}>Personal Information</Text>
-            <AccountSection/>
+          <AccountSection />
           <Text style={Common.profileContentTitle}>Feedbacks</Text>
-            <View style={Common.profileReviewContainer}>
-              <ScrollView showsHorizontalScrollIndicator={false} overScrollMode="never">
-                <ReviewCard />
-                <ReviewCard />
-                <ReviewCard />
-              </ScrollView>
-              <TouchableOpacity style={Common.Reviewbutton} onPress={openModal}>
-                <Text style={Common.ReviewbuttonText}>Show all 14 reviews</Text>
-              </TouchableOpacity>
-            </View>
+          <View style={Common.profileReviewContainer}>
+            <ScrollView showsHorizontalScrollIndicator={false} overScrollMode="never">
+              <ReviewCard />
+              <ReviewCard />
+              <ReviewCard />
+            </ScrollView>
+            <TouchableOpacity style={Common.Reviewbutton} onPress={openModal}>
+              <Text style={Common.ReviewbuttonText}>Show all 14 reviews</Text>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </SafeAreaView>
-      
+
       <BottomSheet
-          ref={bottomSheetRef}
-          onChange={handleSheetChanges}
-          snapPoints={['80%']}
-          index={isModalVisible ? 0 : -1} 
-          enablePanDownToClose
-        >
-          <BottomSheetFlatList
-            data={reviews}
-            showsVerticalScrollIndicator={false}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => <ReviewItem review={item} />}
-            ListHeaderComponent={
-              <Text style={styles.headerText}>14 Reviews</Text>
-            }
-          />
+        ref={bottomSheetRef}
+        onChange={handleSheetChanges}
+        snapPoints={['80%']}
+        index={isModalVisible ? 0 : -1}
+        enablePanDownToClose
+      >
+        <BottomSheetFlatList
+          data={reviews}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <MemoizedReviewItem review={item} />}
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={<Text style={styles.headerText}>14 Reviews</Text>}
+        />
       </BottomSheet>
     </>
   );
 }
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'grey',
-  },
   overlay: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', 
-    zIndex: 1, 
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    zIndex: 1,
   },
   reviewContainer: {
     marginVertical: 5,
@@ -209,7 +212,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   emojiContainer: {
-    backgroundColor: '#DFF2BF', 
+    backgroundColor: '#DFF2BF',
     borderRadius: 25,
     padding: 10,
     justifyContent: 'center',
@@ -223,10 +226,6 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     fontSize: 14,
     color: '#333',
-  },
-  footer: {
-    marginTop: 5,
-    fontSize: 14,
   },
   headerText: {
     fontSize: 18,
