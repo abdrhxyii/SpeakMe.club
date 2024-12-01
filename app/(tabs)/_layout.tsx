@@ -1,10 +1,10 @@
 import { Tabs, useRouter } from 'expo-router';
-import React, {useEffect} from 'react';
-import { Home, UserCircle, SlidersHorizontal , MessageSquare, Settings, User, Zap, ClipboardList } from 'lucide-react-native';
-import { TouchableOpacity, StyleSheet } from 'react-native';
-import * as NavigationBar from 'expo-navigation-bar';
+import React from 'react';
+import { Home, UserCircle, SlidersHorizontal , Settings, User, ClipboardList } from 'lucide-react-native';
+import { TouchableOpacity } from 'react-native';
 import Common from '@/constants/Common';
 import { Colors } from '@/constants/Colors';
+import { router } from 'expo-router';
 
 export default function TabLayout() {
   const route = useRouter()
@@ -50,7 +50,7 @@ export default function TabLayout() {
             <Home color={color} size={24} style={{ marginTop: 7 }}/>
           ),
           headerRight: () => (
-            <TouchableOpacity style={[Common.headerBtn, { marginRight: 10 }]}>
+            <TouchableOpacity style={[Common.headerBtn, { marginRight: 10 }]} onPress={() => router.navigate('/Authentication')}>
               <SlidersHorizontal  color={'black'} size={18} />
             </TouchableOpacity>
           ),

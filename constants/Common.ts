@@ -106,5 +106,14 @@ const Common = StyleSheet.create({
   content: {
     paddingHorizontal: 15,
   },
+  header: {
+    fontSize: 32,
+    fontWeight: '900',
+  },
+  subHeader: {
+    fontSize: 16,
+    marginBottom: 15,
+    color: '#808080',
+  },
 });
 export default Common;
