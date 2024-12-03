@@ -18,6 +18,7 @@ export default function PasswordAuthScreen() {
     const [isLengthValid, setIsLengthValid] = useState(false);
     const [isLetterValid, setIsLetterValid] = useState(false);
     const [isNumberValid, setIsNumberValid] = useState(false);
+    const [isSymbolValid, setIsSymbolValid] = useState(false);
 
     useMemo(() => {}, [email, mode]);
 
@@ -27,13 +28,15 @@ export default function PasswordAuthScreen() {
         const lengthRegex = /.{8,}/; 
         const letterRegex = /[A-Za-z]/; 
         const numberRegex = /\d/; 
+        const symbolRegex = /[!@#$%^&*(),.?":{}|<>]/; // Symbol regex
 
         setIsLengthValid(lengthRegex.test(text));
         setIsLetterValid(letterRegex.test(text));
         setIsNumberValid(numberRegex.test(text));
+        setIsSymbolValid(symbolRegex.test(text));
 
-        if (text.trim() === '' || !lengthRegex.test(text) || !letterRegex.test(text) || !numberRegex.test(text)) {
-            setError('Password must be at least 8 characters long and include at least one letter and one number.');
+        if (text.trim() === '' || !lengthRegex.test(text) || !letterRegex.test(text) || !numberRegex.test(text) || !symbolRegex.test(text)) {
+            setError('Password must be at least 8 characters long and include at least one letter, one number, and one special symbol.');
         } else {
             setError('');
         }
@@ -49,38 +52,42 @@ export default function PasswordAuthScreen() {
 
         try {
             if (mode === 'login') {
-                const { data, error } = await supabase.auth.signInWithOtp({
+                console.log({
                     email: validEmail as string,
-                    options: {
-                        shouldCreateUser: false,
-                    },
+                    password: password.trim(),
+                })
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: validEmail as string,
+                    password: password.trim(),
                 });
-
+    
                 if (error) {
-                    console.log(error, "PassowrdAuthScreen Line 71")
-                    Alert.alert(error.message);
-                    return
+                    setError(error.message)
+                    return;
                 }
+    
                 if (data) {
-                    console.log(data, "data login")
-                    router.push({ pathname: '/OTPVerificationScreen', params: { email: validEmail } });
+                    console.log(data, "Successful login");
+                    router.push('/(tabs)/'); 
                 }
             } else if (mode === 'signup') {
-                const { data, error } = await supabase.auth.signInWithOtp({
+                console.log({
                     email: validEmail as string,
-                    options: {
-                        shouldCreateUser: true,
-                    },
+                    password: password.trim(),
+                })
+                const { data, error } = await supabase.auth.signUp({
+                    email: validEmail as string,
+                    password: password.trim(),
                 });
-
+            
                 if (error) {
-                    console.log(error, "PassowrdAuthScreen Line 71")
-                    Alert.alert(error.message);
-                    return
+                    setError(error.message);
+                    return;
                 }
-                if (data) {
-                    console.log(data, "data")
-                    router.push({ pathname: '/OTPVerificationScreen', params: { email: validEmail } });
+            
+                if (data.user) {
+                    console.log(data, "data");
+                    router.replace({ pathname: '/OTPVerificationScreen', params: { email: validEmail } });
                 }
             }
         } catch (err) {
@@ -93,7 +100,7 @@ export default function PasswordAuthScreen() {
     return (
         <SafeAreaView style={Common.container}>
             <View style={Common.content}>
-                <View style={[styles.inputContainer, { borderColor: isLengthValid && isLetterValid && isNumberValid ? 'green' : Colors.light.primary }]}>
+                <View style={[styles.inputContainer, { borderColor: isLengthValid && isLetterValid && isNumberValid && isSymbolValid ? 'green' : Colors.light.primary }]}>
                     <TextInput
                         style={styles.input}
                         placeholder="Password"
@@ -112,6 +119,7 @@ export default function PasswordAuthScreen() {
 
                 {error ? <Text style={styles.warningText}>{error}</Text> : null}
 
+                {mode != 'login' && 
                 <View style={styles.validationContainer}>
                     <View style={styles.validationItem}>
                         <CheckCircle color={isLengthValid ? 'green' : 'red'} size={16} />
@@ -125,14 +133,18 @@ export default function PasswordAuthScreen() {
                         <CheckCircle color={isNumberValid ? 'green' : 'red'} size={16} />
                         <Text style={[styles.validationText, { color: isNumberValid ? 'green' : 'red' }]}>Should include at least one number</Text>
                     </View>
-                </View>
+                    <View style={styles.validationItem}>
+                        <CheckCircle color={isSymbolValid ? 'green' : 'red'} size={16} />
+                        <Text style={[styles.validationText, { color: isSymbolValid ? 'green' : 'red' }]}>Should include at least one symbol</Text>
+                    </View>
+                </View>}
             </View>
 
             <TouchableOpacity
                 style={styles.button}
                 activeOpacity={0.9}
                 onPress={continueAuthentication}
-                disabled={loading || !(isLengthValid && isLetterValid && isNumberValid)}
+                disabled={loading || !(isLengthValid && isLetterValid && isNumberValid && isSymbolValid)}
             >
                 {loading ? (
                     <ActivityIndicator size="small" color="#fff" />

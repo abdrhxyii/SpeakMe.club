@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, SafeAreaView, TextInput,Alert } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, TextInput, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import Common from '@/constants/Common';
 import TextHeader from '@/components/TextHeader';
@@ -13,6 +13,7 @@ const OTPVerificationScreen = () => {
     const [otp, setOtp] = useState(["", "", "", "", "", ""]);
     const [counter, setCounter] = useState(60);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('')
 
     useEffect(() => {
         if (counter > 0) {
@@ -36,9 +37,11 @@ const OTPVerificationScreen = () => {
     const handleVerify = async () => {
         const otpCode = otp.join('');
         if (otpCode.length !== 6) {
-            Alert.alert('Invalid OTP', 'Please enter the 6-digit OTP sent to your email.');
+            setError('Invalid OTP, Please enter the 6-digit OTP sent to your email.')
             return;
         }
+
+        setLoading(true); 
 
         const { data: { session }, error } = await supabase.auth.verifyOtp({
             email: email as string,
@@ -46,8 +49,10 @@ const OTPVerificationScreen = () => {
             type: 'signup',
         });
 
+        setLoading(false); 
+
         if (error) {
-            Alert.alert('Verification Failed', error.message);
+            setError(error.message)
             return;
         }
         if(session) {
@@ -56,10 +61,36 @@ const OTPVerificationScreen = () => {
         }
     };
 
+    const resendOTP = async () => {
+        if (loading) return; 
+        setLoading(true);
+
+        try {
+            const { error } = await supabase.auth.resend({
+                type: 'signup',
+                email: email as string,
+            })
+
+            if (error) {
+                setError(error.message)
+                return;
+            }
+
+            setCounter(60); 
+            Alert.alert('OTP Resent', 'A new OTP has been sent to your email.');
+        } catch (error) {
+            Alert.alert('An unexpected error occurred');
+        } finally {
+            setLoading(false); 
+        }
+    };
+
     return (
         <SafeAreaView style={Common.container}>
             <View style={Common.content}>
-                <TextHeader header="Enter 4 Digit Code" subheader={`Enter 4 digit code that you receive on your email ${email}`}/>
+                <TextHeader header="Enter 6 Digit Code" subheader={`Enter the 6-digit code sent to your email ${email}`}/>
+                
+                {/* OTP Inputs */}
                 <View style={styles.otpContainer}>
                     {otp.map((digit, index) => (
                         <TextInput
@@ -72,14 +103,24 @@ const OTPVerificationScreen = () => {
                         />
                     ))}
                 </View>
-                {counter > 0 ? (
-                    <Text style={styles.terms}>
-                        Resend code in <Text style={styles.link}>{counter} seconds</Text> 
-                    </Text>
+
+                {error ? <Text style={styles.warningText}>{error}</Text> : null}
+
+                {loading ? (
+                    <ActivityIndicator size="large" color="#000000" style={styles.loader} />
                 ) : (
-                    <Text style={styles.terms}>
-                        Email not received? <Text style={styles.link}>Resend code</Text>
-                    </Text>
+                    counter > 0 ? (
+                        <Text style={styles.terms}>
+                            Resend code in <Text style={styles.link}>{counter} seconds</Text>
+                        </Text>
+                    ) : (
+                        <Text style={styles.terms}>
+                            Email not received?{" "}
+                            <TouchableOpacity onPress={resendOTP}>
+                                <Text style={styles.link}>Resend code</Text>
+                            </TouchableOpacity>
+                        </Text>
+                    )
                 )}
             </View>
         </SafeAreaView>
@@ -110,11 +151,21 @@ const styles = StyleSheet.create({
         fontSize: 13,
         color: '#808080',
         marginBottom: 16,
-        textAlign: 'center'
+        textAlign: 'center',
     },
     link: {
         color: '#1A1A1A',
         fontWeight: '800',
         textDecorationLine: 'underline'
+    },
+    warningText: {        
+        fontSize: 14,
+        color: 'red',
+        lineHeight: 20,
+        marginVertical: 6,
+        textAlign: 'center'
+    },
+    loader: {
+        marginTop: 20, 
     },
 });

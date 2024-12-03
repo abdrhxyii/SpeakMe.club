@@ -157,6 +157,7 @@ export default function RootLayout() {
                     headerTitle: '',
                     headerTintColor: '#000',
                     headerTitleAlign: 'center', 
+                    headerBackVisible: false,
                   }}
               />
               <Stack.Screen name="+not-found" />

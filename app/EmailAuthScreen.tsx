@@ -2,7 +2,7 @@ import { Colors } from '@/constants/Colors';
 import Common from '@/constants/Common';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, SafeAreaView, Pressable } from 'react-native';
 import { Info, CheckCircle  } from 'lucide-react-native';
 import TextHeader from '@/components/TextHeader';
 
@@ -79,9 +79,9 @@ export default function EmailAuthScreen() {
                 {error ? <Text style={styles.warningText}>{error}</Text> : null}
             </View>
 
-            <TouchableOpacity style={styles.button} activeOpacity={0.9} onPress={handleContinue}>
+            <Pressable style={styles.button} onPress={handleContinue}>
                 <Text style={styles.buttonText}>Continue</Text>
-            </TouchableOpacity>
+            </Pressable>
         </SafeAreaView>
     );
 }

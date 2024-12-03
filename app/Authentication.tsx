@@ -2,13 +2,17 @@ import React from 'react';
 import { View, Text, Pressable, Image, StyleSheet, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import Common from '@/constants/Common';
-import * as AuthSession from 'expo-auth-session';
-import axios from 'axios';
 import { Mail } from 'lucide-react-native';
 import { Colors } from '@/constants/Colors';
+import { supabase } from '@/libs/supabase';
 
 const Authentication = () => {
   const router = useRouter();
+
+  const webClinetId = '1070629572115-nk6jq1edb7ngjav853b0u0kbalb9ia3g.apps.googleusercontent.com'
+  const webClientSecret = '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'
+  const androidClientId = '1070629572115-qeu9dutp1evr9mqlcd7prulks1otasjm.apps.googleusercontent.com'
+  const iosClientId = '1070629572115-qgjtl00997dmrjdc89bepqnfa372bic8.apps.googleusercontent.com'
 
   return (
     <View style={Common.container}>
