@@ -2,13 +2,14 @@ import { Colors } from '@/constants/Colors';
 import Common from '@/constants/Common';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, SafeAreaView, Pressable } from 'react-native';
+import { View, Text, TextInput, StyleSheet, SafeAreaView, Pressable } from 'react-native';
 import { Info, CheckCircle  } from 'lucide-react-native';
 import TextHeader from '@/components/TextHeader';
 
 export default function EmailAuthScreen() {
-    const { mode } = useLocalSearchParams();
     const route = useRouter();
+    const { mode } = useLocalSearchParams();
+    
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
 
@@ -37,8 +38,8 @@ export default function EmailAuthScreen() {
         }
     };
 
-    const inputBorderColor = error ? 'red' : email.trim() && !error ? 'green' : Colors.light.darkGray;
-    const iconColor = error ? 'red' : email.trim() && !error ? 'green' : 'transparent';
+    const inputBorderColor = error ? Colors.light.red : email.trim() && !error ? 'green' : Colors.light.darkGray;
+    const iconColor = error ? Colors.light.red : email.trim() && !error ? 'green' : 'transparent';
 
     return (
         <SafeAreaView style={Common.container}>
@@ -109,7 +110,7 @@ const styles = StyleSheet.create({
   },
   warningText: {
     fontSize: 14,
-    color: 'red',
+    color: Colors.light.red,
     lineHeight: 20,
     marginVertical: 6,
   },

@@ -5,6 +5,7 @@ import Common from '@/constants/Common';
 import { Eye, EyeOff, CheckCircle } from 'lucide-react-native'; 
 import { router, useLocalSearchParams } from 'expo-router';
 import { supabase } from '@/libs/supabase';
+import { checkIfEmailExists } from '@/utils/authUtils';
 
 export default function PasswordAuthScreen() {
     const { email, mode } = useLocalSearchParams();
@@ -67,14 +68,17 @@ export default function PasswordAuthScreen() {
                 }
     
                 if (data) {
-                    console.log(data, "Successful login");
-                    router.push('/(tabs)/'); 
+                    console.log(data, "data from login")
+                    router.replace('/(tabs)/'); 
                 }
             } else if (mode === 'signup') {
-                console.log({
-                    email: validEmail as string,
-                    password: password.trim(),
-                })
+                const emailExists = await checkIfEmailExists(validEmail as string);
+                
+                if (emailExists) {
+                    setError("An account with this email already exists. Please log in instead.");
+                    return;
+                }
+
                 const { data, error } = await supabase.auth.signUp({
                     email: validEmail as string,
                     password: password.trim(),
@@ -86,11 +90,12 @@ export default function PasswordAuthScreen() {
                 }
             
                 if (data.user) {
-                    console.log(data, "data");
+                    console.log(data, "data from sigup");
                     router.replace({ pathname: '/OTPVerificationScreen', params: { email: validEmail } });
                 }
             }
         } catch (err) {
+            console.log(err, "err")
             Alert.alert("An unexpected error occurred");
         } finally {
             setLoading(false); 
@@ -100,7 +105,14 @@ export default function PasswordAuthScreen() {
     return (
         <SafeAreaView style={Common.container}>
             <View style={Common.content}>
-                <View style={[styles.inputContainer, { borderColor: isLengthValid && isLetterValid && isNumberValid && isSymbolValid ? 'green' : Colors.light.primary }]}>
+                <View 
+                    style={[
+                        styles.inputContainer, 
+                        { 
+                        borderColor: error ? Colors.light.red : (isLengthValid && isLetterValid && isNumberValid && isSymbolValid ? 'green' : Colors.light.primary) 
+                        }
+                    ]}
+                    >
                     <TextInput
                         style={styles.input}
                         placeholder="Password"
@@ -122,20 +134,20 @@ export default function PasswordAuthScreen() {
                 {mode != 'login' && 
                 <View style={styles.validationContainer}>
                     <View style={styles.validationItem}>
-                        <CheckCircle color={isLengthValid ? 'green' : 'red'} size={16} />
-                        <Text style={[styles.validationText, { color: isLengthValid ? 'green' : 'red' }]}>Should include at least 8 characters</Text>
+                        <CheckCircle color={isLengthValid ? 'green' : Colors.light.red} size={16} />
+                        <Text style={[styles.validationText, { color: isLengthValid ? 'green' : Colors.light.red }]}>Should include at least 8 characters</Text>
                     </View>
                     <View style={styles.validationItem}>
-                        <CheckCircle color={isLetterValid ? 'green' : 'red'} size={16} />
-                        <Text style={[styles.validationText, { color: isLetterValid ? 'green' : 'red' }]}>Should include at least one letter</Text>
+                        <CheckCircle color={isLetterValid ? 'green' : Colors.light.red} size={16} />
+                        <Text style={[styles.validationText, { color: isLetterValid ? 'green' : Colors.light.red }]}>Should include at least one letter</Text>
                     </View>
                     <View style={styles.validationItem}>
-                        <CheckCircle color={isNumberValid ? 'green' : 'red'} size={16} />
-                        <Text style={[styles.validationText, { color: isNumberValid ? 'green' : 'red' }]}>Should include at least one number</Text>
+                        <CheckCircle color={isNumberValid ? 'green' : Colors.light.red} size={16} />
+                        <Text style={[styles.validationText, { color: isNumberValid ? 'green' : Colors.light.red }]}>Should include at least one number</Text>
                     </View>
                     <View style={styles.validationItem}>
-                        <CheckCircle color={isSymbolValid ? 'green' : 'red'} size={16} />
-                        <Text style={[styles.validationText, { color: isSymbolValid ? 'green' : 'red' }]}>Should include at least one symbol</Text>
+                        <CheckCircle color={isSymbolValid ? 'green' : Colors.light.red} size={16} />
+                        <Text style={[styles.validationText, { color: isSymbolValid ? 'green' : Colors.light.red }]}>Should include at least one symbol</Text>
                     </View>
                 </View>}
             </View>
@@ -176,7 +188,7 @@ const styles = StyleSheet.create({
     },
     warningText: {
         fontSize: 14,
-        color: 'red',
+        color: Colors.light.red,
         lineHeight: 20,
         marginVertical: 6,
     },

@@ -61,7 +61,7 @@ export default function TabLayout() {
         options={{
           title: 'Practice',
           tabBarIcon: ({ color, focused }) => (
-            <ClipboardList color={color} size={24} style={{ marginTop: 7 }}/>
+            <ClipboardList  color={color} size={24} style={{ marginTop: 7 }}/>
           ),
         }}
       />

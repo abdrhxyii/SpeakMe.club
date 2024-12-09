@@ -34,7 +34,8 @@ export const Colors = {
     offline: '',
     border: '#DDD',
     darkGray: '#a5a5a5',
-    info: '#666'
+    info: '#666',
+    red: '#FF0800'
   },
 
   dark: {

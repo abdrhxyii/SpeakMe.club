@@ -1,18 +1,42 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { View, Text, Pressable, Image, StyleSheet, Alert } from 'react-native';
+
 import { useRouter } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
+import * as Google from "expo-auth-session/providers/google"
+
 import Common from '@/constants/Common';
 import { Mail } from 'lucide-react-native';
 import { Colors } from '@/constants/Colors';
-import { supabase } from '@/libs/supabase';
+
+const webClinetId = '1070629572115-nk6jq1edb7ngjav853b0u0kbalb9ia3g.apps.googleusercontent.com'
+const androidClientId = '1070629572115-qeu9dutp1evr9mqlcd7prulks1otasjm.apps.googleusercontent.com'
+const iosClientId = '1070629572115-qgjtl00997dmrjdc89bepqnfa372bic8.apps.googleusercontent.com'
+
+WebBrowser.maybeCompleteAuthSession();
 
 const Authentication = () => {
   const router = useRouter();
+  const config = {
+    webClinetId,
+    iosClientId,
+    androidClientId
+  }
 
-  const webClinetId = '1070629572115-nk6jq1edb7ngjav853b0u0kbalb9ia3g.apps.googleusercontent.com'
-  const webClientSecret = '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'
-  const androidClientId = '1070629572115-qeu9dutp1evr9mqlcd7prulks1otasjm.apps.googleusercontent.com'
-  const iosClientId = '1070629572115-qgjtl00997dmrjdc89bepqnfa372bic8.apps.googleusercontent.com'
+  const [request, response, promptAsync] = Google.useAuthRequest(config)
+
+  const handleToken = () => {
+    if(response?.type === "success"){
+      const {authentication} =  response;
+      const token = authentication?.accessToken;
+      console.log(token, "access token")
+    }
+  }
+
+  useEffect(() => {
+    handleToken()
+
+  }, [response])
 
   return (
     <View style={Common.container}>
@@ -23,7 +47,7 @@ const Authentication = () => {
               styles.socialButton,
               pressed && { opacity: 0.8 },
             ]}
-            onPress={() => router.push('/OTPVerificationScreen')}
+            onPress={() => promptAsync()}
           >
             <Image
               source={require('@/assets/images/google1.png')}
@@ -36,7 +60,7 @@ const Authentication = () => {
               styles.emailButton,
               pressed && { opacity: 0.8 },
             ]}
-            onPress={() => router.push({pathname: '/EmailAuthScreen', params: {mode: 'signup'}})}
+            onPress={() => router.replace({pathname: '/EmailAuthScreen', params: {mode: 'signup'}})}
           >
             <Mail size={20} color="#FFF" />
             <Text style={styles.emailButtonText}>Sign up with Email</Text>

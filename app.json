@@ -35,6 +35,12 @@
         {
           "launchMode": "most-recent"
         }
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.1070629572115-qgjtl00997dmrjdc89bepqnfa372bic8"
+        }
       ]
     ],
     "experiments": {

@@ -90,7 +90,6 @@ const OTPVerificationScreen = () => {
             <View style={Common.content}>
                 <TextHeader header="Enter 6 Digit Code" subheader={`Enter the 6-digit code sent to your email ${email}`}/>
                 
-                {/* OTP Inputs */}
                 <View style={styles.otpContainer}>
                     {otp.map((digit, index) => (
                         <TextInput

@@ -1,24 +1,25 @@
-import { useFonts } from 'expo-font';
-import { Stack, useRouter } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
+import { StatusBar, TouchableOpacity } from 'react-native';
 import 'react-native-reanimated';
-import { GestureHandlerRootView } from 'react-native-gesture-handler'; 
 
+import { useFonts } from 'expo-font';
+import * as SplashScreen from 'expo-splash-screen';
 import * as NavigationBar from 'expo-navigation-bar';
+
+import { Stack, useRouter } from 'expo-router';
+
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { TouchableOpacity, StatusBar  } from 'react-native';
 import { Heart } from 'lucide-react-native';
-import Common from '@/constants/Common';
-import Authentication from './Authentication';
+
 import { supabase } from '@/libs/supabase';
-import { Session } from '@supabase/supabase-js'
+import Common from '@/constants/Common';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const [session, setSession] = useState<Session | null>(null)
   const route = useRouter()
   
   const [loaded] = useFonts({
@@ -26,15 +27,6 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-
-    // supabase.auth.getSession().then(({ data: { session } }) => {
-    //   setSession(session)
-    // })
-
-    // supabase.auth.onAuthStateChange((_event, session) => {
-    //   setSession(session)
-    // })
-
     NavigationBar.setBackgroundColorAsync('#ffffff');
     if (loaded) {
       SplashScreen.hideAsync();
@@ -76,10 +68,11 @@ export default function RootLayout() {
                     </TouchableOpacity>  
                   )   
                 }}/>
-              <Stack.Screen name="Authentication"
-                options={{
-                  headerShown: false,   
-                }}/>
+              <Stack.Screen name="Authentication" 
+                  options={{
+                    headerShown: false
+                  }}
+                />
               <Stack.Screen name="EditProfile"
                 options={{
                   headerShown: true,
