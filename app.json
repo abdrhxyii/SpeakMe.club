@@ -14,7 +14,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.abdrhxyii.speakmate"
+      "bundleIdentifier": "com.abdrhxyii.speakmate",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -37,9 +40,10 @@
         }
       ],
       [
-        "@react-native-google-signin/google-signin",
+        "expo-secure-store",
         {
-          "iosUrlScheme": "com.googleusercontent.apps.1070629572115-qgjtl00997dmrjdc89bepqnfa372bic8"
+          "configureAndroidBackup": true,
+          "faceIDPermission": "Allow SpeakMate to access your Face ID biometric data."
         }
       ]
     ],

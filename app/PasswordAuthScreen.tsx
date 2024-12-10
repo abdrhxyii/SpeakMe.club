@@ -1,11 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, Alert, TextInput, StyleSheet, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
-import { Colors } from '@/constants/Colors';
-import Common from '@/constants/Common';
+
 import { Eye, EyeOff, CheckCircle } from 'lucide-react-native'; 
 import { router, useLocalSearchParams } from 'expo-router';
+
 import { supabase } from '@/libs/supabase';
 import { checkIfEmailExists } from '@/utils/authUtils';
+import { setSecureValue } from '@/utils/secureStore';
+import { Colors } from '@/constants/Colors';
+import Common from '@/constants/Common';
 
 export default function PasswordAuthScreen() {
     const { email, mode } = useLocalSearchParams();
@@ -68,6 +71,7 @@ export default function PasswordAuthScreen() {
                 }
     
                 if (data) {
+                    // await setSecureValue();
                     console.log(data, "data from login")
                     router.replace('/(tabs)/'); 
                 }

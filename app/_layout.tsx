@@ -68,11 +68,6 @@ export default function RootLayout() {
                     </TouchableOpacity>  
                   )   
                 }}/>
-              <Stack.Screen name="Authentication" 
-                  options={{
-                    headerShown: false
-                  }}
-                />
               <Stack.Screen name="EditProfile"
                 options={{
                   headerShown: true,
@@ -128,6 +123,12 @@ export default function RootLayout() {
                     headerTitleAlign: 'center', 
                   }}
               />
+              
+              <Stack.Screen name="Authentication" 
+                  options={{
+                    headerShown: false
+                  }}
+                />
               <Stack.Screen name="EmailAuthScreen"
                   options={{
                     headerShown: true,
@@ -145,6 +146,15 @@ export default function RootLayout() {
                   }}
               />
               <Stack.Screen name="OTPVerificationScreen"
+                  options={{
+                    headerShown: true,
+                    headerTitle: '',
+                    headerTintColor: '#000',
+                    headerTitleAlign: 'center', 
+                    headerBackVisible: false,
+                  }}
+              />
+              <Stack.Screen name="IntroductionScreen"
                   options={{
                     headerShown: true,
                     headerTitle: '',

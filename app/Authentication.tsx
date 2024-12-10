@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import { View, Text, Pressable, Image, StyleSheet, Alert } from 'react-native';
+import { View, Text, Pressable, Image, StyleSheet } from 'react-native';
 
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
