@@ -39,7 +39,7 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <StatusBar backgroundColor="#ffffff" barStyle="dark-content" />
+      <StatusBar backgroundColor="#FFFFFF" barStyle="dark-content" />
       <BottomSheetModalProvider>
           <Stack screenOptions={{
               headerStyle: {
@@ -126,7 +126,8 @@ export default function RootLayout() {
               
               <Stack.Screen name="Authentication" 
                   options={{
-                    headerShown: false
+                    headerShown: false,
+                    animation: 'fade'
                   }}
                 />
               <Stack.Screen name="EmailAuthScreen"
@@ -154,9 +155,9 @@ export default function RootLayout() {
                     headerBackVisible: false,
                   }}
               />
-              <Stack.Screen name="IntroductionScreen"
+              <Stack.Screen name="index"
                   options={{
-                    headerShown: true,
+                    headerShown: false,
                     headerTitle: '',
                     headerTintColor: '#000',
                     headerTitleAlign: 'center', 
