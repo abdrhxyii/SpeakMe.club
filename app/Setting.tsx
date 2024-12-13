@@ -1,12 +1,31 @@
 import React, {useState} from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
-import { Mail, Lock, UserX, HelpCircle, LogOut, PencilLine } from 'lucide-react-native';
+import { Redirect } from 'expo-router';
+
+import { Mail, Lock, UserX, HelpCircle, PencilLine } from 'lucide-react-native';
+import { supabase } from '@/libs/supabase';
+
 import Common from '@/constants/Common';
 import { Colors } from '@/constants/Colors';
 import Dialogbox from '@/components/Dialogbox';
 
 const SettingsScreen = () => {
-  const [dialog, setDialog] = useState(false)
+  const [dialog, setDialog] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if(error){
+      setErrorMessage("An Error occurred while signing out, Please try again...");
+      setDialog(false)
+      return;
+    }
+
+    if(!error){
+      setDialog(false);
+      return <Redirect href={'/Authentication'}/>
+    }
+  }
+
   return (
     <SafeAreaView style={Common.container}>
       <ScrollView style={Common.content}>
@@ -48,17 +67,20 @@ const SettingsScreen = () => {
         </TouchableOpacity>
 
         <TouchableOpacity style={Common.dangerButton} onPress={() => setDialog(true)}>
-          <LogOut color="#FFFFFF" size={24} />
           <Text style={Common.dangerButtonText}>Log out</Text>
         </TouchableOpacity>
+        <Text style={[Common.ErrorMessage, styles.errorMessage]}>{errorMessage}</Text>
       </ScrollView>
       <Dialogbox
           visible={dialog}
+          onSave={handleSignOut}
           onClose={() => setDialog(false)}
-          title="Confirm Logout"
+          title="Warning!"
           bodymessage="Are you sure you want to logout?"
-          type={'success'}
-        />
+          status="warning"
+          warningPrimaryButtonText="Yes, Logout"
+          warningSecondaryButtonText="No, Stay"
+      />
     </SafeAreaView>
   );
 };
@@ -106,6 +128,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.light.danger,
   },
+  errorMessage: {
+    textAlign: 'center',
+    fontSize: 15,
+    fontWeight: '500'
+  }
 });
 
 export default SettingsScreen;

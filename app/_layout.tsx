@@ -4,7 +4,6 @@ import 'react-native-reanimated';
 
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import * as NavigationBar from 'expo-navigation-bar';
 
 import { Stack, useRouter } from 'expo-router';
 
@@ -27,7 +26,6 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    NavigationBar.setBackgroundColorAsync('#ffffff');
     if (loaded) {
       SplashScreen.hideAsync();
     }
@@ -43,10 +41,12 @@ export default function RootLayout() {
       <BottomSheetModalProvider>
           <Stack screenOptions={{
               headerStyle: {
-                backgroundColor: '#ffffff',
+                backgroundColor: '#FFFFFF',
               },
               headerShadowVisible: false,
               headerBackTitleVisible: false,
+              navigationBarColor: '#FFFFFF',
+              statusBarColor: '#FFFFFF'
           }}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="Setting" 
@@ -127,7 +127,8 @@ export default function RootLayout() {
               <Stack.Screen name="Authentication" 
                   options={{
                     headerShown: false,
-                    animation: 'fade'
+                    animation: 'fade',
+                    navigationBarColor: '#E8f5E3'
                   }}
                 />
               <Stack.Screen name="EmailAuthScreen"
@@ -155,13 +156,19 @@ export default function RootLayout() {
                     headerBackVisible: false,
                   }}
               />
-              <Stack.Screen name="index"
+            <Stack.Screen name="index"
+                  options={{
+                    headerShown: false,
+                  }}
+              />
+              <Stack.Screen name="Welcome"
                   options={{
                     headerShown: false,
                     headerTitle: '',
                     headerTintColor: '#000',
                     headerTitleAlign: 'center', 
                     headerBackVisible: false,
+                    statusBarColor: '#FFD8B1',
                   }}
               />
               <Stack.Screen name="+not-found" />

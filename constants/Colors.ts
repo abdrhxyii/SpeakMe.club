@@ -22,6 +22,8 @@ const tintColorDark = '#fff';
 // purple card - #2b1c50 and #f0f1ff or #d1d1f7
 // blue card - #1b224b and #dbf0ff
 //green card - #e8f5e3 and #142a19
+
+// #F6ECF9 apple consider this color | #2A2A2A
 export const Colors = {
   light: { 
     text: '#11181C',

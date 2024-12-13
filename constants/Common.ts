@@ -20,7 +20,7 @@ const Common = StyleSheet.create({
     marginTop: 20,
     borderWidth: 1,
     borderColor: Colors.light.danger,
-    marginBottom: 30,
+    marginBottom: 15,
   },
   dangerButtonText: {
     fontSize: 16,
@@ -115,5 +115,8 @@ const Common = StyleSheet.create({
     marginBottom: 15,
     color: '#808080',
   },
+  ErrorMessage: {
+    color: Colors.light.danger
+  }
 });
 export default Common;
