@@ -47,7 +47,7 @@ const Authentication = () => {
               styles.socialButton,
               pressed && { opacity: 0.8 },
             ]}
-            onPress={() => promptAsync()}
+            onPress={() => router.replace('/GoalSelection')}
           >
             <Image
               source={require('@/assets/images/google1.png')}

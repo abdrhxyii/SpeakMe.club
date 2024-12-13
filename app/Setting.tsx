@@ -1,7 +1,6 @@
-import React, {useState} from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
-import { Redirect } from 'expo-router';
-
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Mail, Lock, UserX, HelpCircle, PencilLine } from 'lucide-react-native';
 import { supabase } from '@/libs/supabase';
 
@@ -10,20 +9,29 @@ import { Colors } from '@/constants/Colors';
 import Dialogbox from '@/components/Dialogbox';
 
 const SettingsScreen = () => {
+  const router = useRouter()
   const [dialog, setDialog] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [signedOut, setSignedOut] = useState(false); 
+
   const handleSignOut = async () => {
+    setLoading(true);
     const { error } = await supabase.auth.signOut();
-    if(error){
-      setErrorMessage("An Error occurred while signing out, Please try again...");
-      setDialog(false)
+    setLoading(false);
+
+    if (error) {
+      setErrorMessage('An error occurred while signing out. Please try again...');
+      setDialog(false);
       return;
     }
 
-    if(!error){
-      setDialog(false);
-      return <Redirect href={'/Authentication'}/>
-    }
+    setDialog(false);
+    setSignedOut(true); 
+  };
+
+  if (signedOut) {
+      router.replace('/Authentication')
   }
 
   return (
@@ -71,15 +79,22 @@ const SettingsScreen = () => {
         </TouchableOpacity>
         <Text style={[Common.ErrorMessage, styles.errorMessage]}>{errorMessage}</Text>
       </ScrollView>
+
+      {loading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.light.primary} />
+        </View>
+      )}
+
       <Dialogbox
-          visible={dialog}
-          onSave={handleSignOut}
-          onClose={() => setDialog(false)}
-          title="Warning!"
-          bodymessage="Are you sure you want to logout?"
-          status="warning"
-          warningPrimaryButtonText="Yes, Logout"
-          warningSecondaryButtonText="No, Stay"
+        visible={dialog}
+        onSave={handleSignOut}
+        onClose={() => setDialog(false)}
+        title="Warning!"
+        bodymessage="Are you sure you want to logout?"
+        status="warning"
+        warningPrimaryButtonText="Yes, Logout"
+        warningSecondaryButtonText="No, Stay"
       />
     </SafeAreaView>
   );
@@ -109,29 +124,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.light.danger,
   },
-  starRow: {
-    flexDirection: 'row',
-  },
-  logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 7,
-    marginTop: 20,
-    borderWidth: 1,
-    borderColor: Colors.light.danger,
-    marginBottom: 30,
-  },
-  logoutText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: Colors.light.danger,
-  },
   errorMessage: {
     textAlign: 'center',
     fontSize: 15,
-    fontWeight: '500'
+    fontWeight: '500',
+  },
+  loadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
   }
 });
 
