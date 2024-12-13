@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import Common from '@/constants/Common';
 
 const Welcome = () => {
   const router = useRouter()
@@ -74,7 +75,7 @@ const Welcome = () => {
 
       <View style={styles.footer}>
         <TouchableOpacity style={styles.continueButton} activeOpacity={0.8} onPress={() => router.push('/Authentication')}>
-          <Text style={styles.continueText}>Continue</Text>
+          <Text style={Common.continueText}>Get Started</Text>
         </TouchableOpacity>
         <Text style={styles.privacyText}>
           Hands up! Read our Privacy Policy, it’s not as boring as you might think.
@@ -148,11 +149,6 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     width: '100%',
     alignItems: 'center',
-  },
-  continueText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   privacyText: {
     fontSize: 12,

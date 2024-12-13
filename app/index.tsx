@@ -3,24 +3,25 @@ import { Redirect } from 'expo-router';
 import { supabase } from '@/libs/supabase';
 
 const index = () => {
-  // const [isSignedIn, setIsSignedIn] = useState<boolean | null>(null);
+  const [isSignedIn, setIsSignedIn] = useState<boolean | null>(null);
 
-  // useEffect(() => {
-  //   const checkAuth = async () => {
-  //     const { data: { session } } = await supabase.auth.getSession();
-  //     setIsSignedIn(!!session); 
-  //   };
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log(session, "session from index.tsx")
+      setIsSignedIn(!!session); 
+    };
 
-  //   checkAuth();
-  // }, []);
+    checkAuth();
+  }, []);
 
-  // if (isSignedIn === null) {
-  //   return null;
-  // }
+  if (isSignedIn === null) {
+    return null;
+  }
 
-  // if (isSignedIn) {
-  //   return <Redirect href="/(tabs)/" />;
-  // }
+  if (isSignedIn) {
+    return <Redirect href="/(tabs)/" />;
+  }
 
   return <Redirect href="/Welcome" />;
 };

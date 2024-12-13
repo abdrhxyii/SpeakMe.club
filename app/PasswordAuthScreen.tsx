@@ -165,7 +165,7 @@ export default function PasswordAuthScreen() {
                 {loading ? (
                     <ActivityIndicator size="small" color="#fff" />
                 ) : (
-                    <Text style={styles.buttonText}>Continue</Text>
+                    <Text style={Common.continueText}>Continue</Text>
                 )}
             </TouchableOpacity>
         </SafeAreaView>
@@ -205,11 +205,6 @@ const styles = StyleSheet.create({
         bottom: 20,
         left: 16,
         right: 16,
-    },
-    buttonText: {
-        color: '#FFF',
-        fontSize: 16,
-        fontWeight: 'bold',
     },
     validationContainer: {
         marginTop: 16,

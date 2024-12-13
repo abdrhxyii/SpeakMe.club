@@ -1,6 +1,6 @@
 import { Colors } from '@/constants/Colors';
 import React from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, Image } from 'react-native';
 
 interface DialogboxProps {
   visible: boolean;
@@ -12,7 +12,6 @@ interface DialogboxProps {
   successButtonText?: string;
   warningPrimaryButtonText?: string;
   warningSecondaryButtonText?: string;
-  loading?: boolean;
 }
 
 const Dialogbox: React.FC<DialogboxProps> = ({
@@ -25,7 +24,6 @@ const Dialogbox: React.FC<DialogboxProps> = ({
   successButtonText = 'Login',
   warningPrimaryButtonText = 'Yes, Logout',
   warningSecondaryButtonText = 'No Cancel',
-  loading = false,
 }) => {
   return (
     <Modal transparent={true} animationType="none" visible={visible} onRequestClose={onClose}>
@@ -45,27 +43,19 @@ const Dialogbox: React.FC<DialogboxProps> = ({
           {status === 'success' ? (
             <TouchableOpacity
               style={[styles.basebutton, styles.successbutton]}
-              onPress={loading ? undefined : onClose}
+              onPress={onClose}
               activeOpacity={0.8}
             >
-              {loading ? (
-                <ActivityIndicator size="small" color={'#FFFFFF'} />
-              ) : (
-                <Text style={styles.buttonText}>{successButtonText}</Text>
-              )}
+              <Text style={styles.buttonText}>{successButtonText}</Text>
             </TouchableOpacity>
           ) : (
             <>
               <TouchableOpacity
                 style={[styles.basebutton, styles.warningbutton]}
-                onPress={loading ? undefined : onSave}
+                onPress={onSave}
                 activeOpacity={0.8}
               >
-                {loading ? (
-                  <ActivityIndicator size="small" color={"#FFFFFF"} />
-                ) : (
-                  <Text style={styles.buttonText}>{warningPrimaryButtonText}</Text>
-                )}
+                <Text style={styles.buttonText}>{warningPrimaryButtonText}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.basebutton, styles.cancelbutton]}

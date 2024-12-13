@@ -128,7 +128,7 @@ export default function RootLayout() {
                   options={{
                     headerShown: false,
                     animation: 'fade',
-                    navigationBarColor: '#E8f5E3'
+                    navigationBarColor: '#E8f5E3',
                   }}
                 />
               <Stack.Screen name="EmailAuthScreen"
@@ -156,7 +156,7 @@ export default function RootLayout() {
                     headerBackVisible: false,
                   }}
               />
-            <Stack.Screen name="index"
+              <Stack.Screen name="index"
                   options={{
                     headerShown: false,
                   }}
@@ -169,6 +169,25 @@ export default function RootLayout() {
                     headerTitleAlign: 'center', 
                     headerBackVisible: false,
                     statusBarColor: '#FFD8B1',
+                  }}
+              />
+              <Stack.Screen name="GoalSelection"
+                  options={{
+                    headerShown: true,
+                    headerTitle: '',
+                    headerTintColor: '#000',
+                    headerTitleAlign: 'center', 
+                    headerBackVisible: false,
+                  }}
+              />
+              <Stack.Screen name="GenderSelection"
+                  options={{
+                    headerShown: true,
+                    headerTitle: '',
+                    headerTintColor: '#000',
+                    headerTitleAlign: 'center', 
+                    headerBackVisible: false,
+                    animation: 'slide_from_right'
                   }}
               />
               <Stack.Screen name="+not-found" />

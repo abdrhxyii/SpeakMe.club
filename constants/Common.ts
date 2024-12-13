@@ -117,6 +117,11 @@ const Common = StyleSheet.create({
   },
   ErrorMessage: {
     color: Colors.light.danger
+  },
+  continueText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: 'bold',
   }
 });
 export default Common;

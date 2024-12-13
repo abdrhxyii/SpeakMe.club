@@ -3,15 +3,26 @@ import Common from '@/constants/Common';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, SafeAreaView, Pressable } from 'react-native';
-import { Info, CheckCircle  } from 'lucide-react-native';
+import { Info, CheckCircle } from 'lucide-react-native';
 import TextHeader from '@/components/TextHeader';
 
 export default function EmailAuthScreen() {
     const route = useRouter();
     const { mode } = useLocalSearchParams();
     
+    const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
+    const [fullNameError, setFullNameError] = useState('');
+
+    const validateFullName = (text: string) => {
+        setFullName(text);
+        if (text.trim() === '') {
+            setFullNameError('Full name is required.');
+        } else {
+            setFullNameError('');
+        }
+    };
 
     const validateEmail = (text: string) => {
         setEmail(text);
@@ -25,20 +36,27 @@ export default function EmailAuthScreen() {
     };
 
     const handleContinue = () => {
-        if (!error && email.trim()) {
+        if (
+            (mode === 'login' || !fullNameError) &&  
+            !error && 
+            email.trim()  
+        ) {
             route.push({
                 pathname: '/PasswordAuthScreen', 
                 params: {
+                    fullName: fullName,
                     email: email,
                     mode: mode === 'signup' ? 'signup' : 'login'
                 }
             });
         } else {
-            setError('Please enter a valid email before continuing.');
+            setError('Please fill in all fields correctly before continuing.');
         }
     };
 
     const inputBorderColor = error ? Colors.light.red : email.trim() && !error ? 'green' : Colors.light.darkGray;
+    const fullNameBorderColor = fullNameError && mode === 'signup' ? Colors.light.red : fullName.trim() && !fullNameError ? 'green' : Colors.light.darkGray;
+
     const iconColor = error ? Colors.light.red : email.trim() && !error ? 'green' : 'transparent';
 
     return (
@@ -52,11 +70,34 @@ export default function EmailAuthScreen() {
                         />
                     ) : (
                         <TextHeader 
-                            header="Create an account" 
+                            header="Create an account 👋" 
                             subheader="Let's create your account." 
                         />
                     )
                 }
+
+                {mode === 'signup' && (
+                    <View style={styles.inputContainer}>
+                        <TextInput
+                            style={[styles.input, { borderColor: fullNameBorderColor }]}
+                            placeholder="Full Name"
+                            autoCapitalize="words"
+                            value={fullName}
+                            onChangeText={validateFullName}
+                        />
+                        {fullName.trim() && !fullNameError ? (
+                            <View style={styles.iconContainer}>
+                                <CheckCircle color="green" size={25} />
+                            </View>
+                        ) : fullNameError ? (
+                            <View style={styles.iconContainer}>
+                                <Info color="red" size={25} />
+                            </View>
+                        ) : null}
+                    </View>
+                )}
+                {fullNameError ? <Text style={styles.warningText}>{fullNameError}</Text> : null}
+
                 <View style={styles.inputContainer}>
                     <TextInput
                         style={[styles.input, { borderColor: inputBorderColor }]}
@@ -69,11 +110,11 @@ export default function EmailAuthScreen() {
                     />
                     {email.trim() && !error ? (
                         <View style={styles.iconContainer}>
-                            <CheckCircle color="green" size={25} /> 
+                            <CheckCircle color="green" size={25} />
                         </View>
                     ) : error ? (
                         <View style={styles.iconContainer}>
-                            <Info color={iconColor} size={25} />  
+                            <Info color={iconColor} size={25} />
                         </View>
                     ) : null}
                 </View>
@@ -81,7 +122,7 @@ export default function EmailAuthScreen() {
             </View>
 
             <Pressable style={styles.button} onPress={handleContinue}>
-                <Text style={styles.buttonText}>Continue</Text>
+                <Text style={Common.continueText}>Continue</Text>
             </Pressable>
         </SafeAreaView>
     );
@@ -123,10 +164,5 @@ const styles = StyleSheet.create({
     bottom: 20,
     left: 16,
     right: 16,
-  },
-  buttonText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
 });
