@@ -1,18 +1,26 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Redirect } from 'expo-router';
 import { supabase } from '@/libs/supabase';
+import { useUserStore } from '@/store/userStore';
 
-const index = () => {
-  const [isSignedIn, setIsSignedIn] = useState<boolean | null>(null);
+const Index = () => {
+  const { isSignedIn, setIsSignedIn } = useUserStore(); 
 
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      console.log(session, "session from index.tsx")
-      setIsSignedIn(!!session); 
+      setIsSignedIn(!!session);
     };
 
     checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsSignedIn(!!session);
+    });
+
+    return () => {
+      subscription.unsubscribe(); 
+    };
   }, []);
 
   if (isSignedIn === null) {
@@ -26,4 +34,4 @@ const index = () => {
   return <Redirect href="/Welcome" />;
 };
 
-export default index;
+export default Index;

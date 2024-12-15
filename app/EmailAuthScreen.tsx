@@ -1,62 +1,84 @@
 import { Colors } from '@/constants/Colors';
 import Common from '@/constants/Common';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, SafeAreaView, Pressable } from 'react-native';
+import { useRouter, useLocalSearchParams, useNavigation } from 'expo-router';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, StyleSheet, SafeAreaView, Pressable, ActivityIndicator } from 'react-native';
 import { Info, CheckCircle } from 'lucide-react-native';
 import TextHeader from '@/components/TextHeader';
+import { checkIfEmailExists } from '@/utils/authUtils';
+import { object, string } from 'yup'; 
+import { useUserSelectionStore } from '@/store/onboardingUserSelection';
 
 export default function EmailAuthScreen() {
     const route = useRouter();
-    const { mode } = useLocalSearchParams();
-    
-    const [fullName, setFullName] = useState('');
-    const [email, setEmail] = useState('');
-    const [error, setError] = useState('');
-    const [fullNameError, setFullNameError] = useState('');
+    const navigation = useNavigation();
 
-    const validateFullName = (text: string) => {
-        setFullName(text);
-        if (text.trim() === '') {
-            setFullNameError('Full name is required.');
-        } else {
-            setFullNameError('');
-        }
-    };
+    const { mode } = useLocalSearchParams();
+    const {email, setEmail} = useUserSelectionStore()
+
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const resetGoalOfLearning = useUserSelectionStore((state) => state.resetEmail); 
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+            if (e.data.action.type === "GO_BACK") {
+                resetGoalOfLearning();
+            }
+        });
+        return unsubscribe;
+    }, [navigation, resetGoalOfLearning]);
+
+    const emailSchema = object({
+        email: string()
+            .email('Ensure your email is correct. Invalid email addresses may result in access issues.')
+            .required('Please fill in all fields before continuing.')
+    });
 
     const validateEmail = (text: string) => {
         setEmail(text);
 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (text.trim() === '' || emailRegex.test(text)) {
-            setError('');
-        } else {
-            setError('Ensure your email is correct. Invalid email addresses may result in access issues.');
-        }
+        emailSchema
+            .validate({ email: text })
+            .then(() => {
+                setError('');
+            })
+            .catch((err) => {
+                setError(err.message);
+            });
     };
 
-    const handleContinue = () => {
-        if (
-            (mode === 'login' || !fullNameError) &&  
-            !error && 
-            email.trim()  
-        ) {
-            route.push({
-                pathname: '/PasswordAuthScreen', 
-                params: {
-                    fullName: fullName,
-                    email: email,
-                    mode: mode === 'signup' ? 'signup' : 'login'
+    const handleContinue = async () => {
+        try {
+            setLoading(true);
+            await emailSchema.validate({ email });
+
+            if (mode === 'signup') {
+                const exists = await checkIfEmailExists(email);
+                if (exists) {
+                    setError('An account with this email already exists. Please log in instead.');
+                    setEmail('');
+                    return;
                 }
-            });
-        } else {
-            setError('Please fill in all fields correctly before continuing.');
+    
+                route.push('/GoalSelection');
+            } else if (mode === 'login') {
+                route.push({
+                    pathname: '/PasswordAuthScreen',
+                    params: {
+                        mode: mode,
+                    },
+                });
+            }
+        } catch (error) {
+            setError('There was an issue checking the email. Please try again later.');
+        } finally {
+            setLoading(false);
         }
     };
 
     const inputBorderColor = error ? Colors.light.red : email.trim() && !error ? 'green' : Colors.light.darkGray;
-    const fullNameBorderColor = fullNameError && mode === 'signup' ? Colors.light.red : fullName.trim() && !fullNameError ? 'green' : Colors.light.darkGray;
-
     const iconColor = error ? Colors.light.red : email.trim() && !error ? 'green' : 'transparent';
 
     return (
@@ -75,28 +97,6 @@ export default function EmailAuthScreen() {
                         />
                     )
                 }
-
-                {mode === 'signup' && (
-                    <View style={styles.inputContainer}>
-                        <TextInput
-                            style={[styles.input, { borderColor: fullNameBorderColor }]}
-                            placeholder="Full Name"
-                            autoCapitalize="words"
-                            value={fullName}
-                            onChangeText={validateFullName}
-                        />
-                        {fullName.trim() && !fullNameError ? (
-                            <View style={styles.iconContainer}>
-                                <CheckCircle color="green" size={25} />
-                            </View>
-                        ) : fullNameError ? (
-                            <View style={styles.iconContainer}>
-                                <Info color="red" size={25} />
-                            </View>
-                        ) : null}
-                    </View>
-                )}
-                {fullNameError ? <Text style={styles.warningText}>{fullNameError}</Text> : null}
 
                 <View style={styles.inputContainer}>
                     <TextInput
@@ -121,8 +121,12 @@ export default function EmailAuthScreen() {
                 {error ? <Text style={styles.warningText}>{error}</Text> : null}
             </View>
 
-            <Pressable style={styles.button} onPress={handleContinue}>
-                <Text style={Common.continueText}>Continue</Text>
+            <Pressable style={styles.button} onPress={handleContinue} disabled={loading}>
+                {loading ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                    ) : (
+                    <Text style={Common.continueText}>Continue</Text>
+                )}
             </Pressable>
         </SafeAreaView>
     );

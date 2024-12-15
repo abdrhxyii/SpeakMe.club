@@ -74,7 +74,7 @@ const Welcome = () => {
       </View>
 
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.continueButton} activeOpacity={0.8} onPress={() => router.push('/Authentication')}>
+        <TouchableOpacity style={styles.continueButton} activeOpacity={0.8} onPress={() => router.replace('/Authentication')}>
           <Text style={Common.continueText}>Get Started</Text>
         </TouchableOpacity>
         <Text style={styles.privacyText}>

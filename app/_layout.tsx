@@ -12,14 +12,15 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { Heart } from 'lucide-react-native';
 
-import { supabase } from '@/libs/supabase';
 import Common from '@/constants/Common';
+import { useUserStore } from '@/store/userStore';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const route = useRouter()
+  const route = useRouter();
+  const { isSignedIn } = useUserStore();
   
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
@@ -49,14 +50,8 @@ export default function RootLayout() {
               statusBarColor: '#FFFFFF'
           }}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="Setting" 
-              options={{
-                headerShown: true,
-                headerTitle: 'Setting',
-                headerTintColor: '#000',
-                headerTitleAlign: 'center',     
-              }}/>
-              <Stack.Screen name="Profile"
+            <Stack.Screen name="Setting"  options={{ headerShown: true, headerTitle: 'Setting', headerTintColor: '#000', headerTitleAlign: 'center'}}/>
+            <Stack.Screen name="Profile"
                 options={{
                   headerShown: true,
                   headerTitle: '',
@@ -67,129 +62,23 @@ export default function RootLayout() {
                       <Heart color={'black'} size={18} />
                     </TouchableOpacity>  
                   )   
-                }}/>
-              <Stack.Screen name="EditProfile"
-                options={{
-                  headerShown: true,
-                  headerTitle: 'Edit Profile',
-                  headerTintColor: '#000',
-                  headerTitleAlign: 'center',   
-                }}/>
-              <Stack.Screen name="NameScreen"
-                  options={{
-                    headerShown: true,
-                    headerTitle: '',
-                    headerTintColor: '#000',
-                    headerTitleAlign: 'center', 
-                  }}
-              />
-              <Stack.Screen name="NativeLanguage"
-                  options={{
-                    headerShown: true,
-                    headerTitle: '',
-                    headerTintColor: '#000',
-                    headerTitleAlign: 'center', 
-                  }}
-              />
-              <Stack.Screen name="EnglishLevel"
-                  options={{
-                    headerShown: true,
-                    headerTitle: '',
-                    headerTintColor: '#000',
-                    headerTitleAlign: 'center', 
-                  }}
-              />
-              <Stack.Screen name="AboutMe"
-                  options={{
-                    headerShown: true,
-                    headerTitle: '',
-                    headerTintColor: '#000',
-                    headerTitleAlign: 'center', 
-                  }}
-              />
-              <Stack.Screen name="CountryList"
-                  options={{
-                    headerShown: true,
-                    headerTitle: '',
-                    headerTintColor: '#000',
-                    headerTitleAlign: 'center', 
-                  }}
-              />
-              <Stack.Screen name="Interest"
-                  options={{
-                    headerShown: true,
-                    headerTitle: '',
-                    headerTintColor: '#000',
-                    headerTitleAlign: 'center', 
-                  }}
-              />
+              }}/>
+              <Stack.Screen name="EditProfile" options={{ headerShown: true, headerTitle: 'Edit Profile', headerTintColor: '#000', headerTitleAlign: 'center' }} />
+              <Stack.Screen name="NameScreen" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center' }} />
+              <Stack.Screen name="NativeLanguage" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center', animation: 'slide_from_right' }} />
+              <Stack.Screen name="EnglishLevel" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center', animation: 'slide_from_right' }} />
+              <Stack.Screen name="AboutMe" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center'}} />
+              <Stack.Screen name="CountryList" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center'}} />
+              <Stack.Screen name="Interest" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center' }}/>
               
-              <Stack.Screen name="Authentication" 
-                  options={{
-                    headerShown: false,
-                    animation: 'fade',
-                    navigationBarColor: '#E8f5E3',
-                  }}
-                />
-              <Stack.Screen name="EmailAuthScreen"
-                  options={{
-                    headerShown: true,
-                    headerTitle: '',
-                    headerTintColor: '#000',
-                    headerTitleAlign: 'center', 
-                  }}
-              />
-              <Stack.Screen name="PasswordAuthScreen"
-                  options={{
-                    headerShown: true,
-                    headerTitle: '',
-                    headerTintColor: '#000',
-                    headerTitleAlign: 'center', 
-                  }}
-              />
-              <Stack.Screen name="OTPVerificationScreen"
-                  options={{
-                    headerShown: true,
-                    headerTitle: '',
-                    headerTintColor: '#000',
-                    headerTitleAlign: 'center', 
-                    headerBackVisible: false,
-                  }}
-              />
-              <Stack.Screen name="index"
-                  options={{
-                    headerShown: false,
-                  }}
-              />
-              <Stack.Screen name="Welcome"
-                  options={{
-                    headerShown: false,
-                    headerTitle: '',
-                    headerTintColor: '#000',
-                    headerTitleAlign: 'center', 
-                    headerBackVisible: false,
-                    statusBarColor: '#FFD8B1',
-                  }}
-              />
-              <Stack.Screen name="GoalSelection"
-                  options={{
-                    headerShown: true,
-                    headerTitle: '',
-                    headerTintColor: '#000',
-                    headerTitleAlign: 'center', 
-                    headerBackVisible: false,
-                  }}
-              />
-              <Stack.Screen name="GenderSelection"
-                  options={{
-                    headerShown: true,
-                    headerTitle: '',
-                    headerTintColor: '#000',
-                    headerTitleAlign: 'center', 
-                    headerBackVisible: false,
-                    animation: 'slide_from_right'
-                  }}
-              />
+              <Stack.Screen name="Authentication" options={{ headerShown: false, animation: 'fade', navigationBarColor: '#E8f5E3' }} />
+              <Stack.Screen name="EmailAuthScreen" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center' }} />
+              <Stack.Screen name="PasswordAuthScreen" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center', animation: 'slide_from_right'}}/>
+              <Stack.Screen name="OTPVerificationScreen" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center', headerBackVisible: false }} />
+              <Stack.Screen name="index" options={{ headerShown: false }} />
+              <Stack.Screen name="Welcome" options={{ headerShown: false, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center', headerBackVisible: false, statusBarColor: '#FFD8B1' }} />
+              <Stack.Screen name="GoalSelection" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center', headerBackVisible: false }} />
+              <Stack.Screen name="GenderSelection" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center', headerBackVisible: false, animation: 'slide_from_right' }} />
               <Stack.Screen name="+not-found" />
           </Stack>
       </BottomSheetModalProvider>

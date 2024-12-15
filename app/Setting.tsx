@@ -1,38 +1,55 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Mail, Lock, UserX, HelpCircle, PencilLine } from 'lucide-react-native';
 import { supabase } from '@/libs/supabase';
 
 import Common from '@/constants/Common';
 import { Colors } from '@/constants/Colors';
-import Dialogbox from '@/components/Dialogbox';
 
 const SettingsScreen = () => {
-  const router = useRouter()
-  const [dialog, setDialog] = useState(false);
+  const router = useRouter();
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [signedOut, setSignedOut] = useState(false); 
+  const [signedOut, setSignedOut] = useState(false);
 
   const handleSignOut = async () => {
-    setLoading(true);
-    const { error } = await supabase.auth.signOut();
-    setLoading(false);
-
-    if (error) {
-      setErrorMessage('An error occurred while signing out. Please try again...');
-      setDialog(false);
-      return;
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        setErrorMessage('An error occurred while signing out. Please try again...');
+        return;
+      }
+      setSignedOut(true);
+    } catch (error) {
+      setErrorMessage('An unexpected error occurred while signing out. Please try again...');
+    } finally {
+      setLoading(false);
     }
+  };  
 
-    setDialog(false);
-    setSignedOut(true); 
+  useEffect(() => {
+    if (signedOut) {
+      router.replace('/Authentication');
+    }
+  }, [signedOut, router]);
+
+  const showLogoutAlert = () => {
+    Alert.alert(
+      'Warning!',
+      'Are you sure you want to logout?',
+      [
+        {
+          text: 'No, Stay',
+          onPress: () => console.log('Logout canceled'),
+          style: 'cancel',
+        },
+        { text: 'Yes, Logout', onPress: handleSignOut },
+      ],
+      { cancelable: true }
+    );
   };
-
-  if (signedOut) {
-      router.replace('/Authentication')
-  }
 
   return (
     <SafeAreaView style={Common.container}>
@@ -74,7 +91,7 @@ const SettingsScreen = () => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={Common.dangerButton} onPress={() => setDialog(true)}>
+        <TouchableOpacity style={Common.dangerButton} onPress={showLogoutAlert}>
           <Text style={Common.dangerButtonText}>Log out</Text>
         </TouchableOpacity>
         <Text style={[Common.ErrorMessage, styles.errorMessage]}>{errorMessage}</Text>
@@ -85,17 +102,6 @@ const SettingsScreen = () => {
           <ActivityIndicator size="large" color={Colors.light.primary} />
         </View>
       )}
-
-      <Dialogbox
-        visible={dialog}
-        onSave={handleSignOut}
-        onClose={() => setDialog(false)}
-        title="Warning!"
-        bodymessage="Are you sure you want to logout?"
-        status="warning"
-        warningPrimaryButtonText="Yes, Logout"
-        warningSecondaryButtonText="No, Stay"
-      />
     </SafeAreaView>
   );
 };

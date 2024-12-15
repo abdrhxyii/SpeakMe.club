@@ -1,49 +1,61 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Alert, TextInput, StyleSheet, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
 
-import { Eye, EyeOff, CheckCircle } from 'lucide-react-native'; 
+import { Eye, EyeOff, CheckCircle } from 'lucide-react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 
 import { supabase } from '@/libs/supabase';
 import { checkIfEmailExists } from '@/utils/authUtils';
-import { setSecureValue } from '@/utils/secureStore';
 import { Colors } from '@/constants/Colors';
 import Common from '@/constants/Common';
 
+import { object, string } from 'yup';
+
+import { useUserSelectionStore } from "@/store/onboardingUserSelection";
+
+const passwordValidationSchema = object().shape({
+    password: string()
+        .required('Password is required')
+        .min(8, 'Password must be at least 8 characters long')
+        .matches(/[A-Za-z]/, 'Password must contain at least one letter')
+        .matches(/\d/, 'Password must contain at least one number')
+        .matches(/[!@#$%^&*(),.?":{}|<>]/, 'Password must contain at least one special symbol'),
+});
+
 export default function PasswordAuthScreen() {
-    const { email, mode } = useLocalSearchParams();
-    const validEmail = Array.isArray(email) ? email[0] : email;
+    const { email, goalOfLearning, nativeLanguage, languageFluencyLevel, gender } = useUserSelectionStore(state => state);
+
+    const { mode } = useLocalSearchParams();
 
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
-    const [isLengthValid, setIsLengthValid] = useState(false);
-    const [isLetterValid, setIsLetterValid] = useState(false);
-    const [isNumberValid, setIsNumberValid] = useState(false);
-    const [isSymbolValid, setIsSymbolValid] = useState(false);
+    const [passwordValidation, setPasswordValidation] = useState({
+        isLengthValid: false,
+        isLetterValid: false,
+        isNumberValid: false,
+        isSymbolValid: false,
+    });
 
-    useMemo(() => {}, [email, mode]);
-
-    const validatePassword = (text: any) => {
+    const validatePassword = (text: string) => {
         setPassword(text);
 
-        const lengthRegex = /.{8,}/; 
-        const letterRegex = /[A-Za-z]/; 
-        const numberRegex = /\d/; 
-        const symbolRegex = /[!@#$%^&*(),.?":{}|<>]/; // Symbol regex
-
-        setIsLengthValid(lengthRegex.test(text));
-        setIsLetterValid(letterRegex.test(text));
-        setIsNumberValid(numberRegex.test(text));
-        setIsSymbolValid(symbolRegex.test(text));
-
-        if (text.trim() === '' || !lengthRegex.test(text) || !letterRegex.test(text) || !numberRegex.test(text) || !symbolRegex.test(text)) {
-            setError('Password must be at least 8 characters long and include at least one letter, one number, and one special symbol.');
-        } else {
-            setError('');
-        }
+        passwordValidationSchema
+            .validate({ password: text })
+            .then(() => {
+                setError('');
+                setPasswordValidation({
+                    isLengthValid: text.length >= 8,
+                    isLetterValid: /[A-Za-z]/.test(text),
+                    isNumberValid: /\d/.test(text),
+                    isSymbolValid: /[!@#$%^&*(),.?":{}|<>]/.test(text),
+                });
+            })
+            .catch((err) => {
+                setError(err.message);
+            });
     };
 
     const togglePasswordVisibility = () => {
@@ -51,72 +63,81 @@ export default function PasswordAuthScreen() {
     };
 
     const continueAuthentication = async () => {
-        if (loading) return; 
+        if (loading) return;
         setLoading(true);
 
         try {
             if (mode === 'login') {
-                console.log({
-                    email: validEmail as string,
-                    password: password.trim(),
-                })
                 const { data, error } = await supabase.auth.signInWithPassword({
-                    email: validEmail as string,
+                    email: email.trim(),
                     password: password.trim(),
                 });
-    
-                if (error) {
-                    setError(error.message)
-                    return;
-                }
-    
-                if (data) {
-                    // await setSecureValue();
-                    console.log(data, "data from login")
-                    router.replace('/(tabs)/'); 
-                }
-            } else if (mode === 'signup') {
-                const emailExists = await checkIfEmailExists(validEmail as string);
-                
-                if (emailExists) {
-                    setError("An account with this email already exists. Please log in instead.");
-                    return;
-                }
 
-                const { data, error } = await supabase.auth.signUp({
-                    email: validEmail as string,
-                    password: password.trim(),
-                });
-            
                 if (error) {
                     setError(error.message);
                     return;
                 }
-            
+
+                if (data) {
+                    console.log(data, 'data from login');
+                    router.replace('/(tabs)/');
+                }
+            } else if (mode === 'signup') {
+                const emailExists = await checkIfEmailExists(email.trim());
+
+                if (emailExists) {
+                    setError('An account with this email already exists. Please log in instead.');
+                    return;
+                }
+
+                console.log({
+                    email: email.trim(),
+                    password: password.trim(),
+                })
+
+                const { data, error } = await supabase.auth.signUp({
+                    email: email.trim(),
+                    password: password.trim(),
+                });
+
+                if (error) {
+                    setError(error.message);
+                    return;
+                }
+
                 if (data.user) {
-                    console.log(data, "data from sigup");
-                    router.replace({ pathname: '/OTPVerificationScreen', params: { email: validEmail } });
+                    console.log(data, 'data from signup');
+                    router.replace({ pathname: '/OTPVerificationScreen', params: { email } });
                 }
             }
         } catch (err) {
-            console.log(err, "err")
-            Alert.alert("An unexpected error occurred");
+            console.log(err, 'err');
+            Alert.alert('An unexpected error occurred');
         } finally {
-            setLoading(false); 
+            setLoading(false);
         }
     };
+
+    const isPasswordEmpty = password.trim() === '';
 
     return (
         <SafeAreaView style={Common.container}>
             <View style={Common.content}>
-                <View 
+                <View
                     style={[
-                        styles.inputContainer, 
-                        { 
-                        borderColor: error ? Colors.light.red : (isLengthValid && isLetterValid && isNumberValid && isSymbolValid ? 'green' : Colors.light.primary) 
-                        }
+                        styles.inputContainer,
+                        {
+                            borderColor: error
+                                ? Colors.light.red
+                                : passwordValidation.isLengthValid &&
+                                  passwordValidation.isLetterValid &&
+                                  passwordValidation.isNumberValid &&
+                                  passwordValidation.isSymbolValid
+                                ? 'green'
+                                : Colors.light.primary,
+                        },
                     ]}
-                    >
+                >
                     <TextInput
                         style={styles.input}
                         placeholder="Password"
@@ -134,39 +155,23 @@ export default function PasswordAuthScreen() {
                 </View>
 
                 {error ? <Text style={styles.warningText}>{error}</Text> : null}
-
-                {mode != 'login' && 
-                <View style={styles.validationContainer}>
+                {passwordValidation.isLengthValid && passwordValidation.isLetterValid && passwordValidation.isNumberValid && passwordValidation.isSymbolValid && (
                     <View style={styles.validationItem}>
-                        <CheckCircle color={isLengthValid ? 'green' : Colors.light.red} size={16} />
-                        <Text style={[styles.validationText, { color: isLengthValid ? 'green' : Colors.light.red }]}>Should include at least 8 characters</Text>
+                        <CheckCircle color="green" size={16} />
+                        <Text style={[styles.validationText, { color: 'green' }]}>
+                            Password is strong
+                        </Text>
                     </View>
-                    <View style={styles.validationItem}>
-                        <CheckCircle color={isLetterValid ? 'green' : Colors.light.red} size={16} />
-                        <Text style={[styles.validationText, { color: isLetterValid ? 'green' : Colors.light.red }]}>Should include at least one letter</Text>
-                    </View>
-                    <View style={styles.validationItem}>
-                        <CheckCircle color={isNumberValid ? 'green' : Colors.light.red} size={16} />
-                        <Text style={[styles.validationText, { color: isNumberValid ? 'green' : Colors.light.red }]}>Should include at least one number</Text>
-                    </View>
-                    <View style={styles.validationItem}>
-                        <CheckCircle color={isSymbolValid ? 'green' : Colors.light.red} size={16} />
-                        <Text style={[styles.validationText, { color: isSymbolValid ? 'green' : Colors.light.red }]}>Should include at least one symbol</Text>
-                    </View>
-                </View>}
+                )}
             </View>
 
             <TouchableOpacity
                 style={styles.button}
                 activeOpacity={0.9}
                 onPress={continueAuthentication}
-                disabled={loading || !(isLengthValid && isLetterValid && isNumberValid && isSymbolValid)}
+                disabled={loading || !(passwordValidation.isLengthValid && passwordValidation.isLetterValid && passwordValidation.isNumberValid && passwordValidation.isSymbolValid) || isPasswordEmpty}
             >
-                {loading ? (
-                    <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                    <Text style={Common.continueText}>Continue</Text>
-                )}
+                {loading ? <ActivityIndicator size="small" color="#fff" /> : <Text style={Common.continueText}>Continue</Text>}
             </TouchableOpacity>
         </SafeAreaView>
     );
@@ -213,6 +218,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 8,
+        marginVertical: 6,
     },
     validationText: {
         marginLeft: 8,

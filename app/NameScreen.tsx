@@ -24,7 +24,7 @@ export default function NameScreen() {
       </View>
 
       <TouchableOpacity style={styles.button} activeOpacity={0.9}>
-        <Text style={styles.buttonText}>Done</Text>
+        <Text style={Common.continueText}>Done</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -56,16 +56,11 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: Colors.light.primary,
     paddingVertical: 16,
-    borderRadius: 6,
+    borderRadius: 25,
     alignItems: 'center',
     position: 'absolute',
     bottom: 20,
     left: 16,
     right: 16,
-  },
-  buttonText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
 });

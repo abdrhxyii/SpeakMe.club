@@ -1,20 +1,23 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
-  ScrollView,
-  Vibration
+  Vibration,
 } from "react-native";
-
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import Common from "@/constants/Common";
 import TextHeader from "@/components/TextHeader";
+import { useUserSelectionStore } from "@/store/onboardingUserSelection";
+
+import { useRouter } from "expo-router";
 
 const GenderSelection = () => {
-  const [selectedGender, setSelectedGender] = useState<string | null>(null);
+  const route = useRouter()
+  const { gender, setGender } = useUserSelectionStore();
 
   const genders = [
     {
@@ -30,9 +33,13 @@ const GenderSelection = () => {
   ];
 
   const handleSelection = (id: string) => {
-    setSelectedGender(id);
+    setGender(id);
     Vibration.vibrate(30);
   };
+
+  const handleNext = () => {
+    route.push('/NativeLanguage')
+  }
 
   return (
     <SafeAreaView style={Common.container}>
@@ -41,30 +48,32 @@ const GenderSelection = () => {
           header="Select Your Gender"
           subheader="Choose the gender that best describes you to continue."
         />
-        {genders.map((gender) => (
+        {genders.map((genders) => (
           <TouchableOpacity
             activeOpacity={0.8}
-            key={gender.id}
+            key={genders.id}
             style={[
               styles.genderCard,
-              selectedGender === gender.id && styles.selectedCard,
+              gender === genders.id && styles.selectedCard,
             ]}
-            onPress={() => handleSelection(gender.id)}
+            onPress={() => handleSelection(genders.id)}
           >
-            <View
-              style={[
-                styles.radioButton,
-                selectedGender === gender.id && styles.radioButtonSelected,
-              ]}
+            <MaterialCommunityIcons
+              name={
+                gender === genders.id ? "radiobox-marked" : "radiobox-blank"
+              }
+              size={24}
+              color={gender === genders.id ? Colors.light.primary : "#999"}
+              style={styles.radioButtonIcon}
             />
             <View style={styles.textContainer}>
-              <Text style={styles.title}>{gender.title}</Text>
-              <Text style={styles.description}>{gender.description}</Text>
+              <Text style={styles.title}>{genders.title}</Text>
+              <Text style={styles.description}>{genders.description}</Text>
             </View>
           </TouchableOpacity>
         ))}
       </View>
-      <TouchableOpacity style={styles.continueButton} activeOpacity={0.8}>
+      <TouchableOpacity style={styles.continueButton} activeOpacity={0.8} onPress={handleNext}>
         <Text style={Common.continueText}>Continue</Text>
       </TouchableOpacity>
     </SafeAreaView>
@@ -85,17 +94,8 @@ const styles = StyleSheet.create({
   selectedCard: {
     borderColor: Colors.light.primary,
   },
-  radioButton: {
-    height: 24,
-    width: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: Colors.light.lightgray,
+  radioButtonIcon: {
     marginRight: 15,
-  },
-  radioButtonSelected: {
-    borderColor: Colors.light.primary,
-    backgroundColor: Colors.light.primary,
   },
   textContainer: {
     flex: 1,

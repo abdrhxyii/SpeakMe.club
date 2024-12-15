@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Vibration, ScrollView } from "react-native";
 
 import { useRouter } from "expo-router";
@@ -7,8 +7,10 @@ import { Colors } from "@/constants/Colors";
 import Common from "@/constants/Common";
 import TextHeader from "@/components/TextHeader";
 
+import { useUserSelectionStore } from "@/store/onboardingUserSelection";
+
 const GoalSelection = () => {
-  const [selectedGoal, setSelectedGoal] = useState<number | null>(null);
+  const { goalOfLearning, setGoalOfLearning } = useUserSelectionStore();
   const router = useRouter()
 
   const goals = [
@@ -38,14 +40,18 @@ const GoalSelection = () => {
     },
   ];
 
-  const handleSelection = (id: number) => {
-    setSelectedGoal(id);
+  const handleSelection = (item: string) => {
+    setGoalOfLearning(item);
     Vibration.vibrate(30);
   };
 
   const handleNext = () => {
-    router.replace('/GenderSelection')
-  }
+    if (goalOfLearning) {
+      router.push("/GenderSelection"); 
+    } else {
+      alert("Please select a goal before continuing."); 
+    }
+  };
 
   return (
     <SafeAreaView style={Common.container}>
@@ -60,9 +66,9 @@ const GoalSelection = () => {
               key={goal.id}
               style={[
                 styles.goalCard,
-                selectedGoal === goal.id && styles.selectedCard,
+                goalOfLearning === goal.title && styles.selectedCard,
               ]}
-              onPress={() => handleSelection(goal.id)}
+              onPress={() => handleSelection(goal.title)}
             >
               <Text style={styles.emoji}>{goal.emoji}</Text>
               <View style={styles.textContainer}>

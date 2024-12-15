@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, FlatList, Pressable, StyleSheet, SafeAreaView } from 'react-native';
+import React from 'react';
+import { View, Text, TextInput, FlatList, Pressable, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
 import Common from '@/constants/Common';
+
+import { useUserSelectionStore } from "@/store/onboardingUserSelection";
+import { useRouter } from 'expo-router';
 
 const languages = [
   "English", "Spanish", "Mandarin", "Hindi", "French", "Arabic", "Russian", "Portuguese",
@@ -13,15 +16,11 @@ const languages = [
 ];
 
 export default function NativeLanguage() {
-  const [search, setSearch] = useState('');
-  const [selectedLanguage, setSelectedLanguage] = useState(null);
+  const router = useRouter();
+  const { nativeLanguage, setNativeLanguage } = useUserSelectionStore();
 
-  const filteredLanguages = languages.filter(language =>
-    language.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const handleSelectLanguage = (language: any) => {
-    setSelectedLanguage(language);
+  const handleNext = () => {
+    router.push('/EnglishLevel');
   };
 
   return (
@@ -31,28 +30,31 @@ export default function NativeLanguage() {
           <TextInput
             style={styles.searchInput}
             placeholder="Search language"
-            value={search}
-            onChangeText={setSearch}
           />
           <Ionicons name="search" size={20} color="gray" style={styles.searchIcon} />
         </View>
 
         <FlatList
-          data={filteredLanguages}
+          data={languages}
           keyExtractor={(item) => item}
           overScrollMode="never"
           showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 80 }}
           renderItem={({ item }) => (
-            <Pressable style={styles.languageItem} onPress={() => handleSelectLanguage(item)}>
+            <Pressable style={styles.languageItem} onPress={() => setNativeLanguage(item)}>
               <Text style={styles.languageText}>{item}</Text>
               <Ionicons
-                name={selectedLanguage === item ? "radio-button-on" : "radio-button-off"}
+                name={nativeLanguage === item ? "radio-button-on" : "radio-button-off"}
                 size={20}
-                color={selectedLanguage === item ? Colors.light.primary : "gray"}
+                color={nativeLanguage === item ? Colors.light.primary : "gray"}
               />
             </Pressable>
           )}
         />
+
+        <Pressable style={styles.button} onPress={handleNext}>
+          <Text style={Common.continueText}>Continue</Text>
+        </Pressable>
       </View>
     </SafeAreaView>
   );
@@ -90,9 +92,9 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: Colors.light.primary,
     paddingVertical: 16,
-    borderRadius: 6,
+    borderRadius: 25,
     alignItems: 'center',
-    position: 'absolute',
+    position: 'absolute', 
     bottom: 20,
     left: 16,
     right: 16,
