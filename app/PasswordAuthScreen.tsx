@@ -23,8 +23,7 @@ const passwordValidationSchema = object().shape({
 });
 
 export default function PasswordAuthScreen() {
-    const { email, goalOfLearning, nativeLanguage, languageFluencyLevel, gender } = useUserSelectionStore(state => state);
-
+    const { email } = useUserSelectionStore();
     const { mode } = useLocalSearchParams();
 
     const [password, setPassword] = useState('');
@@ -90,24 +89,18 @@ export default function PasswordAuthScreen() {
                     return;
                 }
 
-                console.log({
-                    email: email.trim(),
-                    password: password.trim(),
-                })
-
-                const { data, error } = await supabase.auth.signUp({
+                const { data, error: signupError } = await supabase.auth.signUp({
                     email: email.trim(),
                     password: password.trim(),
                 });
 
-                if (error) {
-                    setError(error.message);
+                if (signupError) {
+                    setError(signupError.message);
                     return;
                 }
 
-                if (data.user) {
-                    console.log(data, 'data from signup');
-                    router.replace({ pathname: '/OTPVerificationScreen', params: { email } });
+                if (data && data.user) {
+                    router.replace('/OTPVerificationScreen');
                 }
             }
         } catch (err) {

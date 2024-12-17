@@ -1,11 +1,12 @@
-import React from 'react';
-import { View, Text, Pressable, StyleSheet, ScrollView, SafeAreaView, Vibration } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, Pressable, StyleSheet, ScrollView, SafeAreaView, Vibration, Alert } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Common from '@/constants/Common';
 import { Colors } from '@/constants/Colors';
-import { useRouter } from 'expo-router';
+import { useRouter, useNavigation } from 'expo-router';
 
 import { useUserSelectionStore } from "@/store/onboardingUserSelection";
+import { CommonActions } from '@react-navigation/native';
 
 const englishLevels = [
   { id: 'A1', level: 'Beginner', description: 'I can answer questions about my name and how old I am.' },
@@ -17,8 +18,16 @@ const englishLevels = [
 ];
 
 export default function EnglishLevel() {
-  const route = useRouter()
-  const {languageFluencyLevel, setLanguageFluencyLevel } = useUserSelectionStore()
+  const route = useRouter();
+  const navigation = useNavigation();
+  const {languageFluencyLevel, setLanguageFluencyLevel, resetLanguageFluencyLevel } = useUserSelectionStore();
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', () => {
+        resetLanguageFluencyLevel()
+    })
+    return unsubscribe;
+  }, [languageFluencyLevel, resetLanguageFluencyLevel])
 
   const handleSelect = (id: any) => {
     Vibration.vibrate(30);
@@ -26,7 +35,17 @@ export default function EnglishLevel() {
   }
 
   const handleNext = () => {
-    route.push({pathname: '/PasswordAuthScreen', params: {mode: 'signup'}})
+    if (languageFluencyLevel) {
+      navigation.dispatch(CommonActions.reset({
+        routes: [{key: "(tabs)", name: "(tabs)"}]
+      }))
+    } else {
+       Alert.alert(
+          "Fluency Level Required", 
+          "Please select your english fluency level to proceed.", 
+          [{ text: "OK", style: "default" }]
+      ); 
+    }
   }
 
   const renderItem = (item: any) => (

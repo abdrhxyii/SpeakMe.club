@@ -1,7 +1,7 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Vibration, ScrollView } from "react-native";
+import React, { useEffect } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Vibration, ScrollView, Alert } from "react-native";
 
-import { useRouter } from "expo-router";
+import { useRouter, useNavigation } from "expo-router";
 
 import { Colors } from "@/constants/Colors";
 import Common from "@/constants/Common";
@@ -10,9 +10,54 @@ import TextHeader from "@/components/TextHeader";
 import { useUserSelectionStore } from "@/store/onboardingUserSelection";
 
 const GoalSelection = () => {
-  const { goalOfLearning, setGoalOfLearning } = useUserSelectionStore();
-  const router = useRouter()
+  const { goalOfLearning, setGoalOfLearning, resetGoalOfLearning, resetEmail } = useUserSelectionStore();
+  const router = useRouter();
+  const navigation = useNavigation();
 
+  const handleRedirect = () => {
+    router.replace("/Authentication");
+    resetGoalOfLearning();
+    resetEmail();
+}
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      if(e.data.action.type === "GO_BACK") {
+        e.preventDefault();
+        if (goalOfLearning) {
+          Alert.alert(
+            "Unsaved Changes",
+            "You have already selected a learning goal. Leaving now will discard your selection. Are you sure you want to go back?",
+            [
+              { text: "Cancel", style: "cancel", onPress: () => {} },
+              {
+                text: "Yes, Discard",
+                style: "destructive",
+                onPress: handleRedirect,
+              },
+            ]
+          );
+        } else {
+          Alert.alert(
+            "Leave Goal Selection?",
+            "If you leave now, your selected learning goals will not be saved. Are you sure you want to go back?",
+            [
+              { text: "Cancel", style: "cancel", onPress: () => {} },
+              {
+                text: "Yes, Leave",
+                style: "destructive",
+                onPress: handleRedirect,
+              },
+            ]
+          );
+        }
+      }
+    });
+
+    return unsubscribe; 
+  }, [navigation, goalOfLearning, resetGoalOfLearning]);
+
+  
   const goals = [
     {
       id: 1,
@@ -49,7 +94,11 @@ const GoalSelection = () => {
     if (goalOfLearning) {
       router.push("/GenderSelection"); 
     } else {
-      alert("Please select a goal before continuing."); 
+      Alert.alert(
+        "Goal Selection Required", 
+        "Please select a goal to proceed. Choose one that best aligns with your learning aspirations.", 
+        [{ text: "OK", style: "default" }]
+      ); 
     }
   };
 

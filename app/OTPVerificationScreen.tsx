@@ -5,15 +5,16 @@ import { useNavigation } from "expo-router";
 
 import Common from '@/constants/Common';
 import TextHeader from '@/components/TextHeader';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { supabase } from '@/libs/supabase';
+
+import { useUserSelectionStore } from "@/store/onboardingUserSelection";
 
 const OTPVerificationScreen = () => {
     const router = useRouter();
     const navigation = useNavigation();
 
-    const { email } = useLocalSearchParams();
-    const validEmail = Array.isArray(email) ? email[0] : email;
+    const { email, resetEmail } = useUserSelectionStore()
 
     const [otp, setOtp] = useState(["", "", "", "", "", ""]);
     const [counter, setCounter] = useState(60);
@@ -21,6 +22,11 @@ const OTPVerificationScreen = () => {
     const [error, setError] = useState('');
     
     const inputRefs = useRef<TextInput[]>([]);
+
+    const handleRedirect = () => {
+        router.replace("/Authentication");
+        resetEmail();
+    }
 
     useEffect(() => {
         navigation.addListener("beforeRemove", (e) => {
@@ -34,7 +40,7 @@ const OTPVerificationScreen = () => {
                         {
                             text: "Yes",
                             style: "destructive",
-                            onPress: () => navigation.dispatch(e.data.action), 
+                            onPress: handleRedirect
                         },
                     ]
                 );
@@ -69,7 +75,7 @@ const OTPVerificationScreen = () => {
         setLoading(true);
 
         const { data: { session }, error } = await supabase.auth.verifyOtp({
-            email: validEmail as string,
+            email: email,
             token: otpCode,
             type: 'signup',
         });
@@ -82,9 +88,9 @@ const OTPVerificationScreen = () => {
         }
         if (session) {
             console.log(session, "session");
-            router.replace('/(tabs)/');
+            router.replace('/GoalSelection');
         }
-    }, [otp, validEmail, router]);
+    }, [otp, email, router]);
 
     const resendOTP = useCallback(async () => {
         if (loading) return;
@@ -93,7 +99,7 @@ const OTPVerificationScreen = () => {
         try {
             const { error } = await supabase.auth.resend({
                 type: 'signup',
-                email: validEmail as string,
+                email: email
             });
 
             if (error) {
@@ -108,7 +114,7 @@ const OTPVerificationScreen = () => {
         } finally {
             setLoading(false);
         }
-    }, [loading, validEmail]);
+    }, [loading, email]);
 
     useEffect(() => {
         if (otp.every(digit => digit !== "")) {

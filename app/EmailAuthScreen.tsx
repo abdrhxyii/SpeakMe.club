@@ -2,7 +2,7 @@ import { Colors } from '@/constants/Colors';
 import Common from '@/constants/Common';
 import { useRouter, useLocalSearchParams, useNavigation } from 'expo-router';
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, SafeAreaView, Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, StyleSheet, SafeAreaView, Pressable, ActivityIndicator, BackHandler } from 'react-native';
 import { Info, CheckCircle } from 'lucide-react-native';
 import TextHeader from '@/components/TextHeader';
 import { checkIfEmailExists } from '@/utils/authUtils';
@@ -14,21 +14,17 @@ export default function EmailAuthScreen() {
     const navigation = useNavigation();
 
     const { mode } = useLocalSearchParams();
-    const {email, setEmail} = useUserSelectionStore()
+    const {email, setEmail, resetEmail} = useUserSelectionStore()
 
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const resetGoalOfLearning = useUserSelectionStore((state) => state.resetEmail); 
-
     useEffect(() => {
-        const unsubscribe = navigation.addListener('beforeRemove', (e) => {
-            if (e.data.action.type === "GO_BACK") {
-                resetGoalOfLearning();
-            }
+        const unsubscribe = navigation.addListener('beforeRemove', () => {
+            resetEmail();
         });
         return unsubscribe;
-    }, [navigation, resetGoalOfLearning]);
+    }, [navigation, resetEmail]);
 
     const emailSchema = object({
         email: string()
@@ -52,6 +48,10 @@ export default function EmailAuthScreen() {
     const handleContinue = async () => {
         try {
             setLoading(true);
+            if (!email) {
+                setError('Please fill in email field before continuing.');
+                return; 
+            }
             await emailSchema.validate({ email });
 
             if (mode === 'signup') {
@@ -59,10 +59,16 @@ export default function EmailAuthScreen() {
                 if (exists) {
                     setError('An account with this email already exists. Please log in instead.');
                     setEmail('');
+                    resetEmail()
                     return;
                 }
     
-                route.push('/GoalSelection');
+                route.push({
+                    pathname: '/PasswordAuthScreen',
+                    params: {
+                        mode: mode,
+                    },
+                });
             } else if (mode === 'login') {
                 route.push({
                     pathname: '/PasswordAuthScreen',

@@ -1,15 +1,16 @@
-import React from 'react';
-import { View, Text, TextInput, FlatList, Pressable, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, TextInput, FlatList, Pressable, StyleSheet, SafeAreaView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
 import Common from '@/constants/Common';
 
 import { useUserSelectionStore } from "@/store/onboardingUserSelection";
-import { useRouter } from 'expo-router';
+import { useRouter, useNavigation } from 'expo-router';
+import TextHeader from '@/components/TextHeader';
 
 const languages = [
   "English", "Spanish", "Mandarin", "Hindi", "French", "Arabic", "Russian", "Portuguese",
-  "Bengali", "German", "Japanese", "Korean", "Italian", "Turkish", "Vietnamese", 
+  "Bengali", "German", "Japanese", "Korean", "Italian", "Tamil", "Turkish", "Vietnamese", 
   "Urdu", "Persian", "Swahili", "Thai", "Dutch", "Greek", "Czech", "Polish",
   "Romanian", "Hungarian", "Danish", "Finnish", "Norwegian", "Swedish",
   "Indonesian", "Malay", "Tagalog",
@@ -17,15 +18,35 @@ const languages = [
 
 export default function NativeLanguage() {
   const router = useRouter();
-  const { nativeLanguage, setNativeLanguage } = useUserSelectionStore();
+  const navigation = useNavigation()
+  const { nativeLanguage, setNativeLanguage, resetNativeLanguage } = useUserSelectionStore();
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', () => {
+      resetNativeLanguage();
+    })
+    return unsubscribe;
+  }, [nativeLanguage, resetNativeLanguage])
 
   const handleNext = () => {
-    router.push('/EnglishLevel');
+    if(nativeLanguage){
+      router.push('/EnglishLevel');
+    } else {
+       Alert.alert(
+        "Native Language Required", 
+        "Please select your native language to proceed.", 
+        [{ text: "OK", style: "default" }]
+      ); 
+    }
   };
 
   return (
     <SafeAreaView style={Common.container}>
       <View style={[Common.content, { flex: 1 }]}>
+        <TextHeader 
+            header="Select Native Language" 
+            subheader="Choose your native language" 
+        />
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.searchInput}

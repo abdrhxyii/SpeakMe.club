@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   StyleSheet,
   SafeAreaView,
   Vibration,
+  Alert
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
@@ -13,11 +14,19 @@ import Common from "@/constants/Common";
 import TextHeader from "@/components/TextHeader";
 import { useUserSelectionStore } from "@/store/onboardingUserSelection";
 
-import { useRouter } from "expo-router";
+import { useRouter, useNavigation } from "expo-router";
 
 const GenderSelection = () => {
-  const route = useRouter()
-  const { gender, setGender } = useUserSelectionStore();
+  const route = useRouter();
+  const navigation = useNavigation();
+  const { gender, setGender, resetGender } = useUserSelectionStore();
+
+  useEffect(() => {
+      const unsubscribe = navigation.addListener('beforeRemove', () => {
+        resetGender();
+      })
+      return unsubscribe;
+  }, [navigation, resetGender])
 
   const genders = [
     {
@@ -38,7 +47,15 @@ const GenderSelection = () => {
   };
 
   const handleNext = () => {
-    route.push('/NativeLanguage')
+    if (gender) {
+      route.push('/NativeLanguage')
+    } else {
+      Alert.alert(
+        "Gender Selection Required", 
+        "Please select a gender to proceed. Choose one that best aligns with your learning aspirations.", 
+        [{ text: "OK", style: "default" }]
+      ); 
+    }
   }
 
   return (
