@@ -14,19 +14,20 @@ const OTPVerificationScreen = () => {
     const router = useRouter();
     const navigation = useNavigation();
 
-    const { email, resetEmail } = useUserSelectionStore()
+    const { email, resetEmail } = useUserSelectionStore();
 
     const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+    const [startTime, setStartTime] = useState(Date.now());
     const [counter, setCounter] = useState(60);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    
+
     const inputRefs = useRef<TextInput[]>([]);
 
     const handleRedirect = () => {
         router.replace("/Authentication");
         resetEmail();
-    }
+    };
 
     useEffect(() => {
         navigation.addListener("beforeRemove", (e) => {
@@ -40,7 +41,11 @@ const OTPVerificationScreen = () => {
                         {
                             text: "Yes",
                             style: "destructive",
-                            onPress: handleRedirect
+                            onPress: () => {
+                                setTimeout(() => {
+                                    handleRedirect();
+                                }, 200); 
+                            },
                         },
                     ]
                 );
@@ -49,11 +54,16 @@ const OTPVerificationScreen = () => {
     }, [navigation]);
 
     useEffect(() => {
-        if (counter > 0) {
-            const timer = setTimeout(() => setCounter(counter - 1), 1000);
-            return () => clearTimeout(timer);
-        }
-    }, [counter]);
+        const interval = setInterval(() => {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const newCounter = Math.max(60 - elapsed, 0);
+            setCounter(newCounter);
+
+            if (newCounter <= 0) clearInterval(interval);
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [startTime]);
 
     const handleChange = useCallback((text: string, index: number) => {
         const newOtp = [...otp];
@@ -99,7 +109,7 @@ const OTPVerificationScreen = () => {
         try {
             const { error } = await supabase.auth.resend({
                 type: 'signup',
-                email: email
+                email: email,
             });
 
             if (error) {
@@ -107,6 +117,7 @@ const OTPVerificationScreen = () => {
                 return;
             }
 
+            setStartTime(Date.now()); 
             setCounter(60);
             Alert.alert('OTP Resent', 'A new OTP has been sent to your email.');
         } catch (error) {
@@ -165,6 +176,7 @@ const OTPVerificationScreen = () => {
 };
 
 export default OTPVerificationScreen;
+
 
 const styles = StyleSheet.create({
     otpContainer: {

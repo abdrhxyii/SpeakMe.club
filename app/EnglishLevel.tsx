@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { View, Text, Pressable, StyleSheet, ScrollView, SafeAreaView, Vibration, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Pressable, StyleSheet, ScrollView, SafeAreaView, Vibration, Alert, ActivityIndicator } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Common from '@/constants/Common';
 import { Colors } from '@/constants/Colors';
@@ -7,6 +7,7 @@ import { useRouter, useNavigation } from 'expo-router';
 
 import { useUserSelectionStore } from "@/store/onboardingUserSelection";
 import { CommonActions } from '@react-navigation/native';
+import { supabase } from '@/libs/supabase';
 
 const englishLevels = [
   { id: 'A1', level: 'Beginner', description: 'I can answer questions about my name and how old I am.' },
@@ -20,7 +21,8 @@ const englishLevels = [
 export default function EnglishLevel() {
   const route = useRouter();
   const navigation = useNavigation();
-  const {languageFluencyLevel, setLanguageFluencyLevel, resetLanguageFluencyLevel } = useUserSelectionStore();
+  const {languageFluencyLevel, setLanguageFluencyLevel, resetLanguageFluencyLevel, goalOfLearning, nativeLanguage, gender } = useUserSelectionStore();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
@@ -34,19 +36,62 @@ export default function EnglishLevel() {
     setLanguageFluencyLevel(id)
   }
 
-  const handleNext = () => {
-    if (languageFluencyLevel) {
-      navigation.dispatch(CommonActions.reset({
-        routes: [{key: "(tabs)", name: "(tabs)"}]
-      }))
-    } else {
-       Alert.alert(
-          "Fluency Level Required", 
-          "Please select your english fluency level to proceed.", 
-          [{ text: "OK", style: "default" }]
-      ); 
+  const handleNext = async () => {
+    if (!languageFluencyLevel) {
+      Alert.alert(
+        "Fluency Level Required",
+        "Please select your English fluency level to proceed.",
+        [{ text: "OK", style: "default" }]
+      );
+      return;
     }
-  }
+  
+    setLoading(true);
+  
+    try {
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+  
+      if (sessionError || !sessionData?.session?.user) {
+        throw new Error("Failed to retrieve user session. User might not be logged in.");
+      }
+  
+      const userId = sessionData.session.user.id;
+  
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({
+          goal_of_learning: goalOfLearning,
+          native_language: nativeLanguage,
+          language_fluency_level: languageFluencyLevel,
+          gender: gender,
+        })
+        .eq('id', userId);
+  
+      if (updateError) {
+        throw new Error("Failed to update user data.");
+      }
+
+      const { error } = await supabase
+      .from('users')
+      .update({ is_onboarding_complete: true })
+      .eq('id', userId);
+
+      if (error) {
+        throw new Error("Failed to update user data.");
+      }
+  
+      navigation.dispatch(
+        CommonActions.reset({
+          routes: [{ key: "(tabs)", name: "(tabs)" }],
+        })
+      );
+    } catch (error: any) {
+      console.error(error); 
+      Alert.alert("Error", error.message || "An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const renderItem = (item: any) => (
     <Pressable
@@ -75,8 +120,8 @@ export default function EnglishLevel() {
     <SafeAreaView style={Common.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         {englishLevels.map(renderItem)}
-        <Pressable style={styles.button} onPress={handleNext}>
-          <Text style={styles.buttonText}>Continue</Text>
+        <Pressable style={styles.button} onPress={handleNext} disabled={loading}>
+          { loading ? <ActivityIndicator size="small" color="#FFFFFF" /> : <Text style={styles.buttonText}>Continue</Text> }
         </Pressable>
       </ScrollView>
     </SafeAreaView>
@@ -132,6 +177,21 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: '#fff',
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems:'center',
+    transform: [{ translateX: -50 }, { translateY: -50 }],
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    width: '100%',
+    height: '100%',
+    zIndex: 1000,
+  },
+  loaderText: {
+    marginTop: 10,
+    fontSize: 16,
     color: '#fff',
   },
 });

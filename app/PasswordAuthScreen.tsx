@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Alert, TextInput, StyleSheet, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
 
 import { Eye, EyeOff, CheckCircle } from 'lucide-react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, useNavigation } from 'expo-router';
 
 import { supabase } from '@/libs/supabase';
 import { checkIfEmailExists } from '@/utils/authUtils';
@@ -12,6 +12,7 @@ import Common from '@/constants/Common';
 import { object, string } from 'yup';
 
 import { useUserSelectionStore } from "@/store/onboardingUserSelection";
+import { CommonActions } from '@react-navigation/native';
 
 const passwordValidationSchema = object().shape({
     password: string()
@@ -23,6 +24,8 @@ const passwordValidationSchema = object().shape({
 });
 
 export default function PasswordAuthScreen() {
+    const router = useRouter();
+    const navigation = useNavigation();
     const { email } = useUserSelectionStore();
     const { mode } = useLocalSearchParams();
 
@@ -78,8 +81,11 @@ export default function PasswordAuthScreen() {
                 }
 
                 if (data) {
-                    console.log(data, 'data from login');
-                    router.replace('/(tabs)/');
+                    navigation.dispatch(
+                        CommonActions.reset({
+                            routes: [{ key: "(tabs)", name: "(tabs)" }],
+                        })
+                    );
                 }
             } else if (mode === 'signup') {
                 const emailExists = await checkIfEmailExists(email.trim());
@@ -164,7 +170,7 @@ export default function PasswordAuthScreen() {
                 onPress={continueAuthentication}
                 disabled={loading || !(passwordValidation.isLengthValid && passwordValidation.isLetterValid && passwordValidation.isNumberValid && passwordValidation.isSymbolValid) || isPasswordEmpty}
             >
-                {loading ? <ActivityIndicator size="small" color="#fff" /> : <Text style={Common.continueText}>Continue</Text>}
+                {loading ? <ActivityIndicator size="small" color="#FFFFFF" /> : <Text style={Common.continueText}>Continue</Text>}
             </TouchableOpacity>
         </SafeAreaView>
     );

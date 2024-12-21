@@ -98,8 +98,8 @@ const SettingsScreen = () => {
       </ScrollView>
 
       {loading && (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={Colors.light.primary} />
+        <View style={[styles.loadingContainer, StyleSheet.absoluteFillObject]}>
+          <ActivityIndicator size={65} color={"#FFFFFF"} />
         </View>
       )}
     </SafeAreaView>
@@ -144,6 +144,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 1
   }
 });
 

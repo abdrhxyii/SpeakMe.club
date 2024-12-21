@@ -50,7 +50,7 @@ export default function TabLayout() {
             <Home color={color} size={24} style={{ marginTop: 7 }}/>
           ),
           headerRight: () => (
-            <TouchableOpacity style={[Common.headerBtn, { marginRight: 10 }]} onPress={() => router.navigate('/Authentication')}>
+            <TouchableOpacity style={[Common.headerBtn, { marginRight: 10 }]}>
               <SlidersHorizontal  color={'black'} size={18} />
             </TouchableOpacity>
           ),

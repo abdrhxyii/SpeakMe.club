@@ -12,50 +12,17 @@ import { useUserSelectionStore } from "@/store/onboardingUserSelection";
 const GoalSelection = () => {
   const { goalOfLearning, setGoalOfLearning, resetGoalOfLearning, resetEmail } = useUserSelectionStore();
   const router = useRouter();
-  const navigation = useNavigation();
-
-  const handleRedirect = () => {
-    router.replace("/Authentication");
-    resetGoalOfLearning();
-    resetEmail();
-}
+  const navigation = useNavigation()
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', (e) => {
       if(e.data.action.type === "GO_BACK") {
         e.preventDefault();
-        if (goalOfLearning) {
-          Alert.alert(
-            "Unsaved Changes",
-            "You have already selected a learning goal. Leaving now will discard your selection. Are you sure you want to go back?",
-            [
-              { text: "Cancel", style: "cancel", onPress: () => {} },
-              {
-                text: "Yes, Discard",
-                style: "destructive",
-                onPress: handleRedirect,
-              },
-            ]
-          );
-        } else {
-          Alert.alert(
-            "Leave Goal Selection?",
-            "If you leave now, your selected learning goals will not be saved. Are you sure you want to go back?",
-            [
-              { text: "Cancel", style: "cancel", onPress: () => {} },
-              {
-                text: "Yes, Leave",
-                style: "destructive",
-                onPress: handleRedirect,
-              },
-            ]
-          );
-        }
       }
     });
 
     return unsubscribe; 
-  }, [navigation, goalOfLearning, resetGoalOfLearning]);
+  }, [navigation]);
 
   
   const goals = [
