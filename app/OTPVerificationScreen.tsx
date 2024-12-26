@@ -9,12 +9,14 @@ import { useRouter } from 'expo-router';
 import { supabase } from '@/libs/supabase';
 
 import { useUserSelectionStore } from "@/store/onboardingUserSelection";
+import { useUserStore } from '@/store/userStore';
 
 const OTPVerificationScreen = () => {
     const router = useRouter();
     const navigation = useNavigation();
 
     const { email, resetEmail } = useUserSelectionStore();
+    const { setSession } = useUserStore();
 
     const [otp, setOtp] = useState(["", "", "", "", "", ""]);
     const [startTime, setStartTime] = useState(Date.now());
@@ -97,7 +99,7 @@ const OTPVerificationScreen = () => {
             return;
         }
         if (session) {
-            console.log(session, "session");
+            setSession(session)
             router.replace('/GoalSelection');
         }
     }, [otp, email, router]);

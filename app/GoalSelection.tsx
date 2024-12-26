@@ -8,9 +8,10 @@ import Common from "@/constants/Common";
 import TextHeader from "@/components/TextHeader";
 
 import { useUserSelectionStore } from "@/store/onboardingUserSelection";
+import { goals } from "@/data/appData";
 
 const GoalSelection = () => {
-  const { goalOfLearning, setGoalOfLearning, resetGoalOfLearning, resetEmail } = useUserSelectionStore();
+  const { goalOfLearning, setGoalOfLearning } = useUserSelectionStore();
   const router = useRouter();
   const navigation = useNavigation()
 
@@ -23,34 +24,6 @@ const GoalSelection = () => {
 
     return unsubscribe; 
   }, [navigation]);
-
-  
-  const goals = [
-    {
-      id: 1,
-      emoji: "📝",
-      title: "Prepare for exams",
-      description: "I’m aiming to pass important English tests like IELTS or TOEFL for my studies or career.",
-    },
-    {
-      id: 2,
-      emoji: "💼",
-      title: "Advance my career",
-      description: "I aim to secure a better job, earn a promotion, or take on side projects, but my English skills are holding me back.",
-    },
-    {
-      id: 3,
-      emoji: "🤝",
-      title: "Connect with locals and natives",
-      description: "I want to build meaningful relationships with people in my community or abroad.",
-    },
-    {
-      id: 4,
-      emoji: "🌍",
-      title: "Travel confidently",
-      description: "I want to explore the world without language barriers holding me back.",
-    },
-  ];
 
   const handleSelection = (item: string) => {
     setGoalOfLearning(item);

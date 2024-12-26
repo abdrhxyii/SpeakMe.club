@@ -122,6 +122,18 @@ const Common = StyleSheet.create({
     color: '#FFF',
     fontSize: 16,
     fontWeight: 'bold',
-  }
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF'
+  },
+  warningText: {
+    fontSize: 14,
+    color: Colors.light.red,
+    lineHeight: 20,
+    marginVertical: 6,
+  },
 });
 export default Common;

@@ -13,6 +13,7 @@ import { object, string } from 'yup';
 
 import { useUserSelectionStore } from "@/store/onboardingUserSelection";
 import { CommonActions } from '@react-navigation/native';
+import { useUserStore } from '@/store/userStore';
 
 const passwordValidationSchema = object().shape({
     password: string()
@@ -28,6 +29,7 @@ export default function PasswordAuthScreen() {
     const navigation = useNavigation();
     const { email } = useUserSelectionStore();
     const { mode } = useLocalSearchParams();
+    const { setSession } = useUserStore();
 
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -81,6 +83,7 @@ export default function PasswordAuthScreen() {
                 }
 
                 if (data) {
+                    setSession(data.session);
                     navigation.dispatch(
                         CommonActions.reset({
                             routes: [{ key: "(tabs)", name: "(tabs)" }],

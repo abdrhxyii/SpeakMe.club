@@ -8,6 +8,25 @@ export interface LoadingButtonProps {
 export interface UserState {
     isSignedIn: boolean | null;
     setIsSignedIn: (status: boolean | null) => void;
+    session: any;  
+    setSession: (session: any) => void;
+}
+
+export interface UserData {
+    display_name: string;
+    email: string;
+    gender: string;
+    goal_of_learning: string;
+    language_fluency_level: string;
+    native_language: string
+    about_me: string;
+    interest_list: string[];
+}
+
+export interface RefreshState {
+    hasUserUpdated: Boolean;
+    markUpdated: () => void;
+    resetUpdated: () => void;
 }
 
 export interface UserSelectionState {

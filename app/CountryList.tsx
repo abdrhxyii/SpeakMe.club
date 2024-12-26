@@ -1,16 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, SafeAreaView, Pressable } from 'react-native';
+import { View, Text, TextInput, FlatList, StyleSheet, SafeAreaView, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
 import Common from '@/constants/Common';
-
-const countries = [
-  "Andorra", "United Arab Emirates", "Afghanistan", "Antigua and Barbuda", "Anguilla",
-  "Albania", "Armenia", "Angola", "Antarctica", "Argentina", "American Samoa", "Austria",
-  "Australia", "Belgium", "Brazil", "Bahamas", "Bahrain", "Bangladesh", "Barbados",
-  "Belarus", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana",
-  "Bulgaria", "Burkina Faso", "Burundi", "Cambodia", "Cameroon", "Canada",
-];
+import { countries } from '@/data/appData';
 
 export default function CountryList() {
   const [search, setSearch] = useState('');
@@ -54,6 +47,9 @@ export default function CountryList() {
           )}
         />
       </View>
+      <Pressable style={styles.button}>
+          <Text style={Common.continueText}>Continue</Text>
+      </Pressable>
     </SafeAreaView>
   );
 }
@@ -90,7 +86,7 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: Colors.light.primary,
     paddingVertical: 16,
-    borderRadius: 6,
+    borderRadius: 25,
     alignItems: 'center',
     position: 'absolute',
     bottom: 20,

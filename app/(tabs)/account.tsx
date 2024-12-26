@@ -1,50 +1,28 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, TouchableWithoutFeedback  } from 'react-native';
-import React, { useCallback, useRef, useState, useMemo } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, TouchableWithoutFeedback, ActivityIndicator  } from 'react-native';
+import React, { useEffect, useCallback, useRef, useState, useMemo } from 'react';
 import Common from '@/constants/Common';
 import ReviewCard from '@/components/ReviewCard';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import AccountSection from '@/components/AccountSection';
 import ProfileHeader from '@/components/ProfileHeader';
-import { useNavigation } from 'expo-router';
-import { Colors } from '@/constants/Colors';
-
-const reviews = [
-  {
-    id: '1',
-    name: 'Vaishali',
-    location: 'Dehradun, India',
-    date: 'August 2024',
-    review: 'Castle Oodeypore is a magnificent palace with stunning interiors. We stepped in and were absolutely arrested by its royal charm. Kudos to Ma\'am Nirmal for the exquisite aesthetics.',
-  },
-  {
-    id: '2',
-    name: 'Bridget',
-    location: 'Auckland, New Zealand',
-    date: 'January 2024',
-    review: '',
-  },
-  {
-    id: '3',
-    name: 'Vaishali',
-    location: 'Dehradun, India',
-    date: 'August 2024',
-    review: 'Castle Oodeypore is a magnificent palace with stunning interiors. We stepped in and were absolutely arrested by its royal charm. Kudos to Ma\'am Nirmal for the exquisite aesthetics.',
-  },
-  {
-    id: '4',
-    name: 'Bridget',
-    location: 'Auckland, New Zealand',
-    date: 'January 2024',
-    review: '',
-  },
-];
+import { useFocusEffect, useNavigation } from 'expo-router';
+import { supabase } from '@/libs/supabase';
+import { useUserStore } from '@/store/userStore';
+import { UserData } from '@/interfaces'
+import { reviews } from '@/data/appData';
+import InterestsSection from '@/components/InterestsSection';
 
 export default function Account() {
   const navigation = useNavigation();
   const bottomSheetRef = useRef<BottomSheet>(null);
+
+  const { session } = useUserStore();
+
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [showHeaderTitle, setShowHeaderTitle] = useState(false);
-  const scrollThreshold = useMemo(() => 10, []); // Use useMemo for constants
+  const [loading, setLoading] = useState(true);
+  const scrollThreshold = useMemo(() => 10, []);
+  const [userData, setUserData] = useState<UserData | null>(null);
 
   const close = () => {
     setIsModalVisible(false);
@@ -90,10 +68,39 @@ export default function Account() {
 
       if (shouldShowTitle !== showHeaderTitle) {
         setShowHeaderTitle(shouldShowTitle);
-        navigation.setOptions({ headerTitle: shouldShowTitle ? 'Abdur Rahman' : '' });
+        navigation.setOptions({ headerTitle: shouldShowTitle ? userData?.email.split('@')[0] : '' });
       }
     },
     [navigation, showHeaderTitle, scrollThreshold]
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchUserData = async () => {
+        console.log("called")
+        if (!session) return;
+  
+        try {
+          const { data, error } = await supabase
+            .from('users') 
+            .select('*')
+            .eq('id', session.user.id) 
+            .single();
+  
+          if (error) {
+            console.error(error.message);
+          } else {
+            setUserData(data);
+          }
+        } catch (err) {
+          console.error('Error fetching user data', err);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchUserData();
+    }, [session?.user?.id])
   );
 
   const ReviewItem = useCallback(({ review }: any) => (
@@ -119,6 +126,12 @@ export default function Account() {
 
   const MemoizedReviewItem = useMemo(() => ReviewItem, [ReviewItem]);
 
+  if (loading) return (
+    <View style={Common.loaderContainer}>
+      <ActivityIndicator size={65} color={'#000000'}/>
+    </View>
+  );
+
   return (
     <>
       <SafeAreaView style={Common.container}>
@@ -139,10 +152,15 @@ export default function Account() {
           onScroll={handleScroll}
           scrollEventThrottle={16}
         >
-          <ProfileHeader />
+          <ProfileHeader user={userData}/>
+
           <Text style={Common.profileContentTitle}>Personal Information</Text>
-          <AccountSection />
-          <Text style={Common.profileContentTitle}>Feedbacks</Text>
+          <AccountSection user={userData}/>
+
+          <Text style={Common.profileContentTitle}>Interests</Text>
+          <InterestsSection user={userData}/>
+
+          <Text style={Common.profileContentTitle}>Feedbacks (10.8K)</Text>
           <View style={Common.profileReviewContainer}>
             <ScrollView showsHorizontalScrollIndicator={false} overScrollMode="never">
               <ReviewCard />

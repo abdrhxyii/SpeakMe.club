@@ -3,38 +3,108 @@ import { View, Text, Pressable, StyleSheet, ScrollView, SafeAreaView, Vibration,
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Common from '@/constants/Common';
 import { Colors } from '@/constants/Colors';
-import { useRouter, useNavigation } from 'expo-router';
+import { useRouter, useNavigation, useLocalSearchParams } from 'expo-router';
 
 import { useUserSelectionStore } from "@/store/onboardingUserSelection";
+import { useUserStore } from '@/store/userStore';
+import { refreshStore } from '@/store/refreshStore';
+
 import { CommonActions } from '@react-navigation/native';
 import { supabase } from '@/libs/supabase';
-
-const englishLevels = [
-  { id: 'A1', level: 'Beginner', description: 'I can answer questions about my name and how old I am.' },
-  { id: 'A2', level: 'Pre-Intermediate', description: 'I can answer with simple phrases to various questions which are not very complex.' },
-  { id: 'B1', level: 'Intermediate', description: 'I can introduce myself, ask what you are doing, and keep up the conversation on general topics.' },
-  { id: 'B2', level: 'Upper-Intermediate', description: 'I can express my opinion on any topic, sometimes making mistakes. I don’t always remember the correct word, but I’ll pick up a synonym.' },
-  { id: 'C1', level: 'Advanced', description: 'I speak fluently on any topic and use idioms; my pronunciation does not cause difficulties in understanding.' },
-  { id: 'C2', level: 'Proficient', description: 'English is my native language, or I speak it so fluently it’s like a native.' },
-];
+import { englishLevels } from '@/data/appData'
 
 export default function EnglishLevel() {
   const route = useRouter();
   const navigation = useNavigation();
-  const {languageFluencyLevel, setLanguageFluencyLevel, resetLanguageFluencyLevel, goalOfLearning, nativeLanguage, gender } = useUserSelectionStore();
+  const { mode } = useLocalSearchParams();
+
+  const { session } = useUserStore();
+  const { markUpdated } = refreshStore();
+  const {email, languageFluencyLevel, setLanguageFluencyLevel, resetLanguageFluencyLevel, goalOfLearning, nativeLanguage, gender, reset } = useUserSelectionStore();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (mode === 'edit') {
+      fetchLanguageFluencyLevel();
+    }
+
     const unsubscribe = navigation.addListener('beforeRemove', () => {
-        resetLanguageFluencyLevel()
-    })
+      resetLanguageFluencyLevel();
+    });
+
     return unsubscribe;
-  }, [languageFluencyLevel, resetLanguageFluencyLevel])
+  }, [mode, navigation, resetLanguageFluencyLevel]);
+
+  const fetchLanguageFluencyLevel = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('language_fluency_level')
+        .eq('id', session.user.id)
+        .single();
+
+      if (error) {
+        throw new Error("Failed to fetch the language fluency level.");
+      }
+
+      if (data?.language_fluency_level) {
+        const selectedLevel = data.language_fluency_level.split(' ')[0]
+        setLanguageFluencyLevel(selectedLevel);
+      }
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "An unexpected error occurred.");
+    }
+  };
 
   const handleSelect = (id: any) => {
     Vibration.vibrate(30);
-    setLanguageFluencyLevel(id)
+    if (id !== languageFluencyLevel) {
+      setLanguageFluencyLevel(id);
+    }
   }
+
+  const updateUser = async (languageFluencyLevel: any) => {
+    try {
+      const selectedLevel = englishLevels.find(level => level.id === languageFluencyLevel);
+      const levelDescription = selectedLevel ? `${selectedLevel.id} (${selectedLevel.level})` : '';
+  
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({
+          language_fluency_level: levelDescription,
+        })
+        .eq('id', session.user.id);
+  
+      if (updateError) throw new Error("Failed to update user data.");
+    } catch (error: any) {
+      throw new Error(error.message || "An unexpected error occurred.");
+    }
+  };
+
+  const updateOnboardingData = async () => {
+    try {
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({
+          display_name: email.split("@")[0],
+          goal_of_learning: goalOfLearning,
+          native_language: nativeLanguage,
+          gender: gender,
+        })
+        .eq('id', session.user.id);
+  
+      if (updateError) throw new Error("Failed to update onboarding data.");
+  
+      const { error } = await supabase
+        .from('users')
+        .update({ is_onboarding_complete: true })
+        .eq('id', session.user.id);
+  
+      if (error) throw new Error("Failed to mark onboarding as complete.");
+    } catch (error: any) {
+      throw new Error(error.message || "An unexpected error occurred.");
+    }
+  };
 
   const handleNext = async () => {
     if (!languageFluencyLevel) {
@@ -49,44 +119,23 @@ export default function EnglishLevel() {
     setLoading(true);
   
     try {
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      await updateUser(languageFluencyLevel);
   
-      if (sessionError || !sessionData?.session?.user) {
-        throw new Error("Failed to retrieve user session. User might not be logged in.");
+      if (mode === "edit") {
+        markUpdated();
+        route.back();
+        return;
       }
   
-      const userId = sessionData.session.user.id;
-  
-      const { error: updateError } = await supabase
-        .from('users')
-        .update({
-          goal_of_learning: goalOfLearning,
-          native_language: nativeLanguage,
-          language_fluency_level: languageFluencyLevel,
-          gender: gender,
-        })
-        .eq('id', userId);
-  
-      if (updateError) {
-        throw new Error("Failed to update user data.");
-      }
-
-      const { error } = await supabase
-      .from('users')
-      .update({ is_onboarding_complete: true })
-      .eq('id', userId);
-
-      if (error) {
-        throw new Error("Failed to update user data.");
-      }
+      await updateOnboardingData();
   
       navigation.dispatch(
         CommonActions.reset({
           routes: [{ key: "(tabs)", name: "(tabs)" }],
         })
       );
+      reset();
     } catch (error: any) {
-      console.error(error); 
       Alert.alert("Error", error.message || "An unexpected error occurred.");
     } finally {
       setLoading(false);

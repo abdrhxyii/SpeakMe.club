@@ -67,8 +67,8 @@ export default function RootLayout() {
               <Stack.Screen name="NameScreen" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center' }} />
               <Stack.Screen name="NativeLanguage" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center', animation: 'slide_from_right' }} />
               <Stack.Screen name="EnglishLevel" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center', animation: 'slide_from_right' }} />
-              <Stack.Screen name="AboutMe" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center'}} />
-              <Stack.Screen name="CountryList" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center'}} />
+              <Stack.Screen name="AboutMe" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center', animation: 'slide_from_right'}} />
+              <Stack.Screen name="CountryList" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center', animation: 'slide_from_right'}} />
               <Stack.Screen name="Interest" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center' }}/>
               
               <Stack.Screen name="Authentication" options={{ headerShown: false, animation: 'fade', navigationBarColor: '#E8f5E3' }} />
@@ -78,7 +78,7 @@ export default function RootLayout() {
               <Stack.Screen name="index" options={{ headerShown: false }} />
               <Stack.Screen name="Welcome" options={{ headerShown: false, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center', headerBackVisible: false, statusBarColor: '#FFD8B1' }} />
               <Stack.Screen name="GoalSelection" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center', headerBackVisible: false }} />
-              <Stack.Screen name="GenderSelection" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center', headerBackVisible: false, animation: 'slide_from_right' }} />
+              <Stack.Screen name="GenderSelection" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center', headerBackVisible: true, animation: 'slide_from_right' }} />
               <Stack.Screen name="+not-found" />
           </Stack>
       </BottomSheetModalProvider>

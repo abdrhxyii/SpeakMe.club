@@ -6,9 +6,11 @@ import { supabase } from '@/libs/supabase';
 
 import Common from '@/constants/Common';
 import { Colors } from '@/constants/Colors';
+import { useUserStore } from '@/store/userStore';
 
 const SettingsScreen = () => {
   const router = useRouter();
+  const { setSession, setIsSignedIn } = useUserStore()
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [signedOut, setSignedOut] = useState(false);
@@ -21,6 +23,8 @@ const SettingsScreen = () => {
         setErrorMessage('An error occurred while signing out. Please try again...');
         return;
       }
+      setSession(null);
+      setIsSignedIn(null);
       setSignedOut(true);
     } catch (error) {
       setErrorMessage('An unexpected error occurred while signing out. Please try again...');

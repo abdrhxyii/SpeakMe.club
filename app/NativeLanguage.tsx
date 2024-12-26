@@ -1,52 +1,97 @@
-import React, { useEffect } from 'react';
-import { View, Text, TextInput, FlatList, Pressable, StyleSheet, SafeAreaView, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, FlatList, Pressable, StyleSheet, SafeAreaView, Alert, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
 import Common from '@/constants/Common';
 
 import { useUserSelectionStore } from "@/store/onboardingUserSelection";
-import { useRouter, useNavigation } from 'expo-router';
+import { useRouter, useNavigation, useLocalSearchParams } from 'expo-router';
 import TextHeader from '@/components/TextHeader';
-
-const languages = [
-  "English", "Spanish", "Mandarin", "Hindi", "French", "Arabic", "Russian", "Portuguese",
-  "Bengali", "German", "Japanese", "Korean", "Italian", "Tamil", "Turkish", "Vietnamese", 
-  "Urdu", "Persian", "Swahili", "Thai", "Dutch", "Greek", "Czech", "Polish",
-  "Romanian", "Hungarian", "Danish", "Finnish", "Norwegian", "Swedish",
-  "Indonesian", "Malay", "Tagalog",
-];
+import { supabase } from '@/libs/supabase';
+import { useUserStore } from '@/store/userStore';
+import { refreshStore } from '@/store/refreshStore';
+import { languages } from '@/data/appData';
 
 export default function NativeLanguage() {
   const router = useRouter();
-  const navigation = useNavigation()
+  const navigation = useNavigation();
+  const { mode } = useLocalSearchParams();
+  const { session } = useUserStore();
+  const { markUpdated } = refreshStore()
   const { nativeLanguage, setNativeLanguage, resetNativeLanguage } = useUserSelectionStore();
+
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
-      resetNativeLanguage();
-    })
-    return unsubscribe;
-  }, [nativeLanguage, resetNativeLanguage])
+      if (mode !== 'edit') resetNativeLanguage();
+    });
 
-  const handleNext = () => {
-    if(nativeLanguage){
-      router.push('/EnglishLevel');
-    } else {
-       Alert.alert(
-        "Native Language Required", 
-        "Please select your native language to proceed.", 
+    if (mode === 'edit') {
+      fetchNativeLanguage();
+    }
+
+    return unsubscribe;
+  }, [mode, resetNativeLanguage]);
+
+  const fetchNativeLanguage = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('native_language')
+        .eq('id', session.user.id)
+        .single();
+
+      if (error) throw error;
+      if (data?.native_language) {
+        setNativeLanguage(data.native_language);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to fetch native language. Please try again later.');
+    }
+  };
+
+  const handleNext = async () => {
+    if (!nativeLanguage) {
+      Alert.alert(
+        "Native Language Required",
+        "Please select your native language to proceed.",
         [{ text: "OK", style: "default" }]
-      ); 
+      );
+      return;
+    }
+
+    try {
+      setLoading(true)
+      if (mode === "edit") {
+        const { error } = await supabase
+          .from("users")
+          .update({ native_language: nativeLanguage })
+          .eq("id", session.user.id);
+  
+        if (error) {
+          Alert.alert('Error', 'Failed to update native language.');
+        } else {
+          markUpdated();
+          router.back();
+        }
+      } else {
+        router.push('/EnglishLevel');
+      }
+    } catch (error) {
+      setLoading(false)
     }
   };
 
   return (
     <SafeAreaView style={Common.container}>
       <View style={[Common.content, { flex: 1 }]}>
-        <TextHeader 
-            header="Select Native Language" 
-            subheader="Choose your native language" 
-        />
+        {mode !== "edit" && (
+          <TextHeader
+            header="Select Native Language"
+            subheader="Choose your native language"
+          />
+        )}
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.searchInput}
@@ -74,7 +119,13 @@ export default function NativeLanguage() {
         />
 
         <Pressable style={styles.button} onPress={handleNext}>
-          <Text style={Common.continueText}>Continue</Text>
+          {loading ? (
+            <ActivityIndicator size="small" color="#FFFFFF" />
+          ) : (
+            <Text style={Common.continueText}>
+              {mode === "edit" ? "Done" : "Continue"}
+            </Text>
+          )}
         </Pressable>
       </View>
     </SafeAreaView>
