@@ -4,7 +4,6 @@ import { Home, UserCircle, SlidersHorizontal , Settings, User, ClipboardList } f
 import { TouchableOpacity } from 'react-native';
 import Common from '@/constants/Common';
 import { Colors } from '@/constants/Colors';
-import { router } from 'expo-router';
 
 export default function TabLayout() {
   const route = useRouter()

@@ -6,9 +6,10 @@ import { useRouter } from 'expo-router';
 
 export default function InterestsSection({user}: any) {
     const router = useRouter();
+    const interests = user?.interest_list || [];
     return (
         <View style={styles.interestsContainer}>
-            {user.interest_list.length > 0 &&
+            {interests.length > 0 &&
                 user.interest_list.map((item: string, index: number) => (
                 <View key={index} style={styles.interestTag}>
                     <Text style={styles.interestText}>{item}</Text>

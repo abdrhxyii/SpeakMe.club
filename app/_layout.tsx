@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { StatusBar, TouchableOpacity } from 'react-native';
 import 'react-native-reanimated';
 
@@ -68,7 +68,7 @@ export default function RootLayout() {
               <Stack.Screen name="NativeLanguage" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center', animation: 'slide_from_right' }} />
               <Stack.Screen name="EnglishLevel" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center', animation: 'slide_from_right' }} />
               <Stack.Screen name="AboutMe" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center', animation: 'slide_from_right'}} />
-              <Stack.Screen name="CountryList" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center', animation: 'slide_from_right'}} />
+              {/* <Stack.Screen name="CountryList" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center', animation: 'slide_from_right'}} /> */}
               <Stack.Screen name="Interest" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center' }}/>
               
               <Stack.Screen name="Authentication" options={{ headerShown: false, animation: 'fade', navigationBarColor: '#E8f5E3' }} />

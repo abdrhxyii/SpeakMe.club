@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   label: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#6B7280',
   },
   value: {

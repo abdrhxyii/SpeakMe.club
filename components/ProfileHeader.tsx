@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   detailLabel: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#888',
     fontWeight: '600',
   },
