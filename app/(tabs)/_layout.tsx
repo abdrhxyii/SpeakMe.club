@@ -1,14 +1,26 @@
 import { Tabs, useRouter } from 'expo-router';
-import React from 'react';
+import React, { useRef } from 'react';
 import { Home, UserCircle, SlidersHorizontal , Settings, User, ClipboardList } from 'lucide-react-native';
 import { TouchableOpacity } from 'react-native';
 import Common from '@/constants/Common';
 import { Colors } from '@/constants/Colors';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import EnglishLevelFilterSheet from '@/components/BottomSheets/EnglishLevelFilterSheet';
 
 export default function TabLayout() {
-  const route = useRouter()
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const route = useRouter();
+
+  const openPartnerFinderModal = () => {
+    if (bottomSheetModalRef.current) {
+      bottomSheetModalRef.current.present();
+    } else {
+      console.error('BottomSheetModalRef is null');
+    }
+  };
 
   return (
+    <>
     <Tabs
       screenOptions={{
         headerShown: true, 
@@ -49,7 +61,7 @@ export default function TabLayout() {
             <Home color={color} size={24} style={{ marginTop: 7 }}/>
           ),
           headerRight: () => (
-            <TouchableOpacity style={[Common.headerBtn, { marginRight: 10 }]}>
+            <TouchableOpacity style={[Common.headerBtn, { marginRight: 10 }]} onPress={openPartnerFinderModal}>
               <SlidersHorizontal  color={'black'} size={18} />
             </TouchableOpacity>
           ),
@@ -90,5 +102,7 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+    <EnglishLevelFilterSheet ref={bottomSheetModalRef}/>
+    </>
   );
 }

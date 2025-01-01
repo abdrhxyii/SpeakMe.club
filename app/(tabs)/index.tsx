@@ -1,17 +1,17 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { View, Text, FlatList, Image, Pressable, SafeAreaView, StyleSheet, Vibration, TouchableOpacity } from 'react-native';
-import { ChevronDown, PhoneCall, Search } from 'lucide-react-native';
+import { PhoneCall, Search } from 'lucide-react-native';
 import Common from '@/constants/Common';
 import { Colors } from '@/constants/Colors';
 import { Link } from 'expo-router';
 import { data } from '@/data/appData';
-import { BottomSheetView, BottomSheetModal } from '@gorhom/bottom-sheet';
-import CustomBackdrop from '@/components/CustomBackdrop';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import PartnerFinderModal from '@/components/BottomSheets/PartnerFinderModal';
 
 export default function HomeScreen() {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
-  const openModal = () => {
+  const openPartnerFinderModal = () => {
     if (bottomSheetModalRef.current) {
       bottomSheetModalRef.current.present();
     } else {
@@ -57,48 +57,12 @@ export default function HomeScreen() {
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
       />
-      <TouchableOpacity style={styles.perfectPartnerButton} activeOpacity={0.9} onPress={openModal}>
+      <TouchableOpacity style={styles.perfectPartnerButton} activeOpacity={0.9} onPress={openPartnerFinderModal}>
         <Search color="white" size={25} />
         <Text style={styles.buttonText}>Find a perfect partner</Text>
       </TouchableOpacity>
     </SafeAreaView>
-
-    <BottomSheetModal
-        ref={bottomSheetModalRef}
-        snapPoints={['100%']}
-        index={0}
-        backdropComponent={(props) => <CustomBackdrop {...props} />}  
-        enablePanDownToClose
-        handleIndicatorStyle={{ display: 'none' }}
-      >
-        <BottomSheetView style={styles.contentContainer}>
-        <View style={styles.bottomSheetHeader}>
-          <TouchableOpacity onPress={() => bottomSheetModalRef.current?.close()}>
-            <ChevronDown color={'#000000'} size={24} />
-          </TouchableOpacity>
-          <View style={styles.centerContainer}>
-            <Text style={styles.headerText}>Find a Partner</Text>
-          </View>
-        </View>
-        <View style={styles.bodyContainer}>
-          <Text style={styles.headingText}>Looking for the perfect partner</Text>
-          <View style={styles.timerContainer}>
-            <View style={styles.circle}>
-              <Text style={styles.emoji}>👩‍💻</Text>
-              <Text style={styles.timerText}>0:02</Text>
-              <Text style={styles.subText}>Waiting time 0-1 minute</Text>
-            </View>
-          </View>
-          <Text style={styles.noteText}>Don’t lock the screen or exit the app during the search</Text>
-          <TouchableOpacity>
-            <Text style={styles.settingsText}>Search settings</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.cancelButton}>
-            <Text style={styles.cancelButtonText}>Cancel the search</Text>
-          </TouchableOpacity>
-        </View>
-      </BottomSheetView>
-      </BottomSheetModal>
+    <PartnerFinderModal ref={bottomSheetModalRef} />
     </>
   );
 }
@@ -156,87 +120,5 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: 'bold',
     color: Colors.light.primary,
-  },
-  //bottomSheet
-  contentContainer: {
-    flex: 1,
-    paddingHorizontal: 15,
-  },
-  bottomSheetHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  centerContainer: {
-    flex: 1, 
-    alignItems: 'center',
-  },
-  headerText: {
-    textAlign: 'center',
-    fontSize: 16,
-    fontWeight: '600'
-  },
-  bodyContainer: {
-    flex: 1,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    padding: 40,
-  },
-  headingText: {
-    fontSize: 25,
-    fontWeight: '700',
-    marginBottom: 20,
-    textAlign: 'center',
-    color: '#000',
-  },
-  timerContainer: {
-    marginVertical: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  circle: {
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    borderWidth: 10,
-    borderColor: '#7F56D9',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emoji: {
-    fontSize: 40,
-    marginBottom: 5,
-  },
-  timerText: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#000',
-  },
-  subText: {
-    fontSize: 14,
-    color: '#999',
-    textAlign: 'center',
-  },
-  noteText: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  settingsText: {
-    fontSize: 16,
-    color: '#7F56D9',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  cancelButton: {
-    backgroundColor: '#F0F0F0',
-    padding: 15,
-    borderRadius: 8,
-  },
-  cancelButtonText: {
-    fontSize: 16,
-    color: '#000',
-    textAlign: 'center',
   },
 });

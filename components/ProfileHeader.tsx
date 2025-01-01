@@ -37,9 +37,10 @@ export default function ProfileHeader({user}: any) {
           <View style={styles.onlineDot}></View>
         </TouchableOpacity>
       </View>
+      
       <View style={styles.headerTextContainer}>
         <View style={styles.nameContainer}>
-          <Text style={styles.headerTitle}>{user.display_name}</Text>
+          <Text style={styles.headerTitle}>{user.display_name ? (user.display_name.length > 14 ? `${user.display_name.slice(0, 14)}...` : user.display_name) : ""}</Text>
             <Pressable style={styles.editIconContainer} onPress={() => router.push('/EditProfile')}>
                <Text style={styles.editIconText}>Edit</Text>
                <PenLine color={'#FFFFFF'} size={15} />
@@ -87,7 +88,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#ffffff',
-    paddingBottom: 20,
+    paddingBottom: 8,
   },
   headerTextContainer: {
     flex: 1,

@@ -7,12 +7,11 @@ import {
   TouchableOpacity,
   Image,
   SafeAreaView,
-  TouchableWithoutFeedback,
   ActivityIndicator,
 } from 'react-native';
 
 import { useFocusEffect, useNavigation } from 'expo-router';
-import BottomSheet, { BottomSheetModal, BottomSheetFlatList } from '@gorhom/bottom-sheet';
+import { BottomSheetModal, BottomSheetFlatList } from '@gorhom/bottom-sheet';
 
 import Common from '@/constants/Common';
 import ReviewCard from '@/components/ReviewCard';
@@ -21,6 +20,7 @@ import ProfileHeader from '@/components/ProfileHeader';
 import InterestsSection from '@/components/InterestsSection';
 import ComplimentsList from '@/components/ComplimentsList';
 import AdviceList from '@/components/AdviceList';
+import ActionButton from '@/components/ActionButton';
 
 import { supabase } from '@/libs/supabase';
 import { useUserStore } from '@/store/userStore';
@@ -130,7 +130,9 @@ export default function Account() {
           scrollEventThrottle={16}
         >
           <ProfileHeader user={userData}/>
-
+          <Text style={styles.bio}>i'm software engineer based in london, england. I'm practicing english</Text>
+          <ActionButton/>
+          
           <Text style={Common.profileContentTitle}>Personal Information</Text>
           <AccountSection user={userData}/>
 
@@ -222,4 +224,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     padding: 5,
   },
+  bio: {
+    lineHeight: 20 
+  }
 });

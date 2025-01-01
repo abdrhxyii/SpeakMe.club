@@ -10,6 +10,8 @@ import { refreshStore } from '@/store/refreshStore';
 export default function AboutMe() {
   const router = useRouter()
   const [aboutMe, setAboutMe] = useState('');
+  const [error, setError] = useState('');
+  
   const [loading, setLoading] = useState(false);
   const { session } = useUserStore();
   const { markUpdated } = refreshStore()
@@ -28,14 +30,14 @@ export default function AboutMe() {
         .single();
 
       if (error && error.code !== 'PGRST116') { 
-        throw error;
+        setError(error.message);
       }
 
       if (data?.about_me) {
         setAboutMe(data.about_me);
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to fetch your information. Please try again later.');
+      setError('Failed to fetch your information. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -53,13 +55,13 @@ export default function AboutMe() {
         });
 
       if (error) {
-        throw error;
+        setError(error.message)
       } else {
         markUpdated();
         router.back();
       }
     } catch (error) {
-        Alert.alert('Error', 'Failed to save your information. Please try again later.');
+        setError('Failed to save your information. Please try again later.');
     } finally {
         setLoading(false);
     }
@@ -71,12 +73,15 @@ export default function AboutMe() {
         <TextInput
           style={styles.input}
           placeholder="Tell us about you"
-          maxLength={50}
+          maxLength={74}
           value={aboutMe}
           multiline
           onChangeText={(text) => setAboutMe(text)}
         />
-        <Text style={styles.charCount}>{aboutMe.length}/50</Text>
+        <View style={styles.wrappingText}>
+          { error ? <Text style={Common.warningText}>{error}</Text> : <View /> }
+          <Text style={styles.charCount}>{aboutMe.length}/75</Text>
+        </View>
 
         <Text style={styles.infoText}>
           Share a bit about yourself! Describe your interests, background, or anything unique, but avoid sharing contact details or personal information.
@@ -130,4 +135,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  wrappingText: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  }
 });
