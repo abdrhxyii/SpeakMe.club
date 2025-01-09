@@ -56,7 +56,7 @@ export default function Account() {
 
       if (shouldShowTitle !== showHeaderTitle) {
         setShowHeaderTitle(shouldShowTitle);
-        navigation.setOptions({ headerTitle: shouldShowTitle ? userData?.email.split('@')[0] : '' });
+        navigation.setOptions({ headerTitle: shouldShowTitle ? userData?.display_name : '' });
       }
     },
     [navigation, showHeaderTitle, scrollThreshold]

@@ -1,8 +1,9 @@
 import { useRouter } from 'expo-router';
-import React, { useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Common from '@/constants/Common';
+import { Image } from 'react-native';
 
 const Welcome = () => {
   const router = useRouter()
@@ -15,24 +16,6 @@ const Welcome = () => {
     { image: require('@/assets/images/introuser9.png'), backgroundColor: '#FFD8B1' },
   ];
 
-  const opacity = useRef(new Animated.Value(0)).current;
-  const scale = useRef(new Animated.Value(0.5)).current;
-
-  useEffect(() => {
-    Animated.sequence([
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 1000,
-        useNativeDriver: true,
-      }),
-      Animated.timing(scale, {
-        toValue: 1,
-        duration: 1000,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [opacity, scale]);
-
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -43,10 +26,10 @@ const Welcome = () => {
       <View style={styles.content}>
         <View style={styles.emojiContainer}>
           <View style={[styles.centerEmojiWrapper, { backgroundColor: emojiData[0].backgroundColor }]}>
-            <Animated.Image
+          <Image
               source={emojiData[0].image}
-              style={[styles.centerEmojiImage, { opacity, transform: [{ scale }] }]}
-            />
+              style={styles.centerEmojiImage}
+          />
           </View>
           {emojiData.slice(1).map((emoji, index) => {
             const angle = (index * 360) / (emojiData.length - 1);
@@ -63,9 +46,9 @@ const Welcome = () => {
                   { transform: [{ translateX: x }, { translateY: y }] },
                 ]}
               >
-                <Animated.Image
+                <Image
                   source={emoji.image}
-                  style={[styles.emojiImage, { opacity, transform: [{ scale }] }]}
+                  style={styles.emojiImage}
                 />
               </View>
             );

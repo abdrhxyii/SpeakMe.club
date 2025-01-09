@@ -40,7 +40,6 @@ const EditProfile = () => {
   };
 
   useEffect(() => {
-    console.log("This is initial so called")
     fetchUserData();
   }, []);
 
@@ -70,7 +69,6 @@ const EditProfile = () => {
   useFocusEffect(
     useCallback(() => {
       if (hasUserUpdated) {
-        console.log("This is updated so called")
         fetchUserData();
       }
     }, [hasUserUpdated])
