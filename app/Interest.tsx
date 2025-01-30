@@ -1,21 +1,81 @@
 import { Colors } from '@/constants/Colors';
 import Common from '@/constants/Common';
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, SafeAreaView, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, SafeAreaView, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { supabase } from '@/libs/supabase';
+import { useUserStore } from '@/store/userStore';
+import { useRouter } from 'expo-router';
+import { refreshStore } from '@/store/refreshStore';
+import { X } from 'lucide-react-native';
 
 export default function InterestsScreen() {
+  const router = useRouter()
   const [interest, setInterest] = useState('');
-  const [interests, setInterests] = useState(['ilove', 'interest']);
+  const [interests, setInterests] = useState<string[]>([]);
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false);
+  const { session } = useUserStore();
+  const { markUpdated } = refreshStore()
 
-  const addInterest = () => {
-    if (interest.trim() && !interests.includes(interest)) {
-      setInterests([...interests, interest.trim()]);
-      setInterest('');
+  useEffect(() => {
+    fetchInterests();
+  }, []);
+
+  const fetchInterests = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('users')
+        .select('interest_list')
+        .eq('id', session.user.id)
+        .single();
+
+      if (error) throw error;
+
+      if (data?.interest_list) {
+        setInterests(data.interest_list);
+      }
+    } catch (error) {
+      setError("Failed to fetch interests. Please try again later.")
+    } finally {
+      setLoading(false);
     }
   };
 
-  const removeInterest = (item: any) => {
-    setInterests(interests.filter(i => i !== item));
+  const addInterest = () => {
+    if (interest.trim() && !interests.includes(interest)) {
+      if (interests.length < 5) {
+        setInterests([...interests, interest.trim()]);
+        setInterest('');
+      } else {
+        setError('Limit Reached, You can only add up to 5 interests.')
+      }
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      setLoading(true);
+      const { error } = await supabase
+        .from('users')
+        .update({ interest_list: interests })
+        .eq('id', session.user.id);
+
+      if (error) {
+        throw error;
+      } else {
+        markUpdated();
+        router.back();
+      }
+    } catch (error) {
+      setError('Failed to update interests. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const removeInterest = (interestToRemove: string) => {
+    setInterests(interests.filter((i) => i !== interestToRemove));
   };
 
   return (
@@ -32,20 +92,21 @@ export default function InterestsScreen() {
           <Text style={styles.addButtonText}>Add</Text>
         </TouchableOpacity>
       </View>
-
+      {error ? <Text style={styles.warningText}>{error}</Text> : null}
+      
       <View style={styles.interestsContainer}>
         {interests.map((item, index) => (
           <View key={index} style={styles.interestTag}>
             <Text style={styles.interestText}>{item}</Text>
             <TouchableOpacity onPress={() => removeInterest(item)}>
-              <Text style={styles.removeText}>✕</Text>
+              <X color={'#000000'} size={18}/>
             </TouchableOpacity>
           </View>
         ))}
       </View>
 
-      <TouchableOpacity style={styles.button} activeOpacity={0.9}>
-        <Text style={styles.buttonText}>Done</Text>
+      <TouchableOpacity style={styles.button} activeOpacity={0.9} onPress={handleSave} disabled={loading} >
+          {loading ? <ActivityIndicator size="small" color="#FFFFFF" /> : <Text style={Common.continueText}>Done</Text>}
       </TouchableOpacity>
     </View>
     </SafeAreaView>
@@ -94,6 +155,7 @@ const styles = StyleSheet.create({
   },
   interestTag: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#e0e0e0',
     borderRadius: 10,
@@ -112,7 +174,7 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: Colors.light.primary,
     paddingVertical: 16,
-    borderRadius: 6,
+    borderRadius: 25,
     alignItems: 'center',
     position: 'absolute',
     bottom: 20,
@@ -123,5 +185,11 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  warningText: {
+    fontSize: 14,
+    color: Colors.light.red,
+    lineHeight: 20,
+    marginVertical: 3,
   },
 });

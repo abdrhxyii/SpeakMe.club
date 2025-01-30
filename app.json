@@ -45,6 +45,16 @@
           "configureAndroidBackup": true,
           "faceIDPermission": "Allow SpeakMate to access your Face ID biometric data."
         }
+      ],
+      ["expo-localization"]
+      ,
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
       ]
     ],
     "experiments": {

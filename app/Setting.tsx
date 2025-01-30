@@ -1,38 +1,68 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Mail, Lock, UserX, HelpCircle, PencilLine } from 'lucide-react-native';
 import { supabase } from '@/libs/supabase';
 
 import Common from '@/constants/Common';
 import { Colors } from '@/constants/Colors';
-import Dialogbox from '@/components/Dialogbox';
+import { useUserStore } from '@/store/userStore';
 
 const SettingsScreen = () => {
-  const router = useRouter()
-  const [dialog, setDialog] = useState(false);
+  const router = useRouter();
+  const { setSession, setIsSignedIn, session } = useUserStore()
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [signedOut, setSignedOut] = useState(false); 
+  const [signedOut, setSignedOut] = useState(false);
 
   const handleSignOut = async () => {
-    setLoading(true);
-    const { error } = await supabase.auth.signOut();
-    setLoading(false);
-
-    if (error) {
-      setErrorMessage('An error occurred while signing out. Please try again...');
-      setDialog(false);
-      return;
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        setErrorMessage('An error occurred while signing out. Please try again...');
+        return;
+      }
+      console.log(session.user.id, "session.user.id from setting")
+      await markUserOffline(session.user.id);
+      setSession(null);
+      setIsSignedIn(null);
+      setSignedOut(true);
+    } catch (error) {
+      setErrorMessage('An unexpected error occurred while signing out. Please try again...');
+    } finally {
+      setLoading(false);
     }
+  };  
 
-    setDialog(false);
-    setSignedOut(true); 
+  const markUserOffline = async (userId: string) => {
+    await supabase
+      .from('users')
+      .update({ is_online: false, last_seen: new Date().toISOString() })
+      .eq('id', userId);
   };
 
-  if (signedOut) {
-      router.replace('/Authentication')
-  }
+  useEffect(() => {
+    if (signedOut) {
+      router.replace('/Authentication');
+    }
+  }, [signedOut, router]);
+
+  const showLogoutAlert = () => {
+    Alert.alert(
+      'Warning!',
+      'Are you sure you want to logout?',
+      [
+        {
+          text: 'No, Stay',
+          onPress: () => console.log('Logout canceled'),
+          style: 'cancel',
+        },
+        { text: 'Yes, Logout', onPress: handleSignOut },
+      ],
+      { cancelable: true }
+    );
+  };
 
   return (
     <SafeAreaView style={Common.container}>
@@ -74,28 +104,17 @@ const SettingsScreen = () => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={Common.dangerButton} onPress={() => setDialog(true)}>
+        <TouchableOpacity style={Common.dangerButton} onPress={showLogoutAlert}>
           <Text style={Common.dangerButtonText}>Log out</Text>
         </TouchableOpacity>
         <Text style={[Common.ErrorMessage, styles.errorMessage]}>{errorMessage}</Text>
       </ScrollView>
 
       {loading && (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={Colors.light.primary} />
+        <View style={[styles.loadingContainer, StyleSheet.absoluteFillObject]}>
+          <ActivityIndicator size={65} color={"#FFFFFF"} />
         </View>
       )}
-
-      <Dialogbox
-        visible={dialog}
-        onSave={handleSignOut}
-        onClose={() => setDialog(false)}
-        title="Warning!"
-        bodymessage="Are you sure you want to logout?"
-        status="warning"
-        warningPrimaryButtonText="Yes, Logout"
-        warningSecondaryButtonText="No, Stay"
-      />
     </SafeAreaView>
   );
 };
@@ -138,6 +157,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 1
   }
 });
 

@@ -1,51 +1,46 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Vibration, ScrollView } from "react-native";
+import React, { useEffect } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Vibration, ScrollView, Alert } from "react-native";
 
-import { useRouter } from "expo-router";
+import { useRouter, useNavigation } from "expo-router";
 
 import { Colors } from "@/constants/Colors";
 import Common from "@/constants/Common";
 import TextHeader from "@/components/TextHeader";
 
+import { useUserSelectionStore } from "@/store/onboardingUserSelection";
+import { goals } from "@/data/appData";
+
 const GoalSelection = () => {
-  const [selectedGoal, setSelectedGoal] = useState<number | null>(null);
-  const router = useRouter()
+  const { goalOfLearning, setGoalOfLearning } = useUserSelectionStore();
+  const router = useRouter();
+  const navigation = useNavigation()
 
-  const goals = [
-    {
-      id: 1,
-      emoji: "📝",
-      title: "Prepare for exams",
-      description: "I’m aiming to pass important English tests like IELTS or TOEFL for my studies or career.",
-    },
-    {
-      id: 2,
-      emoji: "💼",
-      title: "Advance my career",
-      description: "I aim to secure a better job, earn a promotion, or take on side projects, but my English skills are holding me back.",
-    },
-    {
-      id: 3,
-      emoji: "🤝",
-      title: "Connect with locals and natives",
-      description: "I want to build meaningful relationships with people in my community or abroad.",
-    },
-    {
-      id: 4,
-      emoji: "🌍",
-      title: "Travel confidently",
-      description: "I want to explore the world without language barriers holding me back.",
-    },
-  ];
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      if(e.data.action.type === "GO_BACK") {
+        e.preventDefault();
+      }
+    });
 
-  const handleSelection = (id: number) => {
-    setSelectedGoal(id);
+    return unsubscribe; 
+  }, [navigation]);
+
+  const handleSelection = (item: string) => {
+    setGoalOfLearning(item);
     Vibration.vibrate(30);
   };
 
   const handleNext = () => {
-    router.replace('/GenderSelection')
-  }
+    if (goalOfLearning) {
+      router.push("/GenderSelection"); 
+    } else {
+      Alert.alert(
+        "Goal Selection Required", 
+        "Please select a goal to proceed. Choose one that best aligns with your learning aspirations.", 
+        [{ text: "OK", style: "default" }]
+      ); 
+    }
+  };
 
   return (
     <SafeAreaView style={Common.container}>
@@ -60,9 +55,9 @@ const GoalSelection = () => {
               key={goal.id}
               style={[
                 styles.goalCard,
-                selectedGoal === goal.id && styles.selectedCard,
+                goalOfLearning === goal.title && styles.selectedCard,
               ]}
-              onPress={() => handleSelection(goal.id)}
+              onPress={() => handleSelection(goal.title)}
             >
               <Text style={styles.emoji}>{goal.emoji}</Text>
               <View style={styles.textContainer}>

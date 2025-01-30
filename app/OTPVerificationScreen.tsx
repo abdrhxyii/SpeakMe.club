@@ -5,22 +5,31 @@ import { useNavigation } from "expo-router";
 
 import Common from '@/constants/Common';
 import TextHeader from '@/components/TextHeader';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { supabase } from '@/libs/supabase';
+
+import { useUserSelectionStore } from "@/store/onboardingUserSelection";
+import { useUserStore } from '@/store/userStore';
 
 const OTPVerificationScreen = () => {
     const router = useRouter();
     const navigation = useNavigation();
 
-    const { email } = useLocalSearchParams();
-    const validEmail = Array.isArray(email) ? email[0] : email;
+    const { email, resetEmail } = useUserSelectionStore();
+    const { setSession } = useUserStore();
 
     const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+    const [startTime, setStartTime] = useState(Date.now());
     const [counter, setCounter] = useState(60);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    
+
     const inputRefs = useRef<TextInput[]>([]);
+
+    const handleRedirect = () => {
+        router.replace("/Authentication");
+        resetEmail();
+    };
 
     useEffect(() => {
         navigation.addListener("beforeRemove", (e) => {
@@ -34,7 +43,11 @@ const OTPVerificationScreen = () => {
                         {
                             text: "Yes",
                             style: "destructive",
-                            onPress: () => navigation.dispatch(e.data.action), 
+                            onPress: () => {
+                                setTimeout(() => {
+                                    handleRedirect();
+                                }, 200); 
+                            },
                         },
                     ]
                 );
@@ -43,11 +56,16 @@ const OTPVerificationScreen = () => {
     }, [navigation]);
 
     useEffect(() => {
-        if (counter > 0) {
-            const timer = setTimeout(() => setCounter(counter - 1), 1000);
-            return () => clearTimeout(timer);
-        }
-    }, [counter]);
+        const interval = setInterval(() => {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const newCounter = Math.max(60 - elapsed, 0);
+            setCounter(newCounter);
+
+            if (newCounter <= 0) clearInterval(interval);
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [startTime]);
 
     const handleChange = useCallback((text: string, index: number) => {
         const newOtp = [...otp];
@@ -69,7 +87,7 @@ const OTPVerificationScreen = () => {
         setLoading(true);
 
         const { data: { session }, error } = await supabase.auth.verifyOtp({
-            email: validEmail as string,
+            email: email,
             token: otpCode,
             type: 'signup',
         });
@@ -81,10 +99,10 @@ const OTPVerificationScreen = () => {
             return;
         }
         if (session) {
-            console.log(session, "session");
-            router.replace('/(tabs)/');
+            setSession(session)
+            router.replace('/GoalSelection');
         }
-    }, [otp, validEmail, router]);
+    }, [otp, email, router]);
 
     const resendOTP = useCallback(async () => {
         if (loading) return;
@@ -93,7 +111,7 @@ const OTPVerificationScreen = () => {
         try {
             const { error } = await supabase.auth.resend({
                 type: 'signup',
-                email: validEmail as string,
+                email: email,
             });
 
             if (error) {
@@ -101,6 +119,7 @@ const OTPVerificationScreen = () => {
                 return;
             }
 
+            setStartTime(Date.now()); 
             setCounter(60);
             Alert.alert('OTP Resent', 'A new OTP has been sent to your email.');
         } catch (error) {
@@ -108,7 +127,7 @@ const OTPVerificationScreen = () => {
         } finally {
             setLoading(false);
         }
-    }, [loading, validEmail]);
+    }, [loading, email]);
 
     useEffect(() => {
         if (otp.every(digit => digit !== "")) {
@@ -159,6 +178,7 @@ const OTPVerificationScreen = () => {
 };
 
 export default OTPVerificationScreen;
+
 
 const styles = StyleSheet.create({
     otpContainer: {

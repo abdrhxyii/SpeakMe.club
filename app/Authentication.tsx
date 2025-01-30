@@ -47,7 +47,7 @@ const Authentication = () => {
               styles.socialButton,
               pressed && { opacity: 0.8 },
             ]}
-            onPress={() => router.replace('/GoalSelection')}
+            onPress={() => promptAsync()}
           >
             <Image
               source={require('@/assets/images/google1.png')}
@@ -60,7 +60,7 @@ const Authentication = () => {
               styles.emailButton,
               pressed && { opacity: 0.8 },
             ]}
-            onPress={() => router.replace({pathname: '/EmailAuthScreen', params: {mode: 'signup'}})}
+            onPress={() => router.push({pathname: '/EmailAuthScreen', params: {mode: 'signup'}})}
           >
             <Mail size={20} color="#FFF" />
             <Text style={styles.emailButtonText}>Sign up with Email</Text>

@@ -3,11 +3,14 @@ import { View, Text, StyleSheet, Animated, TouchableOpacity, Modal, Image, Touch
 import { Colors } from '@/constants/Colors';
 import { PenLine } from 'lucide-react-native'; 
 import { useRouter } from 'expo-router';
+import { useProfileStore } from '@/store/profileStore';
 
-export default function ProfileHeader() {
+export default function ProfileHeader({user}: any) {
   const router = useRouter()
   const [modalVisible, setModalVisible] = useState(false);
   const scaleValue = useRef(new Animated.Value(0)).current;
+
+  const { profileImage } = useProfileStore()
 
   const handleImagePress = () => {
     setModalVisible(true);
@@ -26,22 +29,26 @@ export default function ProfileHeader() {
     }).start(() => setModalVisible(false));
   };
 
+  const image = profileImage ? { uri: profileImage } : require('@/assets/images/defaultuser.jpg')
+
   return (
     <View style={styles.header}>
       <View style={styles.profileContainer}>
         <TouchableOpacity onPress={handleImagePress}>
           <Image
-            source={require('@/assets/images/user.jpg')}
+            source={image}
             style={styles.profileImage}
           />
           <View style={styles.onlineDot}></View>
         </TouchableOpacity>
       </View>
+      
       <View style={styles.headerTextContainer}>
         <View style={styles.nameContainer}>
-          <Text style={styles.headerTitle}>Abdur Rahman</Text>
-            <Pressable onPress={() => router.push('/EditProfile')}>
-              <PenLine color={Colors.light.primary} size={22} style={styles.editIcon} />
+          <Text style={styles.headerTitle}>{user.display_name ? (user.display_name.length > 14 ? `${user.display_name.slice(0, 14)}...` : user.display_name) : ""}</Text>
+            <Pressable style={styles.editIconContainer} onPress={() => router.push('/EditProfile')}>
+               <Text style={styles.editIconText}>Edit</Text>
+               <PenLine color={'#FFFFFF'} size={15} />
             </Pressable>
         </View>
         <View style={styles.detailsContainer}>
@@ -70,7 +77,7 @@ export default function ProfileHeader() {
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.fullScreenImageContainer, { transform: [{ scale: scaleValue }] }]}>
               <Image
-                source={require('@/assets/images/user.jpg')}
+                source={image}
                 style={styles.fullScreenImage}
               />
             </Animated.View>
@@ -86,7 +93,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#ffffff',
-    paddingBottom: 20,
+    paddingBottom: 8,
   },
   headerTextContainer: {
     flex: 1,
@@ -97,11 +104,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 30,
+    fontSize: 25,
     fontWeight: '700',
   },
-  editIcon: {
+  editIconContainer: {
     marginLeft: 10, 
+    backgroundColor: '#000000',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 25,
+    flexDirection: 'row', 
+    alignItems: 'center',
+  },
+  editIconText: {
+    fontSize: 13,
+    color: '#FFFFFF',
+    marginRight: 5
   },
   profileImage: {
     width: 65,
@@ -117,8 +135,10 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: Colors.light.online,
-    borderRadius: 8,
+    borderRadius: 50,
     padding: 8,
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
   },
   detailsContainer: {
     flexDirection: 'row',
@@ -129,7 +149,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   detailLabel: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#888',
     fontWeight: '600',
   },

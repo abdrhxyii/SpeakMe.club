@@ -1,123 +1,23 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { View, Text, FlatList, Image, Pressable, SafeAreaView, StyleSheet, Vibration, TouchableOpacity } from 'react-native';
 import { PhoneCall, Search } from 'lucide-react-native';
 import Common from '@/constants/Common';
 import { Colors } from '@/constants/Colors';
 import { Link } from 'expo-router';
+import { data } from '@/data/appData';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import PartnerFinderModal from '@/components/BottomSheets/PartnerFinderModal';
 
 export default function HomeScreen() {
-  const data = [
-    {
-      id: '1',
-      name: 'Alexander horendas',
-      status: 'offline',
-      country: 'Iran',
-      talks: 17,
-      percentage: 100,
-      gender: 'Male',
-      profileImg: require('@/assets/images/user.jpg'),
-    },
-    {
-      id: '2',
-      name: 'rashi',
-      status: 'online',
-      country: 'Saudi Arabia',
-      talks: 187,
-      percentage: 100,
-      gender: 'Male',
-      profileImg: require('@/assets/images/user.jpg'),
-    },
-    {
-      id: '3',
-      name: 'Alexander horendas',
-      status: 'offline',
-      country: 'Iran',
-      talks: 17,
-      percentage: 100,
-      gender: 'Male',
-      profileImg: require('@/assets/images/user.jpg'),
-    },
-    {
-      id: '4',
-      name: 'rashi',
-      status: 'online',
-      country: 'Saudi Arabia',
-      talks: 187,
-      percentage: 100,
-      gender: 'Male',
-      profileImg: require('@/assets/images/user.jpg'),
-    },
-    {
-      id: '5',
-      name: 'Alexander horendas',
-      status: 'offline',
-      country: 'Iran',
-      talks: 17,
-      percentage: 100,
-      gender: 'Male',
-      profileImg: require('@/assets/images/user.jpg'),
-    },
-    {
-      id: '6',
-      name: 'rashi',
-      status: 'online',
-      country: 'Saudi Arabia',
-      talks: 187,
-      percentage: 100,
-      gender: 'Male',
-      profileImg: require('@/assets/images/user.jpg'),
-    },
-    {
-      id: '7',
-      name: 'Alexander horendas',
-      status: 'offline',
-      country: 'Iran',
-      talks: 17,
-      percentage: 100,
-      gender: 'Male',
-      profileImg: require('@/assets/images/user.jpg'),
-    },
-    {
-      id: '8',
-      name: 'rashi',
-      status: 'online',
-      country: 'Saudi Arabia',
-      talks: 187,
-      percentage: 100,
-      gender: 'Male',
-      profileImg: require('@/assets/images/user.jpg'),
-    },
-    {
-      id: '9',
-      name: 'Alexander horendas',
-      status: 'offline',
-      country: 'Iran',
-      talks: 17,
-      percentage: 100,
-      gender: 'Male',
-      profileImg: require('@/assets/images/user.jpg'),
-    },
-    {
-      id: '10',
-      name: 'rashi',
-      status: 'online',
-      country: 'Saudi Arabia',
-      talks: 187,
-      percentage: 100,
-      gender: 'Male',
-      profileImg: require('@/assets/images/user.jpg'),
-    },
-    {
-      id: '11',
-      name: 'Alexander horendas',
-      status: 'offline',
-      country: 'Iran',
-      talks: 17,
-      percentage: 100,
-      gender: 'Male',
-      profileImg: require('@/assets/images/user.jpg'),
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+
+  const openPartnerFinderModal = () => {
+    if (bottomSheetModalRef.current) {
+      bottomSheetModalRef.current.present();
+    } else {
+      console.error('BottomSheetModalRef is null');
     }
-  ];
+  };
 
   const handleCall = () => {
     Vibration.vibrate(20); 
@@ -149,6 +49,7 @@ export default function HomeScreen() {
   );
 
   return (
+    <>
     <SafeAreaView style={Common.container}>
       <FlatList
         data={data}
@@ -156,11 +57,13 @@ export default function HomeScreen() {
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
       />
-      <TouchableOpacity style={styles.perfectPartnerButton} activeOpacity={0.9}>
+      <TouchableOpacity style={styles.perfectPartnerButton} activeOpacity={0.9} onPress={openPartnerFinderModal}>
         <Search color="white" size={25} />
         <Text style={styles.buttonText}>Find a perfect partner</Text>
       </TouchableOpacity>
     </SafeAreaView>
+    <PartnerFinderModal ref={bottomSheetModalRef} />
+    </>
   );
 }
 
