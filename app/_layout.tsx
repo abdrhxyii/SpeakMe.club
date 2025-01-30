@@ -73,7 +73,7 @@ export default function RootLayout() {
               
               <Stack.Screen name="Authentication" options={{ headerShown: false, animation: 'fade', navigationBarColor: '#E8f5E3' }} />
               <Stack.Screen name="EmailAuthScreen" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center' }} />
-              <Stack.Screen name="PasswordAuthScreen" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center', animation: 'slide_from_right'}}/>
+              <Stack.Screen name="PasswordAuthScreen" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center'}}/>
               <Stack.Screen name="OTPVerificationScreen" options={{ headerShown: true, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center', headerBackVisible: false }} />
               <Stack.Screen name="index" options={{ headerShown: false }} />
               <Stack.Screen name="Welcome" options={{ headerShown: false, headerTitle: '', headerTintColor: '#000', headerTitleAlign: 'center', headerBackVisible: false, statusBarColor: '#FFD8B1' }} />

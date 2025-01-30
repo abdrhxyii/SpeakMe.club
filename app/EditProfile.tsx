@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, Pressable, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { User, MessageSquare, Globe, Languages, List, Camera, ChevronRight, UserRoundPen } from 'lucide-react-native';
 import Common from '@/constants/Common';
@@ -8,7 +8,13 @@ import { useUserStore } from '@/store/userStore';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { supabase } from '@/libs/supabase';
 import { UserData } from '@/interfaces';
+
 import { refreshStore } from '@/store/refreshStore';
+import { useProfileStore } from '@/store/profileStore';
+
+import uploadProfileImage from '@/utils/uploadProfileImage';
+import { baseUrl } from '@/utils/BaseUrl';
+import axios from 'axios';
 
 const EditProfile = () => {
   const router = useRouter();
@@ -18,7 +24,11 @@ const EditProfile = () => {
   
   const [loading, setLoading] = useState<boolean>(false);
   const [userData, setUserData] = useState<UserData | null>(null);
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const { profileImage, refreshImage, setProfileImage, setRefreshImage } = useProfileStore();
+
+  const memoizedImageSource = useMemo(() => {
+    return profileImage ? { uri: profileImage } : require('@/assets/images/defaultuser.jpg');
+  }, [profileImage]);
 
   const openImagePicker = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -36,12 +46,52 @@ const EditProfile = () => {
 
     if (!result.canceled) {
       setProfileImage(result.assets[0].uri);
+      await handleImageUpload(result.assets[0].uri);
     }
   };
 
   useEffect(() => {
+    if (!profileImage) {
+      fetchProfileImage();
+    }
+  }, [profileImage]);
+
+  useEffect(() => {
     fetchUserData();
   }, []);
+
+  const fetchProfileImage = async () => {
+    if (!session) return;
+    try {
+      const response = await axios.get(`${baseUrl}/profile/get-profile-pic/${session.user.id}`);
+      console.log(response.data.imageUrl, "Image taken from EditProfile")
+      setProfileImage(response.data.imageUrl);
+    } catch (error: any) {
+      if (error.response) {
+        setProfileImage(null); 
+        console.log("no profile image for this user")
+      } else {
+        console.log("An error occurred while fetching the profile picture.")
+      }
+    }
+  };
+
+  const handleImageUpload = async (imageUri: string) => {
+    if (imageUri) {
+      setLoading(true);
+      try {
+        await uploadProfileImage(imageUri, session.user.id);
+        await fetchProfileImage();
+        setRefreshImage(true);
+      } catch (error) {
+        console.log('Error uploading image:', error);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      console.log('No image selected');
+    }
+  };
 
   const fetchUserData = async () => {
     if (!session) return;
@@ -59,7 +109,7 @@ const EditProfile = () => {
         setUserData(data);
       }
     } catch (err) {
-      console.error('Error fetching user data', err);
+      console.log('Error fetching user data', err);
     } finally {
       setLoading(false);
       resetUpdated();
@@ -85,18 +135,17 @@ const EditProfile = () => {
       <View style={Common.content}>
       <View style={styles.profileContainer}>
         <TouchableOpacity style={styles.profileImage} onPress={openImagePicker}>
-          {profileImage ? (
-            <Image source={{ uri: profileImage }} style={styles.profileImage} />
-          ) : (
-            <Text style={styles.profileInitial}>{userData?.email.split('')[0] || "A"}</Text>
-          )}
+          <Image
+              source={memoizedImageSource}
+              style={styles.profileImage}
+          />
           <View style={styles.cameraIconContainer}>
             <Camera color={Colors.light.primary} size={20} />
           </View>
         </TouchableOpacity>
       </View>
 
-        <Pressable style={styles.itemContainer} onPress={() => router.push('/NameScreen')}>
+      <Pressable style={styles.itemContainer} onPress={() => router.push('/NameScreen')}>
           <UserRoundPen color={Colors.light.primary} size={24} />
           <View style={styles.textContainer}>
             <Text style={styles.itemTitle}>Name</Text>
@@ -173,7 +222,6 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: '#7B4CD9',
     alignItems: 'center',
     justifyContent: 'center',
   },

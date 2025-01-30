@@ -12,6 +12,14 @@ export interface UserState {
     setSession: (session: any) => void;
 }
 
+export interface ProfileState {
+    profileImage: string | null;
+    refreshImage: boolean;
+    setProfileImage: (imageUri: string | null) => void;
+    setRefreshImage: (refresh: boolean) => void;
+    resetProfileImage: () => void;
+}
+
 export interface UserData {
     display_name: string;
     email: string;

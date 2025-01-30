@@ -11,13 +11,15 @@ import { refreshStore } from '@/store/refreshStore';
 
 import { CommonActions } from '@react-navigation/native';
 import { supabase } from '@/libs/supabase';
-import { englishLevels } from '@/data/appData'
+import { englishLevels } from '@/data/appData';
+import { getCountry } from '@/utils/getCountry';
 
 export default function EnglishLevel() {
   const route = useRouter();
   const navigation = useNavigation();
   const { mode } = useLocalSearchParams();
-
+  const country = getCountry();
+  
   const { session } = useUserStore();
   const { markUpdated } = refreshStore();
   const {email, languageFluencyLevel, setLanguageFluencyLevel, resetLanguageFluencyLevel, goalOfLearning, nativeLanguage, gender, reset } = useUserSelectionStore();
@@ -90,6 +92,7 @@ export default function EnglishLevel() {
           goal_of_learning: goalOfLearning,
           native_language: nativeLanguage,
           gender: gender,
+          country: country
         })
         .eq('id', session.user.id);
   
@@ -128,6 +131,11 @@ export default function EnglishLevel() {
       }
   
       await updateOnboardingData();
+
+      await supabase
+        .from('users')
+        .upsert({ is_online: true, last_seen: new Date().toISOString() })
+        .eq('id', session.user.id);
   
       navigation.dispatch(
         CommonActions.reset({

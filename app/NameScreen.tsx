@@ -12,31 +12,35 @@ export default function NameScreen() {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [screenLoading, setScreenLoading] = useState(false);
 
   const { session } = useUserStore();
   const { markUpdated } = refreshStore();
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (!session) return;
-      try {
-        const { data, error } = await supabase
-          .from('users')
-          .select('display_name')
-          .eq('id', session.user.id) 
-          .single();
-        if (error) {
-          setError(error.message);
-        } else {
-          setName(data.display_name);
-        }
+  const fetchUserData = async () => {
+    if (!session) return;
+    setScreenLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('display_name')
+        .eq('id', session.user.id) 
+        .single();
+      if (error) {
+        setError(error.message);
+      } else {
+        setName(data.display_name);
+      }
 
-      } catch (error: any) {
-        setError(error.message || "An unexpected error occurred.");
-      } 
+    } catch (error: any) {
+      setError(error.message || "An unexpected error occurred.");
+    }  finally {
+      setScreenLoading(false)
     }
-    fetchUserData();
+  }
 
+  useEffect(() => {
+    fetchUserData();
   }, [session?.user?.id])
 
   const handleNameUpdate = async () => {
@@ -71,8 +75,13 @@ export default function NameScreen() {
       setLoading(false);
     }
   };
-  
 
+  if (screenLoading) return (
+    <View style={Common.loaderContainer}>
+      <ActivityIndicator size={65} color={'#000000'}/>
+    </View>
+  );
+  
   return (
     <SafeAreaView style={Common.container}>
       <View style={Common.content}>

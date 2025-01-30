@@ -10,7 +10,7 @@ import { useUserStore } from '@/store/userStore';
 
 const SettingsScreen = () => {
   const router = useRouter();
-  const { setSession, setIsSignedIn } = useUserStore()
+  const { setSession, setIsSignedIn, session } = useUserStore()
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [signedOut, setSignedOut] = useState(false);
@@ -23,6 +23,8 @@ const SettingsScreen = () => {
         setErrorMessage('An error occurred while signing out. Please try again...');
         return;
       }
+      console.log(session.user.id, "session.user.id from setting")
+      await markUserOffline(session.user.id);
       setSession(null);
       setIsSignedIn(null);
       setSignedOut(true);
@@ -32,6 +34,13 @@ const SettingsScreen = () => {
       setLoading(false);
     }
   };  
+
+  const markUserOffline = async (userId: string) => {
+    await supabase
+      .from('users')
+      .update({ is_online: false, last_seen: new Date().toISOString() })
+      .eq('id', userId);
+  };
 
   useEffect(() => {
     if (signedOut) {

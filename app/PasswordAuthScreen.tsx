@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, Alert, TextInput, StyleSheet, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
 
 import { Eye, EyeOff, CheckCircle } from 'lucide-react-native';
-import { useRouter, useLocalSearchParams, useNavigation } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 
 import { supabase } from '@/libs/supabase';
 import { checkIfEmailExists } from '@/utils/authUtils';
@@ -12,7 +12,6 @@ import Common from '@/constants/Common';
 import { object, string } from 'yup';
 
 import { useUserSelectionStore } from "@/store/onboardingUserSelection";
-import { CommonActions } from '@react-navigation/native';
 import { useUserStore } from '@/store/userStore';
 
 const passwordValidationSchema = object().shape({
@@ -26,7 +25,6 @@ const passwordValidationSchema = object().shape({
 
 export default function PasswordAuthScreen() {
     const router = useRouter();
-    const navigation = useNavigation();
     const { email } = useUserSelectionStore();
     const { mode } = useLocalSearchParams();
     const { setSession } = useUserStore();
@@ -84,11 +82,12 @@ export default function PasswordAuthScreen() {
 
                 if (data) {
                     setSession(data.session);
-                    navigation.dispatch(
-                        CommonActions.reset({
-                            routes: [{ key: "(tabs)", name: "(tabs)" }],
-                        })
-                    );
+                    await supabase
+                    .from('users')
+                    .update({ is_online: true, last_seen: new Date().toISOString() })
+                    .eq('id', data.session.user.id);
+                    router.dismissAll();
+                    router.replace('/(tabs)/')
                 }
             } else if (mode === 'signup') {
                 const emailExists = await checkIfEmailExists(email.trim());

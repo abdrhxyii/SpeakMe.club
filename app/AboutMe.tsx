@@ -46,7 +46,6 @@ export default function AboutMe() {
   const handleSave = async () => {
     try {
       setLoading(true);
-
       const { error } = await supabase
         .from('users')
         .upsert({

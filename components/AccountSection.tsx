@@ -2,10 +2,8 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Languages, Globe, MapPin, User } from 'lucide-react-native';
 import React from 'react';
 import { Colors } from '@/constants/Colors';
-import { getCountry } from '@/utils/getCountry';
 
 export default function AccountSection({ user }: any) {
-  const country = getCountry();
   return (
     <View style={styles.infoContainer}>
       <View style={styles.infoItem}>
@@ -44,7 +42,7 @@ export default function AccountSection({ user }: any) {
         </View>
         <View style={styles.infoTextContainer}>
           <Text style={styles.label}>Location</Text>
-          <Text style={styles.value}>{country}</Text>
+          <Text style={styles.value}>{user.country}</Text>
         </View>
       </View>
     </View>

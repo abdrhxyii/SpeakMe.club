@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState, useMemo } from 'react';
+import React, { useCallback, useRef, useState, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -45,7 +45,7 @@ export default function Account() {
     if (bottomSheetModalRef.current) {
       bottomSheetModalRef.current.present();
     } else {
-      console.error('BottomSheetModalRef is null');
+      console.log('BottomSheetModalRef is null');
     }
   };
 
@@ -62,34 +62,52 @@ export default function Account() {
     [navigation, showHeaderTitle, scrollThreshold]
   );
 
+  const fetchOnlineUsers = async () => {
+    const { data, error } = await supabase
+      .from('users')
+      .select('display_name') 
+      .eq('is_online', true);
+  
+    if (error) {
+      console.error('Error fetching online users:', error);
+      return;
+    }
+  
+    console.log('Online users from account screen:', data);
+    return data;
+  };
+
+  const fetchUserData = async () => {
+    if (!session) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('users') 
+        .select('*')
+        .eq('id', session.user.id) 
+        .single();
+
+      if (error) {
+        console.error(error.message);
+      } else {
+        setUserData(data);
+      }
+    } catch (err) {
+      console.error('Error fetching user data', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
-      const fetchUserData = async () => {
-        console.log("called")
-        if (!session) return;
-  
-        try {
-          const { data, error } = await supabase
-            .from('users') 
-            .select('*')
-            .eq('id', session.user.id) 
-            .single();
-  
-          if (error) {
-            console.error(error.message);
-          } else {
-            setUserData(data);
-          }
-        } catch (err) {
-          console.error('Error fetching user data', err);
-        } finally {
-          setLoading(false);
-        }
-      };
-  
       fetchUserData();
     }, [session?.user?.id])
   );
+
+  useEffect(() => {
+    fetchOnlineUsers();
+  }, [])
 
   const ReviewItem = useCallback(({ review }: any) => (
     <View style={styles.reviewContainer}>
@@ -130,7 +148,9 @@ export default function Account() {
           scrollEventThrottle={16}
         >
           <ProfileHeader user={userData}/>
-          <Text style={styles.bio}>i'm software engineer based in london, england. I'm practicing english</Text>
+          { userData?.about_me === null ? 
+            null : <Text style={styles.bio}>{userData?.about_me}</Text>
+          }
           <ActionButton/>
           
           <Text style={Common.profileContentTitle}>Personal Information</Text>
