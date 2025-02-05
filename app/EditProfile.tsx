@@ -51,10 +51,11 @@ const EditProfile = () => {
   };
 
   useEffect(() => {
-    if (!profileImage) {
+    // if(refreshImage) {
       fetchProfileImage();
-    }
-  }, [profileImage]);
+      // setRefreshImage(false)
+    // }
+  }, []);
 
   useEffect(() => {
     fetchUserData();
@@ -81,7 +82,6 @@ const EditProfile = () => {
       setLoading(true);
       try {
         await uploadProfileImage(imageUri, session.user.id);
-        await fetchProfileImage();
         setRefreshImage(true);
       } catch (error) {
         console.log('Error uploading image:', error);
@@ -136,7 +136,7 @@ const EditProfile = () => {
       <View style={styles.profileContainer}>
         <TouchableOpacity style={styles.profileImage} onPress={openImagePicker}>
           <Image
-              source={memoizedImageSource}
+              source={profileImage ? { uri: profileImage } : require('@/assets/images/defaultuser.jpg')}
               style={styles.profileImage}
           />
           <View style={styles.cameraIconContainer}>

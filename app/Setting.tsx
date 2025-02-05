@@ -23,7 +23,6 @@ const SettingsScreen = () => {
         setErrorMessage('An error occurred while signing out. Please try again...');
         return;
       }
-      console.log(session.user.id, "session.user.id from setting")
       await markUserOffline(session.user.id);
       setSession(null);
       setIsSignedIn(null);

@@ -62,21 +62,6 @@ export default function Account() {
     [navigation, showHeaderTitle, scrollThreshold]
   );
 
-  const fetchOnlineUsers = async () => {
-    const { data, error } = await supabase
-      .from('users')
-      .select('display_name') 
-      .eq('is_online', true);
-  
-    if (error) {
-      console.error('Error fetching online users:', error);
-      return;
-    }
-  
-    console.log('Online users from account screen:', data);
-    return data;
-  };
-
   const fetchUserData = async () => {
     if (!session) return;
 
@@ -104,10 +89,6 @@ export default function Account() {
       fetchUserData();
     }, [session?.user?.id])
   );
-
-  useEffect(() => {
-    fetchOnlineUsers();
-  }, [])
 
   const ReviewItem = useCallback(({ review }: any) => (
     <View style={styles.reviewContainer}>

@@ -131,11 +131,6 @@ export default function EnglishLevel() {
       }
   
       await updateOnboardingData();
-
-      await supabase
-        .from('users')
-        .upsert({ is_online: true, last_seen: new Date().toISOString() })
-        .eq('id', session.user.id);
   
       navigation.dispatch(
         CommonActions.reset({
