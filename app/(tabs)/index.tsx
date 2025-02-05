@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, Text, FlatList, Image, Pressable, SafeAreaView, StyleSheet, Vibration, TouchableOpacity } from 'react-native';
 import { PhoneCall, Search } from 'lucide-react-native';
 import Common from '@/constants/Common';
@@ -7,9 +7,16 @@ import { Link } from 'expo-router';
 import { data } from '@/data/appData';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import PartnerFinderModal from '@/components/BottomSheets/PartnerFinderModal';
+import usePresence from '@/hooks/usePresence';
 
 export default function HomeScreen() {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const { isOnline } = usePresence();
+  console.log(isOnline, "isOnline")
+
+  useEffect(() => {
+    console.log("User online status:", isOnline);
+  }, [isOnline])
 
   const openPartnerFinderModal = () => {
     if (bottomSheetModalRef.current) {

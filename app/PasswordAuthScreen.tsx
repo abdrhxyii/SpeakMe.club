@@ -13,6 +13,9 @@ import { object, string } from 'yup';
 
 import { useUserSelectionStore } from "@/store/onboardingUserSelection";
 import { useUserStore } from '@/store/userStore';
+import { baseUrl } from '@/utils/BaseUrl';
+import axios from 'axios';
+import retryRequest from '@/utils/retryRequest';
 
 const passwordValidationSchema = object().shape({
     password: string()
@@ -67,55 +70,83 @@ export default function PasswordAuthScreen() {
     const continueAuthentication = async () => {
         if (loading) return;
         setLoading(true);
-
+    
         try {
             if (mode === 'login') {
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email: email.trim(),
-                    password: password.trim(),
-                });
-
-                if (error) {
-                    setError(error.message);
-                    return;
-                }
-
-                if (data) {
-                    setSession(data.session);
-                    await supabase
-                    .from('users')
-                    .update({ is_online: true, last_seen: new Date().toISOString() })
-                    .eq('id', data.session.user.id);
-                    router.dismissAll();
-                    router.replace('/(tabs)/')
-                }
+                await handleLogin();
             } else if (mode === 'signup') {
-                const emailExists = await checkIfEmailExists(email.trim());
-
-                if (emailExists) {
-                    setError('An account with this email already exists. Please log in instead.');
-                    return;
-                }
-
-                const { data, error: signupError } = await supabase.auth.signUp({
-                    email: email.trim(),
-                    password: password.trim(),
-                });
-
-                if (signupError) {
-                    setError(signupError.message);
-                    return;
-                }
-
-                if (data && data.user) {
-                    router.replace('/OTPVerificationScreen');
-                }
+                await handleSignup();
             }
         } catch (err) {
             console.log(err, 'err');
             Alert.alert('An unexpected error occurred');
         } finally {
             setLoading(false);
+        }
+    };
+    
+    const handleLogin = async () => {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: email.trim(),
+            password: password.trim(),
+        });
+    
+        if (error) {
+            if (error.message === 'Email not confirmed') {
+                router.replace({
+                    pathname: "/OTPVerificationScreen",
+                    params: { resend: "true", emailto: email.trim() },
+                });
+            }
+            setError(error.message);
+            return;
+        }
+    
+        if (data) {
+            setSession(data.session);
+            router.dismissAll();
+            router.replace('/(tabs)/');
+        }
+    };
+    
+    const handleSignup = async () => {
+        const emailExists = await checkIfEmailExists(email.trim());
+    
+        if (emailExists) {
+            setError('An account with this email already exists. Please log in instead.');
+            return;
+        }
+    
+        const { data, error: signupError } = await supabase.auth.signUp({
+            email: email.trim(),
+            password: password.trim(),
+        });
+    
+        const userId = data?.user?.id;
+        console.log(userId, "userId");
+    
+        if (!userId) {
+            setError('Please check your internet connection, Try again');
+            return;
+        }
+    
+        try {
+            await retryRequest(`${baseUrl}/user/`, {
+                id: userId,
+                email: email.trim(),
+            });
+        } catch (err) {
+            setError('Failed to create user on backend. Please try again later.');
+            return;
+        }
+    
+        if (signupError) {
+            setError(signupError.message);
+            return;
+        }
+    
+        if (data && data.user) {
+            router.replace('/OTPVerificationScreen');
         }
     };
 

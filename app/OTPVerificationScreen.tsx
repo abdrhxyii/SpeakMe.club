@@ -10,10 +10,12 @@ import { supabase } from '@/libs/supabase';
 
 import { useUserSelectionStore } from "@/store/onboardingUserSelection";
 import { useUserStore } from '@/store/userStore';
+import { useLocalSearchParams } from 'expo-router';
 
 const OTPVerificationScreen = () => {
     const router = useRouter();
     const navigation = useNavigation();
+    const { resend, emailto } = useLocalSearchParams();
 
     const { email, resetEmail } = useUserSelectionStore();
     const { setSession } = useUserStore();
@@ -30,6 +32,12 @@ const OTPVerificationScreen = () => {
         router.replace("/Authentication");
         resetEmail();
     };
+
+    useEffect(() => {
+        if (resend === "true" && emailto) {
+            resendOTP(emailto);
+        }
+    }, [resend, emailto]);    
 
     useEffect(() => {
         navigation.addListener("beforeRemove", (e) => {
@@ -100,11 +108,12 @@ const OTPVerificationScreen = () => {
         }
         if (session) {
             setSession(session)
+            // router.dismissAll();
             router.replace('/GoalSelection');
         }
     }, [otp, email, router]);
 
-    const resendOTP = useCallback(async () => {
+    const resendOTP = useCallback(async (email: any) => {
         if (loading) return;
         setLoading(true);
 
@@ -166,7 +175,7 @@ const OTPVerificationScreen = () => {
                     ) : (
                         <Text style={styles.terms}>
                             Email not received?{" "}
-                            <TouchableOpacity onPress={resendOTP}>
+                            <TouchableOpacity onPress={() => resendOTP(email)}>
                                 <Text style={styles.link}>Resend code</Text>
                             </TouchableOpacity>
                         </Text>

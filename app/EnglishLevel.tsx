@@ -22,7 +22,7 @@ export default function EnglishLevel() {
   
   const { session } = useUserStore();
   const { markUpdated } = refreshStore();
-  const {email, languageFluencyLevel, setLanguageFluencyLevel, resetLanguageFluencyLevel, goalOfLearning, nativeLanguage, gender, reset } = useUserSelectionStore();
+  const {languageFluencyLevel, setLanguageFluencyLevel, resetLanguageFluencyLevel, goalOfLearning, nativeLanguage, gender, reset } = useUserSelectionStore();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -88,7 +88,7 @@ export default function EnglishLevel() {
       const { error: updateError } = await supabase
         .from('users')
         .update({
-          display_name: email.split("@")[0],
+          display_name: session?.user?.email.split("@")[0],
           goal_of_learning: goalOfLearning,
           native_language: nativeLanguage,
           gender: gender,

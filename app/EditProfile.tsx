@@ -51,10 +51,10 @@ const EditProfile = () => {
   };
 
   useEffect(() => {
-    // if(refreshImage) {
+    if(refreshImage) {
       fetchProfileImage();
-      // setRefreshImage(false)
-    // }
+      setRefreshImage(false)
+    }
   }, []);
 
   useEffect(() => {
