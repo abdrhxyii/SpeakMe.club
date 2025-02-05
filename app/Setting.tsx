@@ -1,0 +1,163 @@
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Mail, Lock, UserX, HelpCircle, PencilLine } from 'lucide-react-native';
+import { supabase } from '@/libs/supabase';
+
+import Common from '@/constants/Common';
+import { Colors } from '@/constants/Colors';
+import { useUserStore } from '@/store/userStore';
+
+const SettingsScreen = () => {
+  const router = useRouter();
+  const { setSession, setIsSignedIn, session } = useUserStore()
+  const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [signedOut, setSignedOut] = useState(false);
+
+  const handleSignOut = async () => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        setErrorMessage('An error occurred while signing out. Please try again...');
+        return;
+      }
+      await markUserOffline(session.user.id);
+      setSession(null);
+      setIsSignedIn(null);
+      setSignedOut(true);
+    } catch (error) {
+      setErrorMessage('An unexpected error occurred while signing out. Please try again...');
+    } finally {
+      setLoading(false);
+    }
+  };  
+
+  const markUserOffline = async (userId: string) => {
+    await supabase
+      .from('users')
+      .update({ is_online: false, last_seen: new Date().toISOString() })
+      .eq('id', userId);
+  };
+
+  useEffect(() => {
+    if (signedOut) {
+      router.replace('/Authentication');
+    }
+  }, [signedOut, router]);
+
+  const showLogoutAlert = () => {
+    Alert.alert(
+      'Warning!',
+      'Are you sure you want to logout?',
+      [
+        {
+          text: 'No, Stay',
+          onPress: () => console.log('Logout canceled'),
+          style: 'cancel',
+        },
+        { text: 'Yes, Logout', onPress: handleSignOut },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  return (
+    <SafeAreaView style={Common.container}>
+      <ScrollView style={Common.content}>
+        <View style={styles.row}>
+          <Mail color={Colors.light.primary} size={24} />
+          <View style={styles.rowTextContainer}>
+            <Text style={styles.title}>Change email</Text>
+            <Text style={styles.subtitle}>abdurrahmanx33@gmail.com</Text>
+          </View>
+        </View>
+
+        <TouchableOpacity style={styles.row}>
+          <Lock color={Colors.light.primary} size={24} />
+          <View style={styles.rowTextContainer}>
+            <Text style={styles.title}>Create password</Text>
+            <Text style={styles.warningText}>You don't have a password, it's insecure</Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.row}>
+          <PencilLine color={Colors.light.primary} size={24} />
+          <View style={styles.rowTextContainer}>
+            <Text style={styles.title}>Give us feedback</Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.row}>
+          <UserX color={Colors.light.primary} size={24} />
+          <View style={styles.rowTextContainer}>
+            <Text style={styles.title}>Delete account</Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.row}>
+          <HelpCircle color={Colors.light.primary} size={24} />
+          <View style={styles.rowTextContainer}>
+            <Text style={styles.title}>FAQ</Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={Common.dangerButton} onPress={showLogoutAlert}>
+          <Text style={Common.dangerButtonText}>Log out</Text>
+        </TouchableOpacity>
+        <Text style={[Common.ErrorMessage, styles.errorMessage]}>{errorMessage}</Text>
+      </ScrollView>
+
+      {loading && (
+        <View style={[styles.loadingContainer, StyleSheet.absoluteFillObject]}>
+          <ActivityIndicator size={65} color={"#FFFFFF"} />
+        </View>
+      )}
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  rowTextContainer: {
+    flex: 1,
+    marginLeft: 15,
+  },
+  title: {
+    fontSize: 16,
+    color: '#000000',
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#828282',
+  },
+  warningText: {
+    fontSize: 14,
+    color: Colors.light.danger,
+  },
+  errorMessage: {
+    textAlign: 'center',
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  loadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1
+  }
+});
+
+export default SettingsScreen;

@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "English",
-    "slug": "English",
+    "name": "SpeakMate",
+    "slug": "speakmate",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "com.speakmate",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -14,14 +14,17 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.abdrhxyii.English"
+      "bundleIdentifier": "com.abdrhxyii.speakmate",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.abdrhxyii.English"
+      "package": "com.abdrhxyii.speakmate"
     },
     "web": {
       "bundler": "metro",
@@ -30,7 +33,29 @@
     },
     "plugins": [
       "expo-router",
-      "expo-font"
+      [
+        "expo-dev-launcher",
+        {
+          "launchMode": "most-recent"
+        }
+      ],
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": true,
+          "faceIDPermission": "Allow SpeakMate to access your Face ID biometric data."
+        }
+      ],
+      ["expo-localization"]
+      ,
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
@@ -40,7 +65,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "bbfc832b-ccd3-4a49-8e85-8c71ec3f93b6"
+        "projectId": "d0bc1e2b-30d4-415e-a21b-84f61a57edbf"
       }
     }
   }

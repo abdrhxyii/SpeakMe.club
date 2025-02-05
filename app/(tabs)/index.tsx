@@ -1,141 +1,62 @@
-import React, {useRef} from 'react';
-import { View, Text, FlatList, Image, TouchableOpacity, SafeAreaView, StyleSheet, Animated } from 'react-native';
-import { RefreshCw, PhoneCall, Search } from 'lucide-react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, FlatList, Image, Pressable, SafeAreaView, StyleSheet, Vibration, TouchableOpacity } from 'react-native';
+import { PhoneCall, Search } from 'lucide-react-native';
 import Common from '@/constants/Common';
 import { Colors } from '@/constants/Colors';
+import { Link } from 'expo-router';
+import { data } from '@/data/appData';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import PartnerFinderModal from '@/components/BottomSheets/PartnerFinderModal';
+import usePresence from '@/hooks/usePresence';
 
 export default function HomeScreen() {
-  const data = [
-    {
-      id: '1',
-      name: 'Alexander horendas',
-      status: 'offline',
-      country: 'United States',
-      talks: 17,
-      percentage: 100,
-      gender: 'Male',
-      profileImg: require('@/assets/images/user.jpg'),
-    },
-    {
-      id: '2',
-      name: 'rashi',
-      status: 'online',
-      country: 'Saudi Arabia',
-      talks: 187,
-      percentage: 100,
-      gender: 'Male',
-      profileImg: require('@/assets/images/user.jpg'),
-    },
-    {
-      id: '3',
-      name: 'Alexander horendas',
-      status: 'offline',
-      country: 'United States',
-      talks: 17,
-      percentage: 100,
-      gender: 'Male',
-      profileImg: require('@/assets/images/user.jpg'),
-    },
-    {
-      id: '4',
-      name: 'rashi',
-      status: 'online',
-      country: 'Saudi Arabia',
-      talks: 187,
-      percentage: 100,
-      gender: 'Male',
-      profileImg: require('@/assets/images/user.jpg'),
-    },
-    {
-      id: '5',
-      name: 'Alexander horendas',
-      status: 'offline',
-      country: 'United States',
-      talks: 17,
-      percentage: 100,
-      gender: 'Male',
-      profileImg: require('@/assets/images/user.jpg'),
-    },
-    {
-      id: '6',
-      name: 'rashi',
-      status: 'online',
-      country: 'Saudi Arabia',
-      talks: 187,
-      percentage: 100,
-      gender: 'Male',
-      profileImg: require('@/assets/images/user.jpg'),
-    },
-    {
-      id: '7',
-      name: 'Alexander horendas',
-      status: 'offline',
-      country: 'United States',
-      talks: 17,
-      percentage: 100,
-      gender: 'Male',
-      profileImg: require('@/assets/images/user.jpg'),
-    },
-    {
-      id: '8',
-      name: 'rashi',
-      status: 'online',
-      country: 'Saudi Arabia',
-      talks: 187,
-      percentage: 100,
-      gender: 'Male',
-      profileImg: require('@/assets/images/user.jpg'),
-    },
-    {
-      id: '9',
-      name: 'Alexander horendas',
-      status: 'offline',
-      country: 'United States',
-      talks: 17,
-      percentage: 100,
-      gender: 'Male',
-      profileImg: require('@/assets/images/user.jpg'),
-    },
-    {
-      id: '10',
-      name: 'rashi',
-      status: 'online',
-      country: 'Saudi Arabia',
-      talks: 187,
-      percentage: 100,
-      gender: 'Male',
-      profileImg: require('@/assets/images/user.jpg'),
-    },
-    {
-      id: '11',
-      name: 'Alexander horendas',
-      status: 'offline',
-      country: 'United States',
-      talks: 17,
-      percentage: 100,
-      gender: 'Male',
-      profileImg: require('@/assets/images/user.jpg'),
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const { isOnline } = usePresence();
+  console.log(isOnline, "isOnline")
+
+  useEffect(() => {
+    console.log("User online status:", isOnline);
+  }, [isOnline])
+
+  const openPartnerFinderModal = () => {
+    if (bottomSheetModalRef.current) {
+      bottomSheetModalRef.current.present();
+    } else {
+      console.error('BottomSheetModalRef is null');
     }
-  ];
+  };
+
+  const handleCall = () => {
+    Vibration.vibrate(20); 
+  };
 
   const renderUserItem = ({ item }: any) => (
-    <View style={styles.userContainer}>
-      <View style={styles.profileInfo}>
-        <Image source={item.profileImg} style={styles.profileImage} />
-        <View style={styles.details}>
-          <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.subtext}>
-             {item.gender} • {item.country} • {item.talks} talks
-          </Text>
+    <Link href="/Profile" asChild>
+      <Pressable style={Common.userContainer} android_ripple={{ color: '#ccc' }}>
+        <View style={Common.profileInfo} pointerEvents="box-none">
+          <View style={Common.imageContainer}>
+            <Image source={item.profileImg} style={Common.profileImage} />
+            <View style={Common.levelBadge}>
+              <Text style={Common.levelText}>{item.level || 'B1'}</Text>
+            </View>
+          </View>
+          <View style={Common.details}>
+            <Text style={Common.name}>{item.name}</Text>
+            <Text style={Common.subtext}>
+              {item.gender} • {item.country}
+            </Text>
+            <Text style={Common.subtext}>1200 talks</Text>
+          </View>
         </View>
-      </View>
-      <TouchableOpacity style={styles.callButton}>
-        <PhoneCall color="white" size={20} />
-      </TouchableOpacity>
-    </View>
+        <Pressable style={styles.callButton} onPress={handleCall}>
+          <PhoneCall color="white" size={20} />
+        </Pressable>
+      </Pressable>
+    </Link>
   );
 
   return (
+    <>
     <SafeAreaView style={Common.container}>
       <FlatList
         data={data}
@@ -143,20 +64,17 @@ export default function HomeScreen() {
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
       />
-          <TouchableOpacity style={styles.perfectPartnerButton}>
-            <Search color="white" size={25} />
-            <Text style={styles.buttonText}>Find a perfect partner</Text>
-          </TouchableOpacity>
+      <TouchableOpacity style={styles.perfectPartnerButton} activeOpacity={0.9} onPress={openPartnerFinderModal}>
+        <Search color="white" size={25} />
+        <Text style={styles.buttonText}>Find a perfect partner</Text>
+      </TouchableOpacity>
     </SafeAreaView>
+    <PartnerFinderModal ref={bottomSheetModalRef} />
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 5,
-  },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -165,38 +83,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 10,
     fontWeight: 'bold',
-  },
-  userContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#FFF',
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 5,
-    borderBottomColor: '#ddd',
-    borderBottomWidth: 1,
-  },
-  profileInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  profileImage: {
-    width: 70,
-    height: 70,
-    borderRadius: 50,
-    marginRight: 10,
-  },
-  details: {
-    flexDirection: 'column',
-  },
-  name: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  subtext: {
-    color: '#777',
-    fontSize: 14
   },
   callButton: {
     backgroundColor: Colors.light.primary,
@@ -225,5 +111,21 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  levelBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 10,
+    backgroundColor: '#f3f0f0',
+    borderRadius: 12,
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  levelText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: Colors.light.primary,
   },
 });

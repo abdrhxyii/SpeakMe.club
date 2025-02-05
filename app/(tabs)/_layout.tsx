@@ -1,17 +1,26 @@
-import { Tabs } from 'expo-router';
-import React, {useEffect} from 'react';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Home, UserCircle, SlidersHorizontal , MessageSquare, } from 'lucide-react-native';
-import { TouchableOpacity, StyleSheet } from 'react-native';
-import * as NavigationBar from 'expo-navigation-bar';
+import { Tabs, useRouter } from 'expo-router';
+import React, { useRef } from 'react';
+import { Home, UserCircle, SlidersHorizontal , Settings, User, ClipboardList } from 'lucide-react-native';
+import { TouchableOpacity } from 'react-native';
+import Common from '@/constants/Common';
+import { Colors } from '@/constants/Colors';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import EnglishLevelFilterSheet from '@/components/BottomSheets/EnglishLevelFilterSheet';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-  useEffect(() => {
-    NavigationBar.setBackgroundColorAsync('#ffffff');
-  }, []);
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const route = useRouter();
+
+  const openPartnerFinderModal = () => {
+    if (bottomSheetModalRef.current) {
+      bottomSheetModalRef.current.present();
+    } else {
+      console.error('BottomSheetModalRef is null');
+    }
+  };
 
   return (
+    <>
     <Tabs
       screenOptions={{
         headerShown: true, 
@@ -23,9 +32,8 @@ export default function TabLayout() {
         },
         headerTitleStyle: {
           color: '#000',
-          fontWeight: '700',
-          fontSize: 25,
-          shadowColor: 'none'
+          shadowColor: 'none',
+          fontSize: 18,
         },
         headerTintColor: 'black',
         headerTitleAlign: 'center',
@@ -34,11 +42,12 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: 'white',
           height: 55,
-          borderTopWidth: 0,
+          // borderTopWidth: 0,
         },
         tabBarLabelStyle: {
-          fontSize: 10,
-          paddingBottom: 12,
+          fontSize: 12,
+          paddingBottom: 8,
+          color: Colors.light.primary
         },
       }}
     >
@@ -52,18 +61,27 @@ export default function TabLayout() {
             <Home color={color} size={24} style={{ marginTop: 7 }}/>
           ),
           headerRight: () => (
-            <TouchableOpacity style={styles.headerBtn}>
+            <TouchableOpacity style={[Common.headerBtn, { marginRight: 10 }]} onPress={openPartnerFinderModal}>
               <SlidersHorizontal  color={'black'} size={18} />
             </TouchableOpacity>
           ),
         }}
       />
       <Tabs.Screen
-        name="message"
+        name="practice"
         options={{
-          title: 'Message',
+          title: 'Practice',
           tabBarIcon: ({ color, focused }) => (
-            <MessageSquare color={color} size={24} style={{ marginTop: 7 }}/>
+            <ClipboardList  color={color} size={24} style={{ marginTop: 7 }}/>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="connection"
+        options={{
+          title: 'Connections',
+          tabBarIcon: ({ color, focused }) => (
+            <User color={color} size={24} style={{ marginTop: 7 }}/>
           ),
         }}
       />
@@ -74,20 +92,17 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <UserCircle color={color} size={24} style={{ marginTop: 7 }}/>
           ),
-          headerShown: false,
+          headerShown: true,
+          headerTitle: '', 
+          headerRight: () => (
+            <TouchableOpacity style={[Common.headerBtn, { marginRight: 10 }]} onPress={() => route.push('/Setting')}>
+              <Settings  color={'black'} size={18} />
+            </TouchableOpacity>
+          ),
         }}
       />
     </Tabs>
+    <EnglishLevelFilterSheet ref={bottomSheetModalRef}/>
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  //#fcfbfb
-  // #f3f3f3
-  headerBtn: {
-    backgroundColor: '#f3f0f0', 
-    padding: 10,                    
-    borderRadius: 25,               
-    marginRight: 10
-  }
-})

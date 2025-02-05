@@ -13,8 +13,19 @@ const tintColorDark = '#fff';
 // #E7F7D2
 
 // #a091f5 - purple
+
+// #142a19
+//#224229
+//#e8f5e3
+//#99cca1
+
+// purple card - #2b1c50 and #f0f1ff or #d1d1f7
+// blue card - #1b224b and #dbf0ff
+//green card - #e8f5e3 and #142a19
+
+// #F6ECF9 apple consider this color | #2A2A2A
 export const Colors = {
-  light: {
+  light: { 
     text: '#11181C',
     background: '#fff',
     tint: tintColorLight,
@@ -22,8 +33,14 @@ export const Colors = {
     danger: '#ED1010',
     primary: '#000000',
     online: '#48ea18',
-    offline: ''
+    offline: '',
+    border: '#DDD',
+    darkGray: '#a5a5a5',
+    lightgray: "#E5E5E5",
+    info: '#666',
+    red: '#FF0800'
   },
+
   dark: {
     text: '#ECEDEE',
     background: '#151718',

@@ -1,219 +1,184 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
-import React, { useCallback, useRef, useState } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useCallback, useRef, useState, useMemo, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  SafeAreaView,
+  ActivityIndicator,
+} from 'react-native';
+
+import { useFocusEffect, useNavigation } from 'expo-router';
+import { BottomSheetModal, BottomSheetFlatList } from '@gorhom/bottom-sheet';
+
 import Common from '@/constants/Common';
 import ReviewCard from '@/components/ReviewCard';
-import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import AccountSection from '@/components/AccountSection';
 import ProfileHeader from '@/components/ProfileHeader';
+import InterestsSection from '@/components/InterestsSection';
+import ComplimentsList from '@/components/ComplimentsList';
+import AdviceList from '@/components/AdviceList';
 import ActionButton from '@/components/ActionButton';
-import Dialogbox from '@/components/Dialogbox';
-import { Colors } from '@/constants/Colors';
 
-const reviews = [
-  {
-    id: '1',
-    name: 'Vaishali',
-    location: 'Dehradun, India',
-    date: 'August 2024',
-    review: 'Castle Oodeypore is a magnificent palace with stunning interiors. We stepped-in and were absolutely arrested by its royal charm. Kudos to Ma\'am Nirmal for the exquisite aesthetics, the property mirrors her artistic acumen in more ways than one. The hosts were very kind and welcoming, they even upgraded our room stay. We are grateful for the family\'s warm hospitality and scrumptious meals.',
-    footer: 'Just go for it :))',
-  },
-  {
-    id: '2',
-    name: 'Bridget',
-    location: 'Auckland, New Zealand',
-    date: 'January 2024',
-    review: 'We had a happy family holiday to celebrate a birthday. We dined in on two of the three nights that we stayed and the food was spectacular. Everyone there looked after us so well and the hosts were friendly but also discrete. They had a beautiful swimming pool!',
-  },
-  {
-    id: '3',
-    name: 'Vaishali',
-    location: 'Dehradun, India',
-    date: 'August 2024',
-    review: 'Castle Oodeypore is a magnificent palace with stunning interiors. We stepped-in and were absolutely arrested by its royal charm. Kudos to Ma\'am Nirmal for the exquisite aesthetics, the property mirrors her artistic acumen in more ways than one. The hosts were very kind and welcoming, they even upgraded our room stay. We are grateful for the family\'s warm hospitality and scrumptious meals.',
-    footer: 'Just go for it :))',
-  },
-  {
-    id: '4',
-    name: 'Bridget',
-    location: 'Auckland, New Zealand',
-    date: 'January 2024',
-    review: 'We had a happy family holiday to celebrate a birthday. We dined in on two of the three nights that we stayed and the food was spectacular. Everyone there looked after us so well and the hosts were friendly but also discrete. They had a beautiful swimming pool!',
-  },
-  {
-    id: '5',
-    name: 'Vaishali',
-    location: 'Dehradun, India',
-    date: 'August 2024',
-    review: 'Castle Oodeypore is a magnificent palace with stunning interiors. We stepped-in and were absolutely arrested by its royal charm. Kudos to Ma\'am Nirmal for the exquisite aesthetics, the property mirrors her artistic acumen in more ways than one. The hosts were very kind and welcoming, they even upgraded our room stay. We are grateful for the family\'s warm hospitality and scrumptious meals.',
-    footer: 'Just go for it :))',
-  },
-  {
-    id: '6',
-    name: 'Bridget',
-    location: 'Auckland, New Zealand',
-    date: 'January 2024',
-    review: 'We had a happy family holiday to celebrate a birthday. We dined in on two of the three nights that we stayed and the food was spectacular. Everyone there looked after us so well and the hosts were friendly but also discrete. They had a beautiful swimming pool!',
-  },
-];
+import { supabase } from '@/libs/supabase';
+import { useUserStore } from '@/store/userStore';
+
+import { UserData } from '@/interfaces';
+import { reviews } from '@/data/appData';
+
+import CustomBackdrop from '@/components/CustomBackdrop';
 
 export default function Account() {
-  const bottomSheetRef = useRef<BottomSheet>(null);
-  const [isModalVisible, setIsModalVisible] = useState(false); 
-  const [dialog, setDialog] = useState(false)
+  const navigation = useNavigation();
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
-  const handleSheetChanges = useCallback((index: number) => {
-    if (index === -1) {
-      setIsModalVisible(false);
-    }
-  }, []);
+  const { session } = useUserStore();
+
+  const [showHeaderTitle, setShowHeaderTitle] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const scrollThreshold = useMemo(() => 10, []);
+  const [userData, setUserData] = useState<UserData | null>(null);
 
   const openModal = () => {
-    setIsModalVisible(true);
-    bottomSheetRef.current?.snapToIndex(0);  
+    if (bottomSheetModalRef.current) {
+      bottomSheetModalRef.current.present();
+    } else {
+      console.log('BottomSheetModalRef is null');
+    }
   };
 
-  const closeModal = () => {
-    setIsModalVisible(false);
-    bottomSheetRef.current?.close();  
+  const handleScroll = useCallback(
+    (event: any) => {
+      const yOffset = event.nativeEvent.contentOffset.y;
+      const shouldShowTitle = yOffset > scrollThreshold;
+
+      if (shouldShowTitle !== showHeaderTitle) {
+        setShowHeaderTitle(shouldShowTitle);
+        navigation.setOptions({ headerTitle: shouldShowTitle ? userData?.display_name : '' });
+      }
+    },
+    [navigation, showHeaderTitle, scrollThreshold]
+  );
+
+  const fetchUserData = async () => {
+    if (!session) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('users') 
+        .select('*')
+        .eq('id', session.user.id) 
+        .single();
+
+      if (error) {
+        console.error(error.message);
+      } else {
+        setUserData(data);
+      }
+    } catch (err) {
+      console.error('Error fetching user data', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const ReviewItem = ({ review }: any) => (
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserData();
+    }, [session?.user?.id])
+  );
+
+  const ReviewItem = useCallback(({ review }: any) => (
     <View style={styles.reviewContainer}>
       <View style={styles.Modalheader}>
         <Image
           source={require('@/assets/images/user.jpg')}
           style={styles.ModalprofileImage}
         />
-        <View>
-          <Text style={styles.userName}>{review.name}, {review.location}</Text>
+        <View style={styles.userDetails}>
+          <Text style={styles.userName}>
+            {review.name}, {review.location}
+          </Text>
           <Text style={styles.date}>{review.date}</Text>
+        </View>
+        <View style={styles.emojiContainer}>
+          <Text style={styles.emoji}>👍</Text>
         </View>
       </View>
       <Text style={styles.reviewText}>{review.review}</Text>
-      {review.footer && <Text style={styles.footer}>{review.footer}</Text>}
+    </View>
+  ), []); 
+
+  const MemoizedReviewItem = useMemo(() => ReviewItem, [ReviewItem]);
+
+  if (loading) return (
+    <View style={Common.loaderContainer}>
+      <ActivityIndicator size={65} color={'#000000'}/>
     </View>
   );
-
-  const handleLogoutConfirmation = () => {
-    setDialog(true);
-
-  }
 
   return (
     <>
       <SafeAreaView style={Common.container}>
-        {isModalVisible && <View style={styles.overlay} />} 
-        <ProfileHeader/>
-        <ActionButton/>
-        <ScrollView 
-          style={styles.content} 
+        <ScrollView
+          style={Common.profileContent}
           showsVerticalScrollIndicator={false}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
         >
-          <Text style={styles.contentTitle}>Personal Information</Text>
-            <AccountSection/>
-          <Text style={styles.contentTitle}>Feedbacks</Text>
-            <View style={styles.infoContainer}>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} overScrollMode="never">
-                <ReviewCard />
-                <ReviewCard />
-                <ReviewCard />
-              </ScrollView>
-              <TouchableOpacity style={styles.Reviewbutton} onPress={openModal}>
-                <Text style={styles.ReviewbuttonText}>Show all 14 reviews</Text>
-              </TouchableOpacity>
-            </View>
-            <TouchableOpacity style={styles.logoutbutton} onPress={handleLogoutConfirmation}>
-                <Text style={styles.logoutbuttonText}>Logout</Text>
+          <ProfileHeader user={userData}/>
+          { userData?.about_me === null ? 
+            null : <Text style={styles.bio}>{userData?.about_me}</Text>
+          }
+          <ActionButton/>
+          
+          <Text style={Common.profileContentTitle}>Personal Information</Text>
+          <AccountSection user={userData}/>
+
+          <Text style={Common.profileContentTitle}>Interests</Text>
+          <InterestsSection user={userData}/>
+
+          <ComplimentsList/>
+          <AdviceList/>
+
+          <Text style={Common.profileContentTitle}>Feedbacks (10.8K)</Text>
+          <View style={Common.profileReviewContainer}>
+            <ScrollView showsHorizontalScrollIndicator={false} overScrollMode="never">
+              <ReviewCard />
+              <ReviewCard />
+              <ReviewCard />
+            </ScrollView>
+            <TouchableOpacity style={Common.Reviewbutton} onPress={openModal}>
+              <Text style={Common.ReviewbuttonText}>Show all 14 reviews</Text>
             </TouchableOpacity>
+          </View>
         </ScrollView>
-        <Dialogbox
-            visible={dialog}
-            onClose={() => setDialog(false)}
-            title="Confirm Logout"
-            bodymessage="Are you sure you want to logout?"
-            type={'warning'}
-        />
       </SafeAreaView>
-      
-      <BottomSheet
-          ref={bottomSheetRef}
-          onChange={handleSheetChanges}
-          snapPoints={['75%']}
-          index={isModalVisible ? 0 : -1} 
-          enablePanDownToClose
-        >
-          <BottomSheetFlatList
-            data={reviews}
-            showsVerticalScrollIndicator={false}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => <ReviewItem review={item} />}
-            ListHeaderComponent={
-              <Text style={styles.headerText}>14 Reviews</Text>
-            }
-          />
-      </BottomSheet>
+
+      <BottomSheetModal
+        ref={bottomSheetModalRef}
+        backdropComponent={(props) => <CustomBackdrop {...props} />}  
+        snapPoints={['80%']}
+        index={0}
+        enablePanDownToClose
+      >
+        <BottomSheetFlatList
+          data={reviews}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <MemoizedReviewItem review={item} />}
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={<Text style={styles.headerText}>14 Reviews</Text>}
+        />
+      </BottomSheetModal>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'grey',
-  },
-  infoContainer: {
-    backgroundColor: '#FFF',
-    marginBottom: 10,
-  },
-  content: {
-    padding: 15,
-  },
-  contentTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 15,
-  },
-  Reviewbutton: {
-    paddingVertical: 12,
-    borderRadius: 7,
-    alignItems: 'center',
-    marginTop: 20,
-    borderWidth: 1,
-    borderColor: '#000',
-    marginBottom: 15,
-  },
-  ReviewbuttonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#000',
-  },
-  logoutbutton: {
-    paddingVertical: 12,
-    borderRadius: 7,
-    alignItems: 'center',
-    marginTop: 20,
-    borderWidth: 1,
-    borderColor: Colors.light.danger,
-    marginBottom: 30,
-  },
-  logoutbuttonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: Colors.light.danger,
-  },
-  overlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', 
-    zIndex: 1, 
-  },
   reviewContainer: {
-    marginVertical: 10,
+    marginVertical: 5,
     paddingHorizontal: 20,
   },
   Modalheader: {
@@ -227,6 +192,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginRight: 10,
   },
+  userDetails: {
+    flex: 1,
+  },
   userName: {
     fontWeight: 'bold',
     fontSize: 16,
@@ -235,14 +203,21 @@ const styles = StyleSheet.create({
     color: 'gray',
     fontSize: 14,
   },
+  emojiContainer: {
+    backgroundColor: '#DFF2BF',
+    borderRadius: 25,
+    padding: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 5,
+  },
+  emoji: {
+    fontSize: 16,
+  },
   reviewText: {
     marginVertical: 5,
     fontSize: 14,
     color: '#333',
-  },
-  footer: {
-    marginTop: 5,
-    fontSize: 14,
   },
   headerText: {
     fontSize: 18,
@@ -250,4 +225,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     padding: 5,
   },
+  bio: {
+    lineHeight: 20 
+  }
 });
