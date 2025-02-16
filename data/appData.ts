@@ -198,3 +198,26 @@ export const data = [
     profileImg: require('@/assets/images/user.jpg'),
   }
 ];
+
+// const traitsList = [
+//   "Patient and Supportive", 
+//   "Friendly and Welcoming", 
+//   "Encouraging and Motivating", 
+//   "Speaks Clearly and Slowly", 
+//   "Fun and Engaging", 
+//   "Good at Correcting Mistakes", 
+//   "Active Listener", 
+//   "Provides Useful Feedback", 
+//   "Respectful and Polite", 
+//   "Keeps the Conversation Flowing",
+//   "Frequently Interrupts", 
+//   "Difficult to Understand", 
+//   "Not Engaging or Responsive", 
+//   "Talks Too Much Without Listening", 
+//   "Uses Too Much Slang", 
+//   "Unfriendly or Rude", 
+//   "Lack of Patience", 
+//   "Doesn’t Give Constructive Feedback", 
+//   "Speaks Too Fast", 
+//   "Does Not Stick to the Topic"
+// ];

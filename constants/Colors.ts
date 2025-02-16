@@ -38,7 +38,7 @@ export const Colors = {
     darkGray: '#a5a5a5',
     lightgray: "#E5E5E5",
     info: '#666',
-    red: '#FF0800'
+    red: '#ff3e47'
   },
 
   dark: {
