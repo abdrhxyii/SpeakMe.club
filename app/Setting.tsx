@@ -1,26 +1,42 @@
 import React, { useState, useEffect , useRef} from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Mail, Lock, UserX, HelpCircle, PencilLine } from 'lucide-react-native';
+import { Lock, UserX, HelpCircle, PencilLine } from 'lucide-react-native';
 import { supabase } from '@/libs/supabase';
 
 import Common from '@/constants/Common';
 import { Colors } from '@/constants/Colors';
 import { useUserStore } from '@/store/userStore';
+import { useProfileStore } from '@/store/profileStore';
+
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import { GoogleSignin  } from '@react-native-google-signin/google-signin';
 
 import ReviewBottomSheet from '@/components/BottomSheets/ReviewBottomSheet';
 import DeleteUserBottomSheet from '@/components/BottomSheets/DeleteUserBottomSheet';
+import { removeTokens } from '@/utils/TokenStorage';
 
 const SettingsScreen = () => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const bottomSheetDeleteModalRef = useRef<BottomSheetModal>(null);
   
   const router = useRouter();
-  const { setSession, setIsSignedIn, session } = useUserStore()
+
+  const { setSession, setIsSignedIn, session } = useUserStore();
+  const { resetProfileImage } = useProfileStore();
+
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [signedOut, setSignedOut] = useState(false);
+
+
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: process.env.EXPO_PUBLIC_WEB_CLINET_ID,
+      offlineAccess: true,
+      forceCodeForRefreshToken: true,
+    });
+  }, []);
 
   const openReviewModal = () => {
     if (bottomSheetModalRef.current) {
@@ -46,11 +62,15 @@ const SettingsScreen = () => {
         setErrorMessage('An error occurred while signing out. Please try again...');
         return;
       }
-      await markUserOffline(session.user.id);
+      await GoogleSignin.signOut();
+      await markUserOffline(session.id);
+      await removeTokens();
+      resetProfileImage();
       setSession(null);
       setIsSignedIn(null);
       setSignedOut(true);
     } catch (error) {
+      console.log(error, "error")
       setErrorMessage('An unexpected error occurred while signing out. Please try again...');
     } finally {
       setLoading(false);

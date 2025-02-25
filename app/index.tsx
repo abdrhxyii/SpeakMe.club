@@ -2,49 +2,71 @@ import React, { useEffect, useState } from "react";
 import { Redirect } from "expo-router";
 import { supabase } from "@/libs/supabase";
 import { useUserStore } from "@/store/userStore";
+import { getTokens } from "@/utils/TokenStorage";
 
 const Index = () => {
-  const { isSignedIn, setIsSignedIn, setSession } = useUserStore();
-  const [redirectPath, setRedirectPath] = useState<string | null>(null); 
+  const { setIsSignedIn, setSession } = useUserStore();
+  const [redirectPath, setRedirectPath] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setIsSignedIn(!!session);
-      setSession(session);
+      try {
+        const { accessToken, refreshToken } = await getTokens();
 
-      if (session) {
-        const { data, error } = await supabase
-          .from("users")
-          .select("is_onboarding_complete")
-          .eq("id", session.user.id)
-          .single();
-
-        if (error) {
-          console.error(error);
+        if (!accessToken || !refreshToken) {
+          setRedirectPath("/Welcome"); 
           return;
         }
 
-        if (data && data.is_onboarding_complete === false) {
+        const { data, error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+
+        if (error || !data.session) {
+          console.error("Session restore failed:", error);
+          setRedirectPath("/Welcome"); 
+          return;
+        }
+
+        setIsSignedIn(true);
+        setSession(data.session.user);
+
+        const { data: userData, error: userError } = await supabase
+          .from("users")
+          .select("is_onboarding_complete")
+          .eq("id", data.session.user.id)
+          .single();
+
+        if (userError) {
+          console.error("Error fetching user data:", userError);
+          setRedirectPath("/Welcome"); 
+          return;
+        }
+
+        if (userData && userData.is_onboarding_complete === false) {
           setRedirectPath("/GoalSelection"); 
           return;
         }
-      }
 
-      setRedirectPath(isSignedIn ? "/(tabs)/" : "/Welcome");
+        setRedirectPath("/(tabs)/"); 
+      } catch (err) {
+        console.error("Error retrieving auth tokens:", err);
+        setRedirectPath("/Welcome");
+      }
     };
 
     checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsSignedIn(!!session);
-      setSession(session);
+      setSession(session?.user);
     });
 
     return () => {
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
     };
-  }, [isSignedIn, setIsSignedIn, setSession]);
+  }, [setIsSignedIn, setSession]);
 
   if (redirectPath === null) return null; 
 

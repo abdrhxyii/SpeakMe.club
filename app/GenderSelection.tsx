@@ -50,7 +50,7 @@ const GenderSelection = () => {
     const { data, error } = await supabase
       .from("users")
       .select("gender")
-      .eq('id', session.user.id) 
+      .eq('id', session.id) 
       .single();
 
     if (error) {
@@ -80,7 +80,7 @@ const GenderSelection = () => {
       const { error } = await supabase
         .from("users")
         .update({ gender })
-        .eq("id", session.user.id); 
+        .eq("id", session.id); 
 
       if (error) {
         console.error("Error updating gender:", error);

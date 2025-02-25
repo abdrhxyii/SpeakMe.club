@@ -22,7 +22,7 @@ const DeleteUserBottomSheet = forwardRef<BottomSheetModal>((_, ref) => {
     setError('');
     
     try {
-      const response = await axios.delete(`${baseUrl}/user/${session?.user?.id}`)
+      const response = await axios.delete(`${baseUrl}/user/${session?.id}`)
       console.log(response, "response")
       if(response.status === 200) {
         setSession(null);

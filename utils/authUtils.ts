@@ -23,3 +23,19 @@ export const checkIfEmailExists = async (email: string): Promise<boolean> => {
         return false;
     }
 };
+
+
+export const checkIfNewUser = async (userId: any) => {
+    const { data, error } = await supabase
+      .from('users') 
+      .select('is_onboarding_complete')
+      .eq('id', userId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') { 
+      console.log('Error checking user profile:', error);
+      return true;
+    }
+
+    return !data || !data.is_onboarding_complete;
+}

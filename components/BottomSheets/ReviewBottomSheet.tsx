@@ -37,7 +37,7 @@ const ReviewBottomSheet = forwardRef<BottomSheetModal>((_, ref) => {
     const handleSubmit = async () => {
       console.log(session?.user?.id, "session?.user?.id")
       const reviewData = {
-        userId: session?.user?.id,
+        userId: session?.id,
         rating: rating,
         selectedTraits: selectedTraits,
         feedback: feedback,

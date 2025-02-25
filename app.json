@@ -46,14 +46,19 @@
           "faceIDPermission": "Allow SpeakMate to access your Face ID biometric data."
         }
       ],
-      ["expo-localization"]
-      ,
+      ["expo-localization"],
       [
         "expo-build-properties",
         {
           "android": {
             "usesCleartextTraffic": true
           }
+        }
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.1070629572115-qgjtl00997dmrjdc89bepqnfa372bic8"
         }
       ]
     ],

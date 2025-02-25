@@ -9,9 +9,9 @@ const usePresence = () => {
   const [isOnline, setIsOnline] = useState(false);
 
   useEffect(() => {
-    if (!session?.user) return;
+    if (!session) return;
 
-    const userId = session.user.id;
+    const userId = session?.id;
     const channel = supabase.channel(`presence:${userId}`, {
       config: { presence: { key: userId } },
     });
@@ -39,13 +39,13 @@ const usePresence = () => {
 
     channel
       .on("presence", { event: "sync" }, () => {
-        console.log("Presence synced");
+        // console.log("Presence synced");
       })
       .on("presence", { event: "join" }, ({ key }) => {
-        console.log(`${key} joined`);
+        // console.log(`${key} joined`);
       })
       .on("presence", { event: "leave" }, ({ key }) => {
-        console.log(`${key} left`);
+        // console.log(`${key} left`);
       })
       .subscribe(async (status) => {
         if (status === "SUBSCRIBED") {

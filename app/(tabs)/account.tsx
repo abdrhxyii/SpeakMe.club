@@ -9,6 +9,7 @@ import {
   SafeAreaView,
   ActivityIndicator,
 } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
 
 import { useFocusEffect, useNavigation } from 'expo-router';
 import { BottomSheetModal, BottomSheetFlatList } from '@gorhom/bottom-sheet';
@@ -69,7 +70,7 @@ export default function Account() {
       const { data, error } = await supabase
         .from('users') 
         .select('*')
-        .eq('id', session.user.id) 
+        .eq('id', session.id) 
         .single();
 
       if (error) {
@@ -87,7 +88,7 @@ export default function Account() {
   useFocusEffect(
     useCallback(() => {
       fetchUserData();
-    }, [session?.user?.id])
+    }, [session?.id])
   );
 
   const ReviewItem = useCallback(({ review }: any) => (

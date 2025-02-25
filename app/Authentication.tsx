@@ -1,42 +1,67 @@
-import React, {useEffect} from 'react';
-import { View, Text, Pressable, Image, StyleSheet } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import { View, Text, Pressable, Image, StyleSheet, ActivityIndicator } from 'react-native';
 
 import { useRouter } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
-import * as Google from "expo-auth-session/providers/google"
+import { GoogleSignin  } from '@react-native-google-signin/google-signin';
 
 import Common from '@/constants/Common';
 import { Mail } from 'lucide-react-native';
 import { Colors } from '@/constants/Colors';
-
-const webClinetId = '1070629572115-nk6jq1edb7ngjav853b0u0kbalb9ia3g.apps.googleusercontent.com'
-const androidClientId = '1070629572115-qeu9dutp1evr9mqlcd7prulks1otasjm.apps.googleusercontent.com'
-const iosClientId = '1070629572115-qgjtl00997dmrjdc89bepqnfa372bic8.apps.googleusercontent.com'
-
-WebBrowser.maybeCompleteAuthSession();
+import { supabase } from '@/libs/supabase';
+import { useUserStore } from '@/store/userStore';
+import { saveTokens } from '@/utils/TokenStorage';
+import { checkIfNewUser } from '@/utils/authUtils';
 
 const Authentication = () => {
+  const { setSession, setIsSignedIn } = useUserStore();
+  const [loading, setLoading] = useState(false);
+
   const router = useRouter();
-  const config = {
-    webClinetId,
-    iosClientId,
-    androidClientId
-  }
-
-  const [request, response, promptAsync] = Google.useAuthRequest(config)
-
-  const handleToken = () => {
-    if(response?.type === "success"){
-      const {authentication} =  response;
-      const token = authentication?.accessToken;
-      console.log(token, "access token")
-    }
-  }
-
   useEffect(() => {
-    handleToken()
+    GoogleSignin.configure({
+      webClientId: process.env.EXPO_PUBLIC_WEB_CLINET_ID, 
+      offlineAccess: true,
+      hostedDomain: '',
+      forceCodeForRefreshToken: true,
+    });
+  }, []);
 
-  }, [response])
+  const signInWithGoogle = async () => {
+    setLoading(true);
+    try {
+      await GoogleSignin.hasPlayServices();
+      await GoogleSignin.signOut();
+      const userInfo = await GoogleSignin.signIn();
+        if (userInfo?.data?.idToken) {
+        const { data, error } = await supabase.auth.signInWithIdToken({
+          provider: 'google',
+          token: userInfo?.data?.idToken,
+        });
+
+        if (error) {
+          console.log('Supabase auth error:', error)
+          return;
+        }
+
+        if(data) {
+          setIsSignedIn(true);
+          setSession(data.user);
+          await saveTokens(data.session.access_token, data.session.refresh_token);
+
+          const isNewUser = await checkIfNewUser(data.user.id);
+          if (isNewUser) {            
+            router.replace('/GoalSelection');
+          } else {
+            router.replace('/(tabs)/'); 
+          }
+        }
+      }
+    } catch (error) {
+      console.log('Error during Google sign-in:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={Common.container}>
@@ -47,20 +72,29 @@ const Authentication = () => {
               styles.socialButton,
               pressed && { opacity: 0.8 },
             ]}
-            onPress={() => promptAsync()}
+            onPress={signInWithGoogle}
+            disabled={loading}
           >
-            <Image
-              source={require('@/assets/images/google1.png')}
-              style={styles.icon}
-            />
-            <Text style={styles.socialButtonText}>Continue with Google</Text>
+            {loading ? (
+              <ActivityIndicator size="small" color={Colors.light.primary} />
+            ) : (
+              <>
+                <Image
+                  source={require('@/assets/images/google1.png')}
+                  style={styles.icon}
+                />
+                <Text style={styles.socialButtonText}>Continue with Google</Text>
+              </>
+            )}
           </Pressable>
+
           <Pressable
             style={({ pressed }) => [
               styles.emailButton,
               pressed && { opacity: 0.8 },
             ]}
-            onPress={() => router.push({pathname: '/EmailAuthScreen', params: {mode: 'signup'}})}
+            onPress={() => router.push({ pathname: '/EmailAuthScreen', params: { mode: 'signup' } })}
+            disabled={loading}
           >
             <Mail size={20} color="#FFF" />
             <Text style={styles.emailButtonText}>Sign up with Email</Text>
@@ -71,7 +105,8 @@ const Authentication = () => {
               styles.emailButton,
               pressed && { opacity: 0.8 },
             ]}
-            onPress={() => router.push({pathname: '/EmailAuthScreen', params: {mode: 'login'}})}
+            onPress={() => router.push({ pathname: '/EmailAuthScreen', params: { mode: 'login' } })}
+            disabled={loading}
           >
             <Mail size={20} color="#FFF" />
             <Text style={styles.emailButtonText}>Log in with Email</Text>

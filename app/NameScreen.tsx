@@ -24,7 +24,7 @@ export default function NameScreen() {
       const { data, error } = await supabase
         .from('users')
         .select('display_name')
-        .eq('id', session.user.id) 
+        .eq('id', session.id) 
         .single();
       if (error) {
         setError(error.message);
@@ -41,7 +41,7 @@ export default function NameScreen() {
 
   useEffect(() => {
     fetchUserData();
-  }, [session?.user?.id])
+  }, [session?.id])
 
   const handleNameUpdate = async () => {
     if (!name.trim()) {
@@ -61,7 +61,7 @@ export default function NameScreen() {
       const { error } = await supabase
         .from('users')
         .update({ display_name: name.trim() })
-        .eq('id', session.user.id);
+        .eq('id', session.id);
   
       if (error) {
         setError(error.message);

@@ -11,14 +11,15 @@ import { supabase } from '@/libs/supabase';
 import { useUserSelectionStore } from "@/store/onboardingUserSelection";
 import { useUserStore } from '@/store/userStore';
 import { useLocalSearchParams } from 'expo-router';
+import { saveTokens } from '@/utils/TokenStorage';
 
 const OTPVerificationScreen = () => {
     const router = useRouter();
     const navigation = useNavigation();
-    const { resend, emailto } = useLocalSearchParams();
+    const { resend, emailto } = useLocalSearchParams();    
 
     const { email, resetEmail } = useUserSelectionStore();
-    const { setSession } = useUserStore();
+    const { setIsSignedIn, setSession } = useUserStore();
 
     const [otp, setOtp] = useState(["", "", "", "", "", ""]);
     const [startTime, setStartTime] = useState(Date.now());
@@ -107,8 +108,9 @@ const OTPVerificationScreen = () => {
             return;
         }
         if (session) {
-            setSession(session)
-            // router.dismissAll();
+            setIsSignedIn(true)
+            setSession(session.user)
+            await saveTokens(session.access_token, session.refresh_token)
             router.replace('/GoalSelection');
         }
     }, [otp, email, router]);

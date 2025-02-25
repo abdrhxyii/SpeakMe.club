@@ -4,14 +4,16 @@ import 'react-native-url-polyfill/auto';
 import { createClient } from '@supabase/supabase-js';
 
 const ExpoSecureStoreAdapter = {
-  getItem: (key: string) => {
+  getItem: async (key: string) => {
     return SecureStore.getItemAsync(key)
   },
-  setItem: (key: string, value: string) => {
-    SecureStore.setItemAsync(key, value)
+  setItem: async (key: string, value: string) => {
+    if(key === 'access_token' || key === 'refresh_token') {
+      await SecureStore.setItemAsync(key, value);
+    }
   },
-  removeItem: (key: string) => {
-    SecureStore.deleteItemAsync(key)
+  removeItem: async (key: string) => {
+    await SecureStore.deleteItemAsync(key)
   },
 }
 

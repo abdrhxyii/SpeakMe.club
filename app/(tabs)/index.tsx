@@ -1,30 +1,56 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, FlatList, Image, Pressable, SafeAreaView, StyleSheet, Vibration, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { View, Text, FlatList, Image, Pressable, SafeAreaView, StyleSheet, Vibration, TouchableOpacity, RefreshControl } from 'react-native';
 import { PhoneCall, Search } from 'lucide-react-native';
 import Common from '@/constants/Common';
 import { Colors } from '@/constants/Colors';
-import { Link } from 'expo-router';
-import { data } from '@/data/appData';
+import { Link, useFocusEffect } from 'expo-router';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import PartnerFinderModal from '@/components/BottomSheets/PartnerFinderModal';
 import usePresence from '@/hooks/usePresence';
+import api from '@/utils/apiServices';
+import { baseUrl } from '@/utils/BaseUrl';
 
 export default function HomeScreen() {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const [userData, setUserData] = useState<any[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
   const { isOnline } = usePresence();
-  console.log(isOnline, "isOnline")
 
   useEffect(() => {
-    console.log("User online status:", isOnline);
   }, [isOnline])
+
+  const onRefresh = React.useCallback( async () => {
+      setRefreshing(true);
+      await retriveUsers();
+      setTimeout(() => {
+        setRefreshing(false);
+      }, 2000);
+    }, []);
 
   const openPartnerFinderModal = () => {
     if (bottomSheetModalRef.current) {
       bottomSheetModalRef.current.present();
     } else {
-      console.error('BottomSheetModalRef is null');
+      console.log('BottomSheetModalRef is null');
     }
   };
+
+  const retriveUsers = async () => {
+    try {
+      const { data, status } = await api.get(`${baseUrl}/user`)
+      if (status === 200) {
+        setUserData(data.users)
+      } 
+    } catch (error: any) {
+      console.log("An unexpected error occured, Please refresh or check your internet connection")
+    }
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      retriveUsers();
+    }, [])
+  );
 
   const handleCall = () => {
     Vibration.vibrate(20); 
@@ -35,17 +61,17 @@ export default function HomeScreen() {
       <Pressable style={Common.userContainer} android_ripple={{ color: '#ccc' }}>
         <View style={Common.profileInfo} pointerEvents="box-none">
           <View style={Common.imageContainer}>
-            <Image source={item.profileImg} style={Common.profileImage} />
+            <Image source={ item.profilePictureUrl ? { uri: item.profilePictureUrl } : require('@/assets/images/defaultuser.jpg')} style={Common.profileImage} />
             <View style={Common.levelBadge}>
-              <Text style={Common.levelText}>{item.level || 'B1'}</Text>
+            <Text style={Common.levelText}>{item.level.replace(/\s*\(.*?\)/, '')}</Text>
             </View>
           </View>
           <View style={Common.details}>
-            <Text style={Common.name}>{item.name}</Text>
+            <Text style={Common.name}>{item.display_name}</Text>
             <Text style={Common.subtext}>
               {item.gender} • {item.country}
             </Text>
-            <Text style={Common.subtext}>1200 talks</Text>
+            <Text style={Common.subtext}>{item.country} • {item.talksCount} talks</Text>
           </View>
         </View>
         <Pressable style={styles.callButton} onPress={handleCall}>
@@ -59,7 +85,13 @@ export default function HomeScreen() {
     <>
     <SafeAreaView style={Common.container}>
       <FlatList
-        data={data}
+        data={userData}
+        refreshControl={
+          <RefreshControl 
+            refreshing={refreshing} 
+            onRefresh={onRefresh} 
+          />
+        }
         renderItem={renderUserItem}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
@@ -127,5 +159,5 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: 'bold',
     color: Colors.light.primary,
-  },
+  }
 });
