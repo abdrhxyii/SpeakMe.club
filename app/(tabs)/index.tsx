@@ -1,18 +1,21 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { View, Text, FlatList, Image, Pressable, SafeAreaView, StyleSheet, Vibration, TouchableOpacity, RefreshControl } from 'react-native';
+import { View, Text, FlatList, Image, Pressable, SafeAreaView, StyleSheet, Vibration, TouchableOpacity, RefreshControl, ActivityIndicator } from 'react-native';
 import { PhoneCall, Search } from 'lucide-react-native';
 import Common from '@/constants/Common';
 import { Colors } from '@/constants/Colors';
-import { Link, useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import PartnerFinderModal from '@/components/BottomSheets/PartnerFinderModal';
 import usePresence from '@/hooks/usePresence';
 import api from '@/utils/apiServices';
 import { baseUrl } from '@/utils/BaseUrl';
+import { UserDataCard } from '@/interfaces/index';
 
 export default function HomeScreen() {
+  const router = useRouter();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-  const [userData, setUserData] = useState<any[]>([]);
+  const [userData, setUserData] = useState<UserDataCard[]>([]);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const { isOnline } = usePresence();
 
@@ -36,6 +39,7 @@ export default function HomeScreen() {
   };
 
   const retriveUsers = async () => {
+    setLoading(true)
     try {
       const { data, status } = await api.get(`${baseUrl}/user`)
       if (status === 200) {
@@ -43,6 +47,8 @@ export default function HomeScreen() {
       } 
     } catch (error: any) {
       console.log("An unexpected error occured, Please refresh or check your internet connection")
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -52,13 +58,25 @@ export default function HomeScreen() {
     }, [])
   );
 
+  const handleNavigationToProfile = async (id: string) => {
+    router.push({
+      pathname: "/Profile/[id]",
+      params: {id: id}
+    })
+  }
+
   const handleCall = () => {
     Vibration.vibrate(20); 
   };
 
-  const renderUserItem = ({ item }: any) => (
-    <Link href="/Profile" asChild>
-      <Pressable style={Common.userContainer} android_ripple={{ color: '#ccc' }}>
+  if (loading) return (
+    <View style={Common.loaderContainer}>
+      <ActivityIndicator size={65} color={'#000000'}/>
+    </View>
+  );
+
+  const renderUserItem = ({ item }: {item: UserDataCard}) => (
+      <Pressable style={Common.userContainer} android_ripple={{ color: '#ccc' }} onPress={() => handleNavigationToProfile(item.id)}>
         <View style={Common.profileInfo} pointerEvents="box-none">
           <View style={Common.imageContainer}>
             <Image source={ item.profilePictureUrl ? { uri: item.profilePictureUrl } : require('@/assets/images/defaultuser.jpg')} style={Common.profileImage} />
@@ -78,7 +96,6 @@ export default function HomeScreen() {
           <PhoneCall color="white" size={20} />
         </Pressable>
       </Pressable>
-    </Link>
   );
 
   return (
