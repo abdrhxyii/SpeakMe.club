@@ -62,6 +62,7 @@ const SettingsScreen = () => {
         setErrorMessage('An error occurred while signing out. Please try again...');
         return;
       }
+      await GoogleSignin.revokeAccess()
       await GoogleSignin.signOut();
       await markUserOffline(session.id);
       await removeTokens();

@@ -15,6 +15,7 @@ import { useProfileStore } from '@/store/profileStore';
 import uploadProfileImage from '@/utils/uploadProfileImage';
 import { baseUrl } from '@/utils/BaseUrl';
 import axios from 'axios';
+import { showToast } from '@/utils/toast';
 
 const EditProfile = () => {
 
@@ -78,11 +79,13 @@ const EditProfile = () => {
       if (success) {
         setIsImageFetched(false); 
         await fetchProfileImage();
+        showToast({ title: 'Profile saved successfully', message: 'Image uploaded successfully!', preset: 'done' }); 
       } else {
         throw new Error('Upload failed');
       }
-    } catch (error) {
-      console.log('Error uploading image:', error);
+    } catch (error: any) {
+      console.log('Error uploading image:', error.response.data);
+      showToast({ title: 'Profile failed to save', message: 'Image uploaded successfully!', preset: 'done' }); 
       setProfileImage(null);
     } finally {
       setLoading(false);

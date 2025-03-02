@@ -5,7 +5,7 @@ import Common from '@/constants/Common';
 import ActionButton from '@/components/ActionButton';
 import AccountSection from '@/components/AccountSection';
 import ReviewCard from '@/components/ReviewCard';
-import { useLocalSearchParams, useGlobalSearchParams } from 'expo-router';
+import { useGlobalSearchParams } from 'expo-router';
 import { UserProfile } from '@/interfaces'
 import { baseUrl } from '@/utils/BaseUrl';
 import api from '@/utils/apiServices';
@@ -24,7 +24,6 @@ export default function Profile() {
       try {
         const { data, status } = await api.get(`${baseUrl}/user/${id}`)
         if (status === 200) {
-          console.log(data, "data")
           setUserData(data)
         } 
       } catch (error: any) {

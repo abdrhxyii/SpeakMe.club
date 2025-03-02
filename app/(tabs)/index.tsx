@@ -89,7 +89,7 @@ export default function HomeScreen() {
             <Text style={Common.subtext}>
               {item.gender} • {item.country}
             </Text>
-            <Text style={Common.subtext}>{item.country} • {item.talksCount} talks</Text>
+            <Text style={Common.subtext}>{item.talksCount} talks</Text>
           </View>
         </View>
         <Pressable style={styles.callButton} onPress={handleCall}>

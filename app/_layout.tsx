@@ -24,7 +24,7 @@ export default function RootLayout() {
   const route = useRouter();
   const { id } = useGlobalSearchParams()
   const [heartFilled, setHeartFilled] = useState(false); 
-  const { session, isSignedIn } = useUserStore();
+  const { session } = useUserStore();
   
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
@@ -41,25 +41,19 @@ export default function RootLayout() {
   }
 
   const handleAddFriend = async (favouriteUserId: any) => {
-    const data = {
-      myId: session.id,
-      otheruser: favouriteUserId
-    }
-    console.log(data, "data")
-
     try {
-      const { status } = await api.post(`${baseUrl}/friends/${session.id}/${favouriteUserId}`);
+      const { data, status } = await api.post(`${baseUrl}/friends/${session.id}/${favouriteUserId}`);
       if (status === 200) {
+        console.log(data, "data")
         setHeartFilled(true);
       }
-    } catch (error) {
-      console.log('Error adding friend', error);
+    } catch (error: any) {
+      console.log('Error adding friend', error.response.data.message);
     }
   };
 
   return (
     <GestureHandlerRootView   style={{ flex: 1 }}>
-      <StatusBar backgroundColor="#FFFFFF" barStyle="dark-content" />
       <BottomSheetModalProvider>
           <Stack screenOptions={{
               headerStyle: {
@@ -80,7 +74,7 @@ export default function RootLayout() {
                   headerTitleAlign: 'center',   
                   headerRight: () => (
                     <TouchableOpacity style={[Common.headerBtn, { marginRight: 2 }]} onPress={() => handleAddFriend(id)}>
-                      <Heart color={'black'} size={20} fill={"#000000"}/>
+                      <Heart color={'black'} size={20} fill={ heartFilled ? "#000000" : ""}/>
                     </TouchableOpacity>  
                   )   
               }}/>
