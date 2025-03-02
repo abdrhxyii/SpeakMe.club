@@ -42,7 +42,7 @@ const renderUserFriendItem = ({ item }: any) => (
       <View style={Common.imageContainer}>
         <Image source={{ uri: item.profilePictureUrl }} style={Common.profileImage} />
         <View style={Common.levelBadge}>
-          <Text style={Common.levelText}>{item.level || 'B1'}</Text>
+          <Text style={Common.levelText}>{item.level.replace(/\s*\(.*?\)/, '')}</Text>
         </View>
       </View>
       <View style={Common.details}>
@@ -57,22 +57,22 @@ const renderUserFriendItem = ({ item }: any) => (
   </TouchableOpacity>
 );
 
-const renderUserBlockedItem = ({ item }: any) => (
+const renderUserBlockedItem = ({ item, onUnblock }: any) => (
   <TouchableOpacity style={Common.userContainer} activeOpacity={0.6}>
     <View style={Common.profileInfo} pointerEvents="box-none">
       <View style={Common.imageContainer}>
-        <Image source={item.profileImg} style={Common.profileImage} />
+        <Image source={require('@/assets/images/defaultuser.jpg')} style={Common.profileImage} />
         <View style={Common.levelBadge}>
-          <Text style={Common.levelText}>{item.level || 'B1'}</Text>
+          <Text style={Common.levelText}>{item.level.replace(/\s*\(.*?\)/, '')}</Text>
         </View>
       </View>
       <View style={Common.details}>
-        <Text style={Common.name}>{item.name}</Text>
+        <Text style={Common.name}>{item.display_name}</Text>
         <Text style={Common.subtext}>{item.gender} • {item.country}</Text>
-        <Text style={Common.subtext}>1200 talks</Text>
+        <Text style={Common.subtext}>{item.talksCount} talks</Text>
       </View>
     </View>
-    <TouchableOpacity style={{ display: 'flex', alignItems: 'center' }}>
+    <TouchableOpacity style={{ display: 'flex', alignItems: 'center' }} onPress={() => onUnblock(item.id)}>
       <Ban color={Colors.light.danger} size={30} />
       <Text style={styles.removeButtonText}>Blocked</Text>
     </TouchableOpacity>
@@ -109,12 +109,12 @@ const FriendsRoute = ({ friends }: { friends: any[] }) => (
   </SafeAreaView>
 );
 
-const BlockedRoute = () => (
+const BlockedRoute = ({ blockedUsers, onUnblock }: { blockedUsers: any[], onUnblock: (id: any) => void }) => (
   <SafeAreaView style={Common.container}>
-    {connectionData.length > 0 ? (
+    {blockedUsers.length > 0 ? (
       <FlatList
-        data={connectionData}
-        renderItem={renderUserBlockedItem}
+        data={blockedUsers}
+        renderItem={({ item }) => renderUserBlockedItem({ item, onUnblock })}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
       />
@@ -128,6 +128,7 @@ export default function Connection() {
   const [index, setIndex] = useState(0);
   const { session } = useUserStore();
   const [friends, setFriends] = useState([]);
+  const [blockedUsers, setBlockedUsers] = useState([]);
 
   const [routes] = useState([
     { key: 'history', title: 'History' },
@@ -142,7 +143,7 @@ export default function Connection() {
       case 'friends':
         return <FriendsRoute friends={friends} />;
       case 'blocked':
-        return <BlockedRoute />;
+        return <BlockedRoute blockedUsers={blockedUsers} onUnblock={handleUnblockUsers} />;
       default:
         return null;
     }
@@ -150,6 +151,7 @@ export default function Connection() {
 
   useEffect(() => {
     retrieveFriends();
+    retrieveBlockedUsers();
   }, []);
 
   const retrieveFriends = async () => {
@@ -162,6 +164,28 @@ export default function Connection() {
       console.log(error);
     }
   };
+
+  const retrieveBlockedUsers = async () => {
+    try {
+      const { data, status } = await api.get(`${baseUrl}/block/blocked/${session.id}`);
+      if (status === 200) {
+        setBlockedUsers(data.blockedUsers || []);
+      }
+    } catch (error) {
+      console.log("Error fetching blocked users:", error);
+    }
+  };
+
+  const handleUnblockUsers = async (id: any) => {
+    try {
+      const { status } = await api.delete(`${baseUrl}/block/${session.id}/${id}`);
+      if (status === 200) {
+        retrieveBlockedUsers();
+      }
+    } catch (error) {
+      console.log("Error handleUnblockUsers :", error);
+    }
+  }
 
   return (
     <TabView
