@@ -1,13 +1,14 @@
 import { Colors } from '@/constants/Colors';
 import Common from '@/constants/Common';
 import { Ban } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, FlatList, SafeAreaView } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, FlatList, SafeAreaView, ActivityIndicator } from 'react-native';
 import { TabView, TabBar } from 'react-native-tab-view';
 import api from '@/utils/apiServices';
 import { baseUrl } from '@/utils/BaseUrl';
 import { useUserStore } from '@/store/userStore';
 import { connectionData } from '@/data/appData';
+import { useFocusEffect } from 'expo-router';
 
 const EmptyState = ({ message }: { message: string }) => (
   <View style={styles.emptyContainer}>
@@ -36,11 +37,14 @@ const renderUserHistoryItem = ({ item }: any) => (
   </TouchableOpacity>
 );
 
-const renderUserFriendItem = ({ item }: any) => (
+const renderUserFriendItem = ({ item, onUnfriend }: { item: any, onUnfriend: (id: any) => void }) => (
   <TouchableOpacity style={Common.userContainer} activeOpacity={0.6}>
     <View style={Common.profileInfo} pointerEvents="box-none">
       <View style={Common.imageContainer}>
-        <Image source={{ uri: item.profilePictureUrl }} style={Common.profileImage} />
+      <Image
+          source={item.profilePictureUrl ? { uri: item.profilePictureUrl } : require('@/assets/images/defaultuser.jpg')}
+          style={Common.profileImage}
+        />
         <View style={Common.levelBadge}>
           <Text style={Common.levelText}>{item.level.replace(/\s*\(.*?\)/, '')}</Text>
         </View>
@@ -51,7 +55,7 @@ const renderUserFriendItem = ({ item }: any) => (
         <Text style={Common.subtext}>{item.talksCount} talks</Text>
       </View>
     </View>
-    <TouchableOpacity style={styles.removeButton}>
+    <TouchableOpacity style={styles.removeButton} onPress={() => onUnfriend(item.id)}>
       <Text style={styles.removeButtonText}>Remove</Text>
     </TouchableOpacity>
   </TouchableOpacity>
@@ -94,12 +98,16 @@ const HistoryRoute = () => (
   </SafeAreaView>
 );
 
-const FriendsRoute = ({ friends }: { friends: any[] }) => (
+const FriendsRoute = ({ friends, onUnfriend, loading }: { friends: any[], onUnfriend: (id: any) => void, loading : boolean }) => (
   <SafeAreaView style={Common.container}>
-    {friends.length > 0 ? (
+    {loading ? (
+      <View style={Common.loaderContainer}>
+        <ActivityIndicator size={65} color={'#000000'} />
+      </View>
+    ) : friends.length > 0 ? (
       <FlatList
         data={friends}
-        renderItem={renderUserFriendItem}
+        renderItem={({ item }) => renderUserFriendItem({ item, onUnfriend })}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
       />
@@ -109,9 +117,13 @@ const FriendsRoute = ({ friends }: { friends: any[] }) => (
   </SafeAreaView>
 );
 
-const BlockedRoute = ({ blockedUsers, onUnblock }: { blockedUsers: any[], onUnblock: (id: any) => void }) => (
+const BlockedRoute = ({ blockedUsers, onUnblock, loading }: { blockedUsers: any[], onUnblock: (id: any) => void, loading: boolean }) => (
   <SafeAreaView style={Common.container}>
-    {blockedUsers.length > 0 ? (
+    {loading ? (
+      <View style={Common.loaderContainer}>
+        <ActivityIndicator size={65} color={'#000000'} />
+      </View>
+    ) : blockedUsers.length > 0 ? (
       <FlatList
         data={blockedUsers}
         renderItem={({ item }) => renderUserBlockedItem({ item, onUnblock })}
@@ -126,9 +138,15 @@ const BlockedRoute = ({ blockedUsers, onUnblock }: { blockedUsers: any[], onUnbl
 
 export default function Connection() {
   const [index, setIndex] = useState(0);
+
   const { session } = useUserStore();
+
   const [friends, setFriends] = useState([]);
   const [blockedUsers, setBlockedUsers] = useState([]);
+
+  const [loadingHistory, setLoadingHistory] = useState(true);
+  const [loadingFriends, setLoadingFriends] = useState(true);
+  const [loadingBlocked, setLoadingBlocked] = useState(true);
 
   const [routes] = useState([
     { key: 'history', title: 'History' },
@@ -141,38 +159,69 @@ export default function Connection() {
       case 'history':
         return <HistoryRoute />;
       case 'friends':
-        return <FriendsRoute friends={friends} />;
+        return <FriendsRoute friends={friends} onUnfriend={handleUnfriend} loading={loadingFriends}/>;
       case 'blocked':
-        return <BlockedRoute blockedUsers={blockedUsers} onUnblock={handleUnblockUsers} />;
+        return <BlockedRoute blockedUsers={blockedUsers} onUnblock={handleUnblockUsers} loading={loadingBlocked}/>;
       default:
         return null;
     }
   };
 
-  useEffect(() => {
-    retrieveFriends();
-    retrieveBlockedUsers();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      if (index === 1) {
+        retrieveFriends();
+      } else if (index === 2) {
+        retrieveBlockedUsers();
+      }
+    }, [index, session.id])
+  );  
 
   const retrieveFriends = async () => {
+    setLoadingFriends(true);
     try {
       const { data, status } = await api.get(`${baseUrl}/friends/${session.id}`);
       if (status === 200) {
-        setFriends(data.favouriteUsers || []);
+        setFriends(data.favouriteUsers);
       }
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      if (error.response && error.response.status === 404) {
+        setFriends([]);
+      } else {
+        console.log("Error fetching blocked users:", error);
+      }
+    } finally {
+      setLoadingFriends(false);
     }
   };
 
   const retrieveBlockedUsers = async () => {
+    setLoadingBlocked(true);
+
     try {
       const { data, status } = await api.get(`${baseUrl}/block/blocked/${session.id}`);
       if (status === 200) {
-        setBlockedUsers(data.blockedUsers || []);
+        setBlockedUsers(data.blockedUsers);
+      }
+    } catch (error: any) {
+      if (error.response && error.response.status === 404) {
+        setBlockedUsers([]);
+      } else {
+        console.log("Error fetching blocked users:", error);
+      }
+    } finally {
+      setLoadingBlocked(false);
+    }
+  };
+
+  const handleUnfriend = async (favourite_user_id: any) => {
+    try {
+      const { status } = await api.delete(`${baseUrl}/friends/${session.id}/${favourite_user_id}`);
+      if (status === 200) {
+        retrieveFriends(); 
       }
     } catch (error) {
-      console.log("Error fetching blocked users:", error);
+      console.log("Error handleUnfriend:", error);
     }
   };
 
