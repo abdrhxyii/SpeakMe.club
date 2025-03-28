@@ -26,7 +26,7 @@ export default function AboutMe() {
       const { data, error } = await supabase
         .from('users')
         .select('about_me')
-        .eq('id', session.user.id)
+        .eq('id', session?.id)
         .single();
 
       if (error && error.code !== 'PGRST116') { 
@@ -49,7 +49,7 @@ export default function AboutMe() {
       const { error } = await supabase
         .from('users')
         .upsert({
-          id: session.user.id,
+          id: session.id,
           about_me: aboutMe,
         });
 

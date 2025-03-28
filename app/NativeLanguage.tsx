@@ -39,7 +39,7 @@ export default function NativeLanguage() {
       const { data, error } = await supabase
         .from('users')
         .select('native_language')
-        .eq('id', session.user.id)
+        .eq('id', session.id)
         .single();
 
       if (error) throw error;
@@ -67,7 +67,7 @@ export default function NativeLanguage() {
         const { error } = await supabase
           .from("users")
           .update({ native_language: nativeLanguage })
-          .eq("id", session.user.id);
+          .eq("id", session.id);
   
         if (error) {
           Alert.alert('Error', 'Failed to update native language.');

@@ -15,20 +15,40 @@ import { useProfileStore } from '@/store/profileStore';
 import uploadProfileImage from '@/utils/uploadProfileImage';
 import { baseUrl } from '@/utils/BaseUrl';
 import axios from 'axios';
+import { showToast } from '@/utils/toast';
 
 const EditProfile = () => {
-  const router = useRouter();
 
+  const router = useRouter();
   const { session } = useUserStore();
   const { hasUserUpdated, resetUpdated } = refreshStore();
-  
+  const { profileImage, setProfileImage, setRefreshImage } = useProfileStore();
+
   const [loading, setLoading] = useState<boolean>(false);
   const [userData, setUserData] = useState<UserData | null>(null);
-  const { profileImage, refreshImage, setProfileImage, setRefreshImage } = useProfileStore();
+  const [isImageFetched, setIsImageFetched] = useState<boolean>(false); 
 
   const memoizedImageSource = useMemo(() => {
     return profileImage ? { uri: profileImage } : require('@/assets/images/defaultuser.jpg');
   }, [profileImage]);
+
+  const fetchProfileImage = useCallback(async () => {
+    if (!session || isImageFetched) return; 
+    try {
+      const response = await axios.get(`${baseUrl}/profile/get-profile-pic/${session.id}`);
+      console.log('Fetched profile image:', response.data.imageUrl);
+      setProfileImage(response.data.imageUrl || null);
+      setIsImageFetched(true); 
+    } catch (error: any) {
+      if (error.response) {
+        console.log('No profile image for this user');
+        setProfileImage(null);
+      } else {
+        console.log('Error fetching profile picture:', error.message);
+      }
+      setIsImageFetched(true); 
+    }
+  }, [session, setProfileImage, isImageFetched]);
 
   const openImagePicker = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -45,83 +65,66 @@ const EditProfile = () => {
     });
 
     if (!result.canceled) {
-      setProfileImage(result.assets[0].uri);
-      await handleImageUpload(result.assets[0].uri);
-    }
-  };
-
-  useEffect(() => {
-    if(refreshImage) {
-      fetchProfileImage();
-      setRefreshImage(false)
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchUserData();
-  }, []);
-
-  const fetchProfileImage = async () => {
-    if (!session) return;
-    try {
-      const response = await axios.get(`${baseUrl}/profile/get-profile-pic/${session.user.id}`);
-      console.log(response.data.imageUrl, "Image taken from EditProfile")
-      setProfileImage(response.data.imageUrl);
-    } catch (error: any) {
-      if (error.response) {
-        setProfileImage(null); 
-        console.log("no profile image for this user")
-      } else {
-        console.log("An error occurred while fetching the profile picture.")
-      }
+      const imageUri = result.assets[0].uri;
+      setProfileImage(imageUri); 
+      await handleImageUpload(imageUri);
     }
   };
 
   const handleImageUpload = async (imageUri: string) => {
-    if (imageUri) {
-      setLoading(true);
-      try {
-        await uploadProfileImage(imageUri, session.user.id);
-        setRefreshImage(true);
-      } catch (error) {
-        console.log('Error uploading image:', error);
-      } finally {
-        setLoading(false);
+    if (!imageUri || !session) return;
+    setLoading(true);
+    try {
+      const success = await uploadProfileImage(imageUri, session.id);
+      if (success) {
+        setIsImageFetched(false); 
+        await fetchProfileImage();
+        showToast({ title: 'Profile saved successfully', message: 'Image uploaded successfully!', preset: 'done' }); 
+      } else {
+        throw new Error('Upload failed');
       }
-    } else {
-      console.log('No image selected');
+    } catch (error: any) {
+      console.log('Error uploading image:', error.response.data);
+      showToast({ title: 'Profile failed to save', message: 'Image uploaded successfully!', preset: 'done' }); 
+      setProfileImage(null);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     if (!session) return;
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from('users')
         .select('*')
-        .eq('id', session.user.id)
+        .eq('id', session.id)
         .single();
 
-      if (error) {
-        console.error(error.message);
-      } else {
-        setUserData(data);
-      }
+      if (error) throw error;
+      setUserData(data);
     } catch (err) {
-      console.log('Error fetching user data', err);
+      console.log('Error fetching user data:', err);
     } finally {
       setLoading(false);
       resetUpdated();
     }
-  };
+  }, [session, resetUpdated]);
+
+  useEffect(() => {
+    fetchUserData();
+    if (!profileImage && !isImageFetched) {
+      fetchProfileImage(); 
+    }
+  }, [fetchUserData, fetchProfileImage, profileImage, isImageFetched]);
 
   useFocusEffect(
     useCallback(() => {
       if (hasUserUpdated) {
         fetchUserData();
       }
-    }, [hasUserUpdated])
+    }, [hasUserUpdated, fetchUserData])
   );
 
   if (loading) return (
@@ -136,7 +139,7 @@ const EditProfile = () => {
       <View style={styles.profileContainer}>
         <TouchableOpacity style={styles.profileImage} onPress={openImagePicker}>
           <Image
-              source={profileImage ? { uri: profileImage } : require('@/assets/images/defaultuser.jpg')}
+              source={memoizedImageSource}
               style={styles.profileImage}
           />
           <View style={styles.cameraIconContainer}>

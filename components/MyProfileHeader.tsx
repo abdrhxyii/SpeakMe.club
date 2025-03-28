@@ -4,12 +4,13 @@ import { Colors } from '@/constants/Colors';
 import { PenLine } from 'lucide-react-native'; 
 import { useRouter } from 'expo-router';
 import { useProfileStore } from '@/store/profileStore';
-import { UserProfile } from '@/interfaces'
 
-export default function ProfileHeader({user}: any) {
+export default function MyProfileHeader({user}: any) {
   const router = useRouter()
   const [modalVisible, setModalVisible] = useState(false);
   const scaleValue = useRef(new Animated.Value(0)).current;
+
+  const { profileImage } = useProfileStore()
 
   const handleImagePress = () => {
     setModalVisible(true);
@@ -28,12 +29,14 @@ export default function ProfileHeader({user}: any) {
     }).start(() => setModalVisible(false));
   };
 
+  const image = profileImage ? { uri: profileImage } : require('@/assets/images/defaultuser.jpg')
+
   return (
     <View style={styles.header}>
       <View style={styles.profileContainer}>
         <TouchableOpacity onPress={handleImagePress}>
           <Image
-            source={ user.profilePictureUrl ? { uri: user.profilePictureUrl } : require('@/assets/images/defaultuser.jpg')}
+            source={image}
             style={styles.profileImage}
           />
           <View style={styles.onlineDot}></View>
@@ -43,6 +46,10 @@ export default function ProfileHeader({user}: any) {
       <View style={styles.headerTextContainer}>
         <View style={styles.nameContainer}>
           <Text style={styles.headerTitle}>{user.display_name ? (user.display_name.length > 14 ? `${user.display_name.slice(0, 14)}...` : user.display_name) : ""}</Text>
+            <Pressable style={styles.editIconContainer} onPress={() => router.push('/EditProfile')}>
+               <Text style={styles.editIconText}>Edit</Text>
+               <PenLine color={'#FFFFFF'} size={15} />
+            </Pressable>
         </View>
         <View style={styles.detailsContainer}>
           <View style={styles.detailItem}>
@@ -70,7 +77,7 @@ export default function ProfileHeader({user}: any) {
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.fullScreenImageContainer, { transform: [{ scale: scaleValue }] }]}>
               <Image
-                source={ user.profilePictureUrl ? { uri: user.profilePictureUrl } : require('@/assets/images/defaultuser.jpg')}
+                source={image}
                 style={styles.fullScreenImage}
               />
             </Animated.View>

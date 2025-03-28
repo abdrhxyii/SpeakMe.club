@@ -13,6 +13,8 @@ import { CommonActions } from '@react-navigation/native';
 import { supabase } from '@/libs/supabase';
 import { englishLevels } from '@/data/appData';
 import { getCountry } from '@/utils/getCountry';
+import { baseUrl } from '@/utils/BaseUrl';
+import retryRequest from '@/utils/retryRequest';
 
 export default function EnglishLevel() {
   const route = useRouter();
@@ -42,7 +44,7 @@ export default function EnglishLevel() {
       const { data, error } = await supabase
         .from('users')
         .select('language_fluency_level')
-        .eq('id', session.user.id)
+        .eq('id', session.id)
         .single();
 
       if (error) {
@@ -75,7 +77,7 @@ export default function EnglishLevel() {
         .update({
           language_fluency_level: levelDescription,
         })
-        .eq('id', session.user.id);
+        .eq('id', session.id);
   
       if (updateError) throw new Error("Failed to update user data.");
     } catch (error: any) {
@@ -88,20 +90,20 @@ export default function EnglishLevel() {
       const { error: updateError } = await supabase
         .from('users')
         .update({
-          display_name: session?.user?.email.split("@")[0],
+          display_name: session?.email.split("@")[0],
           goal_of_learning: goalOfLearning,
           native_language: nativeLanguage,
           gender: gender,
           country: country
         })
-        .eq('id', session.user.id);
+        .eq('id', session.id);
   
       if (updateError) throw new Error("Failed to update onboarding data.");
   
       const { error } = await supabase
         .from('users')
         .update({ is_onboarding_complete: true })
-        .eq('id', session.user.id);
+        .eq('id', session.id);
   
       if (error) throw new Error("Failed to mark onboarding as complete.");
     } catch (error: any) {
@@ -131,6 +133,11 @@ export default function EnglishLevel() {
       }
   
       await updateOnboardingData();
+
+      await retryRequest(`${baseUrl}/user/`, {
+        id: session.id,
+        email: session.email.trim(),
+      });
   
       navigation.dispatch(
         CommonActions.reset({

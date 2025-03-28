@@ -57,3 +57,42 @@ export interface UserSelectionState {
     resetLanguageFluencyLevel: () => void;
     resetGender: () => void;
 }
+
+export interface UserDataCard {
+    id: string;
+    display_name: string; 
+    gender: 'male' | 'female';
+    country: string; 
+    level: string; 
+    is_online: boolean; 
+    talksCount: string; 
+    profilePictureUrl: string | null; 
+}
+  
+
+interface Feedback {
+    id: number;
+    from_user_id: number;
+    is_thumbs_up: boolean;
+    compliments: string | null;
+    advice: string | null;
+    review: string | null;
+    feedbackGiverName: string;
+  }
+  
+export interface UserProfile {
+    id: number;
+    email: string;
+    display_name: string;
+    gender: string;
+    about_me: string | null;
+    language_fluency_level: string | null;
+    native_language: string | null;
+    is_online: boolean;
+    interest_list: string | null;
+    country: string | null;
+    preferences: object | null;  
+    profilePictureUrl: string | null;
+    feedbacks: Feedback[];
+}
+  

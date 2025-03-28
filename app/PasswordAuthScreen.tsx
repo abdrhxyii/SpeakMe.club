@@ -13,9 +13,7 @@ import { object, string } from 'yup';
 
 import { useUserSelectionStore } from "@/store/onboardingUserSelection";
 import { useUserStore } from '@/store/userStore';
-import { baseUrl } from '@/utils/BaseUrl';
-import axios from 'axios';
-import retryRequest from '@/utils/retryRequest';
+import { saveTokens } from '@/utils/TokenStorage';
 
 const passwordValidationSchema = object().shape({
     password: string()
@@ -36,6 +34,7 @@ export default function PasswordAuthScreen() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+    const { setIsSignedIn } = useUserStore()
 
     const [passwordValidation, setPasswordValidation] = useState({
         isLengthValid: false,
@@ -103,7 +102,9 @@ export default function PasswordAuthScreen() {
         }
     
         if (data) {
-            setSession(data.session);
+            setIsSignedIn(true)
+            setSession(data.session.user);
+            await saveTokens(data.session.access_token, data.session.refresh_token)
             router.dismissAll();
             router.replace('/(tabs)/');
         }
@@ -121,24 +122,6 @@ export default function PasswordAuthScreen() {
             email: email.trim(),
             password: password.trim(),
         });
-    
-        const userId = data?.user?.id;
-        console.log(userId, "userId");
-    
-        if (!userId) {
-            setError('Please check your internet connection, Try again');
-            return;
-        }
-    
-        try {
-            await retryRequest(`${baseUrl}/user/`, {
-                id: userId,
-                email: email.trim(),
-            });
-        } catch (err) {
-            setError('Failed to create user on backend. Please try again later.');
-            return;
-        }
     
         if (signupError) {
             setError(signupError.message);

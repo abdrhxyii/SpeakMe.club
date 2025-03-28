@@ -27,7 +27,7 @@ export default function InterestsScreen() {
       const { data, error } = await supabase
         .from('users')
         .select('interest_list')
-        .eq('id', session.user.id)
+        .eq('id', session.id)
         .single();
 
       if (error) throw error;
@@ -59,7 +59,7 @@ export default function InterestsScreen() {
       const { error } = await supabase
         .from('users')
         .update({ interest_list: interests })
-        .eq('id', session.user.id);
+        .eq('id', session.id);
 
       if (error) {
         throw error;

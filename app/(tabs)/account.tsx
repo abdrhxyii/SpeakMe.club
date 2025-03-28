@@ -9,6 +9,7 @@ import {
   SafeAreaView,
   ActivityIndicator,
 } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
 
 import { useFocusEffect, useNavigation } from 'expo-router';
 import { BottomSheetModal, BottomSheetFlatList } from '@gorhom/bottom-sheet';
@@ -16,7 +17,7 @@ import { BottomSheetModal, BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import Common from '@/constants/Common';
 import ReviewCard from '@/components/ReviewCard';
 import AccountSection from '@/components/AccountSection';
-import ProfileHeader from '@/components/ProfileHeader';
+import MyProfileHeader from '@/components/MyProfileHeader';
 import InterestsSection from '@/components/InterestsSection';
 import ComplimentsList from '@/components/ComplimentsList';
 import AdviceList from '@/components/AdviceList';
@@ -69,7 +70,7 @@ export default function Account() {
       const { data, error } = await supabase
         .from('users') 
         .select('*')
-        .eq('id', session.user.id) 
+        .eq('id', session.id) 
         .single();
 
       if (error) {
@@ -87,7 +88,7 @@ export default function Account() {
   useFocusEffect(
     useCallback(() => {
       fetchUserData();
-    }, [session?.user?.id])
+    }, [session?.id])
   );
 
   const ReviewItem = useCallback(({ review }: any) => (
@@ -128,7 +129,7 @@ export default function Account() {
           onScroll={handleScroll}
           scrollEventThrottle={16}
         >
-          <ProfileHeader user={userData}/>
+          <MyProfileHeader user={userData}/>
           { userData?.about_me === null ? 
             null : <Text style={styles.bio}>{userData?.about_me}</Text>
           }
